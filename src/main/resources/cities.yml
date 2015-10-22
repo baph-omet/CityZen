@@ -1,0 +1,9 @@
+##############################################
+#  This is the data file for all defined cities
+#  Do not modify unless you know what you're doing
+##############################################
+
+cities:
+  examplecity:
+    name: "Example City"
+    mayor: "iamvishnu"
