@@ -4,6 +4,16 @@
 ##############################################
 
 cities:
-  examplecity:
-    name: "Example City"
-    mayor: "iamvishnu"
+    testCity:
+        name: "testCity"
+        center: "100;88;-200"
+        mayor: "testPlayer"
+        deputies:
+        - "testPlayer3"
+        - "testPlayer4"
+        citizens:
+        - "testPlayer"
+        - "testPlayer1"
+        - "testPlayer2"
+        - "testPlayer3"
+        - "testPlayer4"

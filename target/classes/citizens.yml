@@ -1,0 +1,12 @@
+
+
+
+
+citizens:
+    testPlayer:
+        name: "testPlayer"
+        uuid: "12345abcdef"
+        reputation: 100
+        affiliation: "testCity"
+        plots:
+        -

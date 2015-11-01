@@ -3,6 +3,8 @@ package io.github.griffenx.CityZen;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
 
 public class CityZenCommander implements CommandExecutor {
 	private final CityZen plugin;
@@ -13,8 +15,23 @@ public class CityZenCommander implements CommandExecutor {
 	
 	public boolean onCommand(CommandSender sender, Command command,
 			String label, String[] args) {
-		if (command.getName().equalsIgnoreCase("city") || command.getName().equalsIgnoreCase("cityzen") || command.getName().equalsIgnoreCase("citizen")) {
-			if (args[0].equalsIgnoreCase(""))
+		
+		String cmdName = command.getName();
+		
+		if ((cmdName.equalsIgnoreCase("reputation") || cmdName.equalsIgnoreCase("rep"))) {
+			if (args.length == 0 && sender instanceof Player && sender.hasPermission("cityzen.reputation.self")) {
+				//TODO: Get self reputation
+			}
+			if (args.length > 0 && (sender instanceof ConsoleCommandSender || sender.hasPermission("cityzen.reputation.other"))) {
+				//TODO: Print rep of another player
+			}
+		}
+		
+		else if (cmdName.equalsIgnoreCase("city")) {
+			
+		}
+		else if (cmdName.equalsIgnoreCase("citizen")) {
+			if (args[0].equalsIgnoreCase("")) {}
 		}
 		return false;
 	}
