@@ -14,6 +14,8 @@ public class City {
 	public List<Citizen> citizens;
 	public List<Citizen> deputies;
 	
+	public List<Plot> plots;
+	
 	public String name;
 	public String slogan;
 	public ChatColor color;
@@ -39,18 +41,22 @@ public class City {
 		slogan = getProperty("slogan");
 		color = ChatColor.getByChar(getProperty("color"));
 		
-		//mayor = new Citizen()
+		maxPlotSize = Integer.parseInt(getProperty("maxPlotSize"));
+		minPlotSize = Integer.parseInt(getProperty("minPlotSize"));
+		//TODO: get city center location
 		
+		freeJoin = Boolean.valueOf(getProperty("freeJoin"));
+		openPlotting = Boolean.valueOf(getProperty("openPlotting"));
+		blockBlacklist = Boolean.valueOf(getProperty("blockBlacklist"));
+		if (blockBlacklist) useBlacklistAsWhitelist = Boolean.valueOf(getProperty("useBlacklistAsWhitelist"));
+		
+		//TODO: Create a method to get block blacklist and convert to type Material
+		blacklistedBlocks = getBlacklist();
+		
+		mayor = Util.getCitizen(UUID.fromString(getProperty("mayor"));
 		citizens = getCitizens();
+		deputies = getDeputies();
 		
-	}
-
-	public List<Citizen> getCitizens() {
-		List<Citizen> cits = new Vector<Citizen>();
-		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".citizens")) {
-			cits.add(new Citizen(CityZen.getPlugin().getServer().getPlayer(UUID.fromString(u))));
-		}
-		return cits;
 	}
 	
 	public void addCitizen(Citizen ctz) {
@@ -65,7 +71,7 @@ public class City {
 	}
 	
 	public void evictCitizen(Citizen ctz) {
-		ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOneEvictionPercent") / 100);
+		ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100);
 		citizens.remove(ctz);
 		//TODO: Remove plots
 	}
@@ -90,6 +96,45 @@ public class City {
 					CityZen.cityConfig.getConfig().set("cities." + identifier + "." + property, val);
 				} return val;
 			}
-		} return "";
+		}
+		FileConfiguration defaultConfig = CityZen.getPlugin().getConfig();
+		for (String prop : defaultConfig.getConfigurationSection("cityDefaults").getKeys(false)) {
+			if (prop.equalsIgnoreCase(property)) {
+				val = defaultConfig.getString("cityDefaults." + property);
+				//TODO: Change value of property to default
+				//TODO: Change value of property in config to default
+				//NOTE: This assuemes that the default config is intact. Should probably do some sort of error handling on loading configs to make sure that each value is valid.
+				return val;
+			}
+		}
+		return "";
+	}
+	
+	private List<Citizen> getCitizens() {
+		List<Citizen> cits = new Vector<Citizen>();
+		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".citizens")) {
+			cits.add(Util.getCitizen(UUID.fromString(u)));
+		}
+		return cits;
+	}
+	
+	private List<Citizen> getDeputies() {
+		List<Citizen> deps = new Vector<Citizen>();
+		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".deputies")) {
+			deps.add(Util.getCitizen(UUID.fromString(u)));
+		}
+		return deps;
+	}
+	
+	private List<Material> getBlacklist() {
+		//TODO: Get blacklisted materials from config, then convert them to type Material
+	}
+	
+	private List<Plot> getPlots() {
+		List<Plot> plts = new Vector<Plot>();
+		for (String key : CityZen.cityConfig.getConfig().getConfigurationSection("cities." + identifier + ".plots").getKeys(false)) {
+			//TODO: Get a plot
+			plts.add()
+		}
 	}
 }
