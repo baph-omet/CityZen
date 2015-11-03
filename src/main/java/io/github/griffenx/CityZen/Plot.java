@@ -8,20 +8,14 @@ public class Plot {
 	private Location corner2;
 	private Citizen owner;
 	private City affiliation;
+	private int identifier;
 	
-	public Plot(Citizen creator) {
-		center = creator.passport.getLocation();
-		owner = creator;
-		affiliation = creator.affiliation;
-	}
-	public Plot(Location location, Citizen creator, City city) {
-		center = location;
-		owner = creator;
+	public Plot(City city, int id) {
 		affiliation = city;
+		identifier = id;
+		
+		//TODO: Load values from disk into memory
 	}
-	public Plot(double x, double y, double z, Citizen creator, City city) {
-		center = new Location(creator.passport.getWorld(),x,y,z);
-		owner = creator;
-		affiliation = city;
-	}
+	
+	//TODO: Method to create a new plot
 }
