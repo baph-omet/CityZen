@@ -3,12 +3,24 @@
 #       (add some stuff here)
 ##############################################
 
+# Distance (in blocks) minimum between city centers
+minCitySeparation: 1000
+
+# Number of blocks around each plot that are protected as part of the city
+plotProtectedArea: 16
+
+# Default city config values
+# If these values are absent from a city's config, they will be drawn from here
+# Additionally, all new cities will get these values, however they may be overwritten
 cityDefaults:
     color: "&f"
     slogan: "The newest city on the server!"
     freeJoin: false
     openPlotting: false
     blockBlacklist: false
+    
+# Sources of internal changes to reputation
+# Reputation may also be modified externally via commands
 reputation:
     default: 0
     gainedOnJoinCity: 100
