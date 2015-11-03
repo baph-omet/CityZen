@@ -20,7 +20,7 @@ cities:
         slogan: "Hello world!"
         
         # Location of city center
-        center: "100;88;-200"
+        center: "100,-200,world"
         
         # UUID of player that is this city's mayor
         mayor: "778310a6219c43599d19271573d98b7c"
@@ -70,4 +70,35 @@ cities:
         - "tnt"
         - "5:3"
         
-        
+        # A list of all plots in this city
+        plots:
+            
+            # A unique ID assigned to each plot. Need not be sequential.
+            0:
+                
+                # Location of the plot's two corners, assumes same world as city
+                corner1: "150,-150"
+                corner2: "166,-134"
+                
+                # The base height of plot
+                # When a plot is wiped, it is reset to flatlands at this height
+                height: 70
+                
+                # Whether or not this plot is a MegaPlot
+                mega: false
+                
+                # Protection level for MegaPlots
+                # protected - Only owners can build
+                # communal - Only citizens of the city can build
+                # public - Anyone can build, even non-citizens
+                # Ignored if mega is false
+                protection: "protected"
+                
+                # UUID of this plot's creator
+                creator: "778310a6219c43599d19271573d98b7c"
+                
+                # List of UUID's of this plot's owners
+                # The plot's creator need not be an owner
+                owners:
+                - "778310a6219c43599d19271573d98b7c"
+                - "878310a6219c43599d19271573d98b7c"
