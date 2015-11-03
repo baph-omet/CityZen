@@ -1,47 +1,73 @@
 package io.github.griffenx.CityZen;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.Vector;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
+import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 
 public class City {
 	public Citizen mayor;
+	public List<Citizen> citizens;
+	public List<Citizen> deputies;
+	
 	public String name;
-	public ArrayList<Citizen> citizens;
+	public String slogan;
+	public ChatColor color;
 	
-	private Location center;
+	public int maxPlotSize;
+	public int minPlotSize;
+	public Location center;
 	
-	public City(String name) {
-		//TODO: Load city from config, set handling for if the city doesn't exist
-	}
-	public City(String name, Player founder) {
-		Citizen mayor = new Citizen(founder);
+	public Boolean freeJoin;
+	public Boolean openPlotting;
+	public Boolean blockBlacklist;
+	public Boolean useBlacklistAsWhitelist;
+	
+	public List<Material> blacklistedBlocks;
+	
+	private String identifier;
+	private ConfigurationSection properties;
+	
+	public City(String id) {
+		properties = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + id);
+		identifier = id;
+		name = getProperty("name");
+		slogan = getProperty("slogan");
+		color = ChatColor.getByChar(getProperty("color"));
 		
-		name = name;
-		mayor = mayor;
+		//mayor = new Citizen()
+		
+		citizens = getCitizens();
+		
 	}
-	public City(String cityName, Player founder, int x, int z) {
-		name = cityName;
-		mayor = new Citizen(founder);
-		initialX = x;
-		initialZ = z;
-	}
-	
-	public List getCitizens() {
-		return CityZen.cityConfig.getConfig().getShortList("cities." + name + ".citizens");
+
+	public List<Citizen> getCitizens() {
+		List<Citizen> cits = new Vector<Citizen>();
+		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".citizens")) {
+			cits.add(new Citizen(CityZen.getPlugin().getServer().getPlayer(UUID.fromString(u))));
+		}
+		return cits;
 	}
 	
 	public void addCitizen(Citizen ctz) {
-//		reputation += ctz.reputation;
 		citizens.add(ctz);
+		//TODO: Handling for when a citizen is added to a city, perhaps
 	}
 	
 	public void removeCitizen(Citizen ctz) {
-		// Player loses rep for leaving a city
-		ctz.reputation /= 2;
+		ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100);
 		citizens.remove(ctz);
+		//TODO: Remove plots
+	}
+	
+	public void evictCitizen(Citizen ctz) {
+		ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOneEvictionPercent") / 100);
+		citizens.remove(ctz);
+		//TODO: Remove plots
 	}
 	
 	public int getReputation() {
@@ -51,6 +77,19 @@ public class City {
 	}
 	
 	public void save() {
-		
+		// This operation should be done regularly to avoid data loss if the server crashes or whatever
+		//TODO: Save all properties of city to config, then reload config
+	}
+	
+	private String getProperty(String property) {
+		for (String prop : properties.getKeys(false)) {
+			if (prop.equalsIgnoreCase(property)) {
+				String val = CityZen.cityConfig.getConfig().getString(properties.getString(property));
+				if (val.length() == 0) {
+					val = CityZen.getPlugin().getConfig().getString("cityDefaults." + property);
+					CityZen.cityConfig.getConfig().set("cities." + identifier + "." + property, val);
+				} return val;
+			}
+		} return "";
 	}
 }

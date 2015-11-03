@@ -4,7 +4,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class Plot {
-	private Location center;
+	private Location corner1;
+	private Location corner2;
 	private Citizen owner;
 	private City affiliation;
 	

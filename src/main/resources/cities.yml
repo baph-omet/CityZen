@@ -3,17 +3,71 @@
 #  Do not modify unless you know what you're doing
 ##############################################
 
+# All cities are listed under here.
 cities:
-    testCity:
-        name: "testCity"
+
+    # Each city has an identifier that's basically its name with spaces removed.
+    # If this identifier is taken, it will add a number to the end.
+    testcity:
+    
+        # Publicly visible name
+        name: "Test City"
+        
+        # Color code used for this city's name. Must be a valid Bukkit code.
+        color: "&c"
+        
+        # Publicly visible slogan. Must be less than 100 characters or it will be truncated.
+        slogan: "Hello world!"
+        
+        # Location of city center
         center: "100;88;-200"
-        mayor: "testPlayer"
+        
+        # UUID of player that is this city's mayor
+        mayor: "778310a6219c43599d19271573d98b7c"
+        
+        # List of UUID's of players who are this city's deputies
         deputies:
-        - "testPlayer3"
-        - "testPlayer4"
+        - "878310a6219c43599d19271573d98b7c"
+        - "978310a6219c43599d19271573d98b7c"
+        
+        # List of UUID's of players who are citizens of this city
         citizens:
-        - "testPlayer"
-        - "testPlayer1"
-        - "testPlayer2"
-        - "testPlayer3"
-        - "testPlayer4"
+        - "778310a6219c43599d19271573d98b7c"
+        - "878310a6219c43599d19271573d98b7c"
+        - "978310a6219c43599d19271573d98b7c"
+        - "078310a6219c43599d19271573d98b7c"
+        - "178310a6219c43599d19271573d98b7c"
+        
+        # Max width of a square plot in this city 
+        # (plots may be any rectangle with an area no more than this number of blocks squared)
+        # Set to -1 to ignore this value and just use the server default
+        maxPlotSize: 16
+        
+        # Minimum plot size, same as above, but minimum
+        minPlotSize: 8
+        
+        # If true, any player may join this city
+        # If false, all new citizens must be invited by the mayor or a deputy
+        freeJoin: false
+        
+        # If true, citizens may place their own plots
+        # If false, only the mayor or a deputy may place plots
+        openPlotting: false
+        
+        # If true, item restricting will be enabled
+        # If false, any block types may be used
+        blockBlacklist: false
+        
+        # If true, the blacklist is inverted and players may only build with the blocks listed below
+        # Only checked if blockBlacklist is true
+        useBlacklistAsWhitelist: false
+        
+        # A list of blocks that are restricted in this city
+        # Only checked if blockBlacklist is true
+        # If this list is empty, the plugin treats this as if blockBlacklist is false
+        blacklistedBlocks:
+        - "netherbrick"
+        - "tnt"
+        - "5:3"
+        
+        

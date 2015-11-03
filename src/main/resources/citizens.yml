@@ -3,9 +3,8 @@
 
 
 citizens:
-    testPlayer:
+    778310a6219c43599d19271573d98b7c:
         name: "testPlayer"
-        uuid: "12345abcdef"
         reputation: 100
         affiliation: "testCity"
         plots:

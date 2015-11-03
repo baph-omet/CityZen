@@ -1,10 +1,9 @@
 package io.github.griffenx.CityZen;
 
-import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 public class Citizen {
 	
@@ -12,18 +11,26 @@ public class Citizen {
 	public City affiliation;
 	public Player passport;
 	
-	///<summary>
-	///Creates a new Citizen based on the player's name
-	///</summary>
+	public Citizen(UUID uuid) {
+		this((Player) CityZen.getPlugin().getServer().getOfflinePlayer(uuid));
+	}
+	
 	public Citizen(Player plr) {
 		passport = plr;
 		FileConfiguration cnfg = CityZen.citizenConfig.getConfig();
 		if (cnfg.contains("citizens." + passport.getName())) {
 			reputation = cnfg.getInt("citizens." + passport.getName() + ".reputation");
 			affiliation = new City(cnfg.getString("citizens." + passport.getName() + ".affiliation"));
-			cnfg.get
 		}
-		
+	}
+	
+	public void subRep(int amount) {
+		reputation -= amount;
+		fixRep();
+	}
+	
+	private void fixRep() {
+		if (reputation < 0) reputation = 0;
 	}
 	
 	public void save() {

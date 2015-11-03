@@ -3,3 +3,16 @@
 #       (add some stuff here)
 ##############################################
 
+cityDefaults:
+    color: "&f"
+    slogan: "The newest city on the server!"
+    freeJoin: false
+    openPlotting: false
+    blockBlacklist: false
+reputation:
+    default: 0
+    gainedOnJoinCity: 100
+    gainedOnBuyPlot: 100
+    lostOnSellPlot: 100
+    lostOnLeaveCityPercent: 25
+    lostOnEvictionPercent: 50
