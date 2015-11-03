@@ -8,14 +8,16 @@ public class Util {
 	/**
 	 * Gets a Citizen by name from list of citizens in memory. 
 	 * If somehow that player is online, but their citizen record is not in memory, it will be added.
+	 * This method should be used exclusively for getting citizens, NOT initializing a new Citizen.
 	 * @param name
 	 * The name of the player to get
 	 * @return
 	 * Returns a citizen from memory if online, or a new citizen record if offline.
 	 */
-	public static Citizen getCitizen(String name) {
+	public static Citizen getCitizen(UUID uuid) {
 		Citizen ctz = null;
 		for(Citizen c : CityZen.citizens) {
+			//TODO: Get player's UUID (not quite sure how to do this w/o docs)
 			if (c.passport.getName().equalsIgnoreCase(name)) {
 				ctz = c;
 			}
@@ -33,6 +35,7 @@ public class Util {
 	/**
 	 * Gets a City by name from list of cities in memory.
 	 * If somehow that city is not in memory, it will be added.
+	 * This method should be used exclusively for getting cities, NOT initializing a new City.
 	 * @param name
 	 * The name of the city to get.
 	 * @return
