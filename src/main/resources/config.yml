@@ -7,7 +7,8 @@
 minCitySeparation: 1000
 
 # Number of blocks around each plot that are protected as part of the city
-plotProtectedArea: 16
+# Also serves as the maximum spacing between new plots
+plotBuffer: 16
 
 # Default city config values
 # If these values are absent from a city's config, they will be drawn from here
