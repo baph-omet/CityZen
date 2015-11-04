@@ -14,9 +14,8 @@ public class Citizen {
 	public Citizen(UUID uuid) {
 		this((Player) CityZen.getPlugin().getServer().getOfflinePlayer(uuid));
 	}
-	
-	public Citizen(Player plr) {
-		passport = plr;
+	public Citizen(Player player) {
+		passport = player;
 		FileConfiguration cnfg = CityZen.citizenConfig.getConfig();
 		if (cnfg.contains("citizens." + passport.getName())) {
 			reputation = cnfg.getInt("citizens." + passport.getName() + ".reputation");

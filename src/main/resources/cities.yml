@@ -1,7 +1,7 @@
-##############################################
-#  This is the data file for all defined cities
-#  Do not modify unless you know what you're doing
-##############################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # #
+#  This is the data file for all defined cities     #
+#  Do not modify unless you know what you're doing  #
+# # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # All cities are listed under here.
 cities:
@@ -54,6 +54,10 @@ cities:
         # If false, only the mayor or a deputy may place plots
         openPlotting: false
         
+        # If true, wiped plots will reset to the natural terrain from seed
+        # If false, wiped plots will generate flatlands at their height
+        naturalWipe: false
+        
         # If true, item restricting will be enabled
         # If false, any block types may be used
         blockBlacklist: false
@@ -68,7 +72,6 @@ cities:
         blacklistedBlocks:
         - "netherbrick"
         - "tnt"
-        - "5:3"
         
         # A list of all plots in this city
         plots:

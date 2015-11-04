@@ -1,7 +1,6 @@
 package io.github.griffenx.CityZen;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 public class Plot {
 	private Location corner1;
@@ -15,6 +14,7 @@ public class Plot {
 		identifier = id;
 		
 		//TODO: Load values from disk into memory
+		
 	}
 	
 	//TODO: Method to create a new plot

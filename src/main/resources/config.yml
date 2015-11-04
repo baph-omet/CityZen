@@ -1,7 +1,7 @@
-##############################################
-#     Welcome to the config for CityZen
-#       (add some stuff here)
-##############################################
+# # # # # # # # # # # # # # # # # # # # # # #
+#     Welcome to the config for CityZen     #
+#       (add some stuff here)               #
+# # # # # # # # # # # # # # # # # # # # # # #
 
 # Distance (in blocks) minimum between city centers
 minCitySeparation: 1000
