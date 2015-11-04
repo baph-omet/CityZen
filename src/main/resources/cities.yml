@@ -19,9 +19,6 @@ cities:
         # Publicly visible slogan. Must be less than 100 characters or it will be truncated.
         slogan: "Hello world!"
         
-        # Location of city center
-        center: "100,-200,world"
-        
         # UUID of player that is this city's mayor
         mayor: "778310a6219c43599d19271573d98b7c"
         
