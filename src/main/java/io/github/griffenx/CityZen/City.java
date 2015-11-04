@@ -23,7 +23,6 @@ public class City {
 	
 	public int maxPlotSize;
 	public int minPlotSize;
-	public Location center;
 	
 	public Boolean freeJoin;
 	public Boolean openPlotting;
@@ -45,7 +44,6 @@ public class City {
 		
 		maxPlotSize = Integer.parseInt(getProperty("maxPlotSize"));
 		minPlotSize = Integer.parseInt(getProperty("minPlotSize"));
-		//TODO: get city center location
 		
 		freeJoin = Boolean.valueOf(getProperty("freeJoin"));
 		openPlotting = Boolean.valueOf(getProperty("openPlotting"));
@@ -91,21 +89,35 @@ public class City {
 		return color + name;
 	}
 	
+	public Location getCenter() {
+		//TODO: Gets the location that's the center of the city, calculated based on where each of the city's plots are
+		// midpoint x, midpoint z
+		// This means that the value is dynamic and no longer needs to be stored in the config,
+		// since the location of a city is just a function of its plots anyway.
+	}
+	
 	public void addCitizen(Citizen ctz) {
 		citizens.add(ctz);
 		//TODO: Handling for when a citizen is added to a city, perhaps
 	}
 	
 	public void removeCitizen(Citizen ctz) {
-		ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100);
-		citizens.remove(ctz);
-		//TODO: Remove plots
+		removeCitizen(ctz, false);
 	}
-	
-	public void evictCitizen(Citizen ctz) {
-		ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100);
+	public void removeCitizen(Citizen ctz, Boolean evict) {
+		if (evict) {
+			ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100);
+		} else {
+			ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100);
+		}
 		citizens.remove(ctz);
 		//TODO: Remove plots
+		for (Plot p : plots) {
+			// I sure hope this is the right syntax
+			if (p.owners.contains(ctz)) {
+				p.removeOwner(ctz);
+			}
+		}
 	}
 	
 	public int getReputation() {
@@ -210,5 +222,13 @@ public class City {
 			//TODO: Get a plot
 			plts.add(new Plot(this, Integer.valueOf(key)));
 		} return plts;
+	}
+	
+	private void wipePlots() {
+		for (Plot p : plots) {
+			if (p.owners.Length() == 0) {
+				p.wipe();
+			}
+		}
 	}
 }
