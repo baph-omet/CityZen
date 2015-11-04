@@ -61,6 +61,36 @@ public class City {
 		
 	}
 	
+	/**
+	 * Gets a City by name from list of cities in memory.
+	 * If somehow that city is not in memory, it will be added.
+	 * This method should be used exclusively for getting cities, NOT initializing a new City.
+	 * @param name
+	 * The name of the city to get.
+	 * @return
+	 * A city from list of cities in memory
+	 */
+	public static City getCity(String name) {
+		City cty = null;
+		for(City c : CityZen.cities) {
+			if (c.name.equalsIgnoreCase(name)) {
+				cty = c;
+			}
+		}
+		
+		if (cty == null) {
+			cty = new City(name);
+			CityZen.cities.add(cty);
+		}
+		
+		return cty;
+	}
+	
+	public String getChatName() {
+		//TODO: Verify that this works
+		return color + name;
+	}
+	
 	public void addCitizen(Citizen ctz) {
 		citizens.add(ctz);
 		//TODO: Handling for when a citizen is added to a city, perhaps
@@ -136,6 +166,16 @@ public class City {
 			}
 		}
 		return "";
+	}
+	
+	private void setProperty(String property, Object value) {
+		for (String prop : properties.getKeys(false)) {
+			if (prop.equalsIgnoreCase(property)) {
+				CityZen.cityConfig.getConfig().set("cities." + identifier + "." + property, value);
+				//TODO: Reload properties into memory
+				return;
+			}
+		}
 	}
 	
 	private List<Citizen> getCitizens() {
