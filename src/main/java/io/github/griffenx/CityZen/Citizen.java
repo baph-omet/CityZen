@@ -10,23 +10,28 @@ public class Citizen {
 	public int reputation;
 	public City affiliation;
 	public Player passport;
+	public List<String> alerts;
+	
+	private ConfigurationSection properties;
 	
 	public Citizen(UUID uuid) {
 		this((Player) CityZen.getPlugin().getServer().getOfflinePlayer(uuid));
 	}
 	public Citizen(Player player) {
+		//TODO: Make sure this is the correct way to get UUID
+		// I hate not having access to the bukkit api at work >.<
+		properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.UUID);
 		passport = player;
-		FileConfiguration cnfg = CityZen.citizenConfig.getConfig();
-		if (cnfg.contains("citizens." + passport.getName())) {
-			reputation = cnfg.getInt("citizens." + passport.getName() + ".reputation");
-			affiliation = new City(cnfg.getString("citizens." + passport.getName() + ".affiliation"));
-		}
+		reputation = getProperty("reputation");
+		affiliation = City.getCity(getProperty("affiliation"));
+		
+		alerts = properties.getStringList("alerts");
 	}
 	
 	/**
 	 * Gets a Citizen by name from list of citizens in memory. 
 	 * If somehow that player is online, but their citizen record is not in memory, it will be added.
-	 * This method should be used exclusively for getting citizens, NOT initializing a new Citizen.
+	 * This method should be used exclusively for getting online citizens, NOT initializing a new Citizen.
 	 * @param name
 	 * The name of the player to get
 	 * @return
@@ -49,6 +54,12 @@ public class Citizen {
 		return ctz;
 	}
 	
+	public void alert(String alertText) {
+		//TODO: Date of today + alertText, then write back to citizen file
+		// SimpleDateFormat?
+		alerts.add( + alertText);
+	}
+	
 	public void subRep(int amount) {
 		reputation -= amount;
 		fixRep();
@@ -68,5 +79,15 @@ public class Citizen {
 		cnfg.set(pPath + ".affiliation", affiliation.name);
 	}
 	
-	
+	private String getProperty(String property) {
+		for (String prop : properties.getKeys(false)) {
+			if (prop.equalsIgnoreCase(property)) {
+				//TODO: I'm not sure this is correct
+				// Check this in the city class as well
+				return CityZen.citizenConfig.getConfig().getString(properties.getString(property));
+				// No need to set defaults, as there are no defaults for citizens
+			}
+		}
+		return "";
+	}
 }
