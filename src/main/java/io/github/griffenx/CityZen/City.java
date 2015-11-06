@@ -96,6 +96,12 @@ public class City {
 		// since the location of a city is just a function of its plots anyway.
 	}
 	
+	public int getReputation() {
+		int tot = 0;
+		for(Citizen c : citizens) tot += c.reputation;
+		return tot;
+	}
+	
 	public void addCitizen(Citizen ctz) {
 		citizens.add(ctz);
 		//TODO: Handling for when a citizen is added to a city, perhaps
@@ -120,10 +126,10 @@ public class City {
 		}
 	}
 	
-	public int getReputation() {
-		int tot = 0;
-		for(Citizen c : citizens) tot += c.reputation;
-		return tot;
+	public void alertCitizens(String alertText) {
+		for (Citizen c : citizens) {
+			c.alert(alertText);
+		}
 	}
 	
 	public void save() {
