@@ -1,7 +1,9 @@
 package io.github.griffenx.CityZen;
 
+import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -18,11 +20,10 @@ public class Citizen {
 		this((Player) CityZen.getPlugin().getServer().getOfflinePlayer(uuid));
 	}
 	public Citizen(Player player) {
-		//TODO: Make sure this is the correct way to get UUID
-		// I hate not having access to the bukkit api at work >.<
-		properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.UUID);
+		properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId());
 		passport = player;
-		reputation = getProperty("reputation");
+		reputation = Integer.valueOf(getProperty("reputation"));
+		fixRep();
 		affiliation = City.getCity(getProperty("affiliation"));
 		
 		alerts = properties.getStringList("alerts");
@@ -32,22 +33,21 @@ public class Citizen {
 	 * Gets a Citizen by name from list of citizens in memory. 
 	 * If somehow that player is online, but their citizen record is not in memory, it will be added.
 	 * This method should be used exclusively for getting online citizens, NOT initializing a new Citizen.
-	 * @param name
-	 * The name of the player to get
+	 * @param uuid
+	 * The uuid of the player to get
 	 * @return
 	 * Returns a citizen from memory if online, or a new citizen record if offline.
 	 */
 	public static Citizen getCitizen(UUID uuid) {
 		Citizen ctz = null;
 		for(Citizen c : CityZen.citizens) {
-			//TODO: Get player's UUID (not quite sure how to do this w/o docs)
-			if (c.passport.getName().equalsIgnoreCase(name)) {
+			if (c.passport.getUniqueId().equals(uuid)) {
 				ctz = c;
 			}
 		}
 		
 		if (ctz == null) {
-			Player newCtz = CityZen.getPlugin().getServer().getPlayer(UUID.fromString(name));
+			Player newCtz = CityZen.getPlugin().getServer().getPlayer(uuid);
 			ctz = new Citizen(newCtz);
 			if (newCtz.isOnline()) CityZen.citizens.add(ctz);
 		}

@@ -1,9 +1,23 @@
-
-
-
+# # # # # # # # # # # # # # # # # # # # # # # # # # #
+#  This is the data file for all defined citizens   #
+#  Do not modify unless you know what you're doing  #
+# # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 citizens:
+    # Citizens are indexed by their UUID
     778310a6219c43599d19271573d98b7c:
+        # The last known username of this citizen
+        # Auto-updates on player login
         name: "testPlayer"
+        
+        # This player's reputation
         reputation: 100
+        
+        # The city with which this player is affiliated
         affiliation: "testCity"
+        
+        # Any pending alerts for this player
+        # Once alerts are read, they are automatically erased from this list
+        # Alerts are written in the form: "YYYYMMDD Alert text..." with the date being the date it was sent
+        alerts:
+        - "20151106 This is a test alert that was sent to this player. They will be prompted to check this message whenever they run a command."

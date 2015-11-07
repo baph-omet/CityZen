@@ -1,6 +1,11 @@
 package io.github.griffenx.CityZen;
 
+import java.util.List;
+import java.util.Vector;
+
 import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 
 public class Plot {
 	public Citizen creator;
@@ -10,8 +15,9 @@ public class Plot {
 	
 	public List<Citizen> owners;
 	
-	private Location corner1;
-	private Location corner2;
+	public Location corner1;
+	public Location corner2;
+	
 	private City affiliation;
 	private int identifier;
 	
@@ -39,7 +45,7 @@ public class Plot {
 	
 	public void wipe() {
 		//TODO: restore the plot to a blank plot, method depends on city's wipe settings
-		if (owners.Length() == 0) {
+		if (owners.size() == 0) {
 			if (affiliation.naturalWipe) {
 				//TODO: Restore plot to natural terrain
 			} else {
@@ -51,6 +57,25 @@ public class Plot {
 	public void removeOwner(Citizen owner) {
 		owners.remove(owner);
 		wipe();
+	}
+	
+	public void save() {
+		FileConfiguration config = CityZen.cityConfig.getConfig();
+		String path = "cities." + affiliation.identifier + ".plots." + identifier;
+		if (config.contains(path)) {
+			config.createSection(path);
+		}
+		ConfigurationSection props = config.getConfigurationSection(path);
+		props.set(".corner1", (int) corner1.getX() + "," + (int) corner1.getZ());
+		props.set(".corner2", (int) corner2.getX() + "," + (int) corner2.getZ());
+		props.set(".height",baseHeight);
+		props.set(".mega",isMega);
+		props.set(".protection", protection);
+		props.set(".creator", creator.passport.getUniqueId());
+		
+		List<String> ownrs = new Vector<String>();
+		for (Citizen c : owners) ownrs.add(c.passport.getUniqueId().toString());
+		props.set(".owners", ownrs);
 	}
 	
 	private String getProperty(String property) {

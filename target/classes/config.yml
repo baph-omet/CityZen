@@ -7,7 +7,23 @@
 minCitySeparation: 1000
 
 # Number of blocks around each plot that are protected as part of the city
-plotProtectedArea: 16
+# Also serves as the maximum spacing between new plots
+plotBuffer: 16
+
+# Server-wide maximum size for normal plots
+# Plot may not contain more than this many blocks squared on the X/Z plane
+# Does not apply to MegaPlots
+# Used as the city-wide default for new cities
+maxPlotSize: 16
+
+# Server-wide minimum size for all plots
+# Plot must not contain fewer than this many blocks squared on the X/Z plane
+# Used as the city-wide default for new cities
+minPlotSize: 4
+
+# Server-wide maximum size for MegaPlots
+# Plot may not contain more than this many blocks squared on the X/Z plane
+maxMegaPlotSize: 128
 
 # Default city config values
 # If these values are absent from a city's config, they will be drawn from here
@@ -18,6 +34,8 @@ cityDefaults:
     freeJoin: false
     openPlotting: false
     blockBlacklist: false
+    useBlacklistAsWhitelist: false
+    naturalWipe: false
     
 # Sources of internal changes to reputation
 # Reputation may also be modified externally via commands
