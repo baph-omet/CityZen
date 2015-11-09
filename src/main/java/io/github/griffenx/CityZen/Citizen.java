@@ -79,6 +79,17 @@ public class Citizen {
 		cnfg.set(pPath + ".affiliation", affiliation.name);
 	}
 	
+	/**
+	 * Determines if two Citizen objects are the same by their UUID
+	 * @param citizen
+	 * The citizen to compare to this one
+	 * @return
+	 * Whether or not these Citizens are the same
+	 */
+	public Boolean equals(Citizen citizen) {
+		return passport.getUniqueId().equals(citizen.passport.getUniqueId());
+	}
+	
 	private String getProperty(String property) {
 		for (String prop : properties.getKeys(false)) {
 			if (prop.equalsIgnoreCase(property)) {

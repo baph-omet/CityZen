@@ -11,15 +11,15 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class City {
-	public Citizen mayor;
-	public List<Citizen> citizens;
-	public List<Citizen> deputies;
+	//public Citizen mayor;
+	//public List<Citizen> citizens;
+	//public List<Citizen> deputies;
 	
-	public List<Plot> plots;
+	//public List<Plot> plots;
 	
-	public String name;
-	public String slogan;
-	public ChatColor color;
+	//public String name;
+	//public String slogan;
+	//public ChatColor color;
 	public String identifier;
 	
 	public int maxPlotSize;
@@ -72,60 +72,147 @@ public class City {
 	public static City getCity(String name) {
 		City cty = null;
 		for(City c : CityZen.cities) {
-			if (c.name.equalsIgnoreCase(name)) {
+			if (c.getName().equalsIgnoreCase(name)) {
 				cty = c;
 			}
 		}
-		
 		if (cty == null) {
 			cty = new City(name);
 			CityZen.cities.add(cty);
 		}
-		
 		return cty;
 	}
 	
+	/**
+	 * Gets the Mayor of this City
+	 * @return
+	 * Citizen who is the Mayor of this city
+	 */
 	public Citizen getMayor() {
 		return Citizen.getCitizen(UUID.fromString(getProperty("mayor")));
 	}
 	
+	/**
+	 * Sets the mayor of this city to a new citizen. Overwrites the old mayor.
+	 * @param newMayor
+	 * The Citizen to set as the City's new Mayor
+	 */
+	public void setMayor(Citizen newMayor) {
+		Citizen ctz = null;
+		for (Citizen c : getCitizens()) {
+			if (c.passport.getUniqueId().equals(newMayor.passport.getUniqueId())) {
+				ctz = newMayor;
+			}
+		}
+		if (ctz == null) {
+			addCitizen(newMayor);
+		}
+		setProperty("mayor",newMayor.passport.getUniqueId().toString());
+	}
+	
+	/**
+	 * Simply gets this City's name
+	 * @return
+	 * This city's name
+	 */
 	public String getName() {
 		return getProperty("name");
 	}
 	
+	/**
+	 * Simply gets this city's slogan
+	 * @return
+	 * This city's slogan
+	 */
 	public String getSlogan() {
 		return getProperty("slogan");
 	}
 	
+	/**
+	 * Gets the chat color for this City's name. If the value in config can't be converted to a color, it just uses WHITE instead.
+	 * @return
+	 * A ChatColor from this City's config
+	 */
 	public ChatColor getColor() {
-		return ChatColor.getByChar(getProperty("color"));
+		ChatColor color;
+		try {
+			color = ChatColor.getByChar(getProperty("color"));
+		} catch(Exception e) {
+			color = ChatColor.WHITE;
+		}
+		return color;
 	}
 	
+	/**
+	 * Gets the maximum size of plots for this City. If the value in config is set to ignore (is less than 0),
+	 * or otherwise can't be converted, the server default is used instead.
+	 * @return
+	 * The maximum plot size for this City
+	 */
 	public int getMaxPlotSize() {
-		int maxPlotSize = Integer.valueOf(getProperty("maxPlotSize"));
+		int maxPlotSize;
+		try {
+			maxPlotSize = Integer.valueOf(getProperty("maxPlotSize"));
+		} catch (NumberFormatException e) {
+			maxPlotSize = CityZen.getPlugin().getConfig().getInt("maxPlotSize");
+		}
 		if (maxPlotSize > -1) return maxPlotSize;
 		else return CityZen.getPlugin().getConfig().getInt("maxPlotSize");
 	}
 	
+	/**
+	 * Gets the minimum size of plots for this City. If the value in config is set to ignore (is less than 0),
+	 * or otherwise can't be converted, the server default is used instead.
+	 * @return
+	 * The minimum plot size for this City
+	 */
+	public int getMinPlotSize() {
+		int minPlotSize;
+		try {
+			minPlotSize = Integer.valueOf(getProperty("minPlotSize"));
+		} catch (NumberFormatException e) {
+			minPlotSize = CityZen.getPlugin().getConfig().getInt("minPlotSize");
+		}
+		if (minPlotSize > -1) return minPlotSize;
+		else return CityZen.getPlugin().getConfig().getInt("minPlotSize");
+	}
 	
-	
+	/**
+	 * Gets a list of citizens from their UUID's in file. If a line cannot be converted, it will be ignored.
+	 * @return
+	 * A list of Citizens who are members of this City
+	 */
 	public List<Citizen> getCitizens() {
 		List<Citizen> cits = new Vector<Citizen>();
 		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".citizens")) {
-			cits.add(Citizen.getCitizen(UUID.fromString(u)));
+			try {
+				cits.add(Citizen.getCitizen(UUID.fromString(u)));
+			} catch (IllegalArgumentException e) {}
 		}
 		return cits;
 	}
 	
+	/**
+	 * Gets a list of deputies from their UUID's in file. If a line cannot be converted, it will be ignored.
+	 * @return
+	 * A list of Citizens who are deputies of this City
+	 */
 	public List<Citizen> getDeputies() {
 		List<Citizen> deps = new Vector<Citizen>();
 		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".deputies")) {
-			deps.add(Citizen.getCitizen(UUID.fromString(u)));
+			try {
+				deps.add(Citizen.getCitizen(UUID.fromString(u)));
+			} catch (IllegalArgumentException e) {}
 		}
 		return deps;
 	}
 	
-	private List<Plot> getPlots() {
+	/**
+	 * Gets a list of this City's plots.
+	 * @return
+	 * A List of this city's plots.
+	 */
+	public List<Plot> getPlots() {
 		List<Plot> plts = new Vector<Plot>();
 		for (String key : CityZen.cityConfig.getConfig().getConfigurationSection("cities." + identifier + ".plots").getKeys(false)) {
 			//TODO: Get a plot
@@ -133,6 +220,11 @@ public class City {
 		} return plts;
 	}
 	
+	/**
+	 * Returns a list of materials that are blacklisted in this city. Illegible lines are ignored.
+	 * @return
+	 * A list of Materials that are blacklisted in this City.
+	 */
 	public List<Material> getBlacklist() {
 		List<Material> mats = new Vector<Material>();
 		for (String block : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".blacklistedBlocks")) {
@@ -143,14 +235,19 @@ public class City {
 		} return mats;
 	}
 	
+	/**
+	 * Returns the center point of this city, based on its plots.
+	 * @return
+	 * A Location that signifies the center of this city
+	 */
 	public Location getCenter() {
 		Location center = null;
-		if (plots.size() > 0) {
+		if (getPlots().size() > 0) {
 			double maxX = 0,
 					minX = 0,
 					maxZ = 0,
 					minZ = 0;
-			for (Plot p : plots) {
+			for (Plot p : getPlots()) {
 				if (p.corner1.getX() > maxX) maxX = p.corner1.getX();
 				if (p.corner1.getX() < minX) minX = p.corner1.getX();
 				if (p.corner1.getZ() > maxZ) maxZ = p.corner1.getZ();
@@ -161,53 +258,90 @@ public class City {
 				if (p.corner2.getZ() > maxZ) maxZ = p.corner2.getZ();
 				if (p.corner2.getZ() < minZ) minZ = p.corner2.getZ();
 			}
-			center = new Location(plots.get(0).corner1.getWorld(),(maxX + minX) / 2, 0, (maxZ + minZ) / 2);
+			center = new Location(getPlots().get(0).corner1.getWorld(),(maxX + minX) / 2, 0, (maxZ + minZ) / 2);
 		}
 		return center;
 	}
 	
+	/**
+	 * Puts the city's color and name together to get a chat-friendly representation of its name
+	 * @return
+	 * Color + Name
+	 */
 	public String getChatName() {
 		//TODO: Verify that this works
-		return color + name;
+		return getColor() + getName();
 	}
 
+	/**
+	 * Gets this city's reputation as the sum of its citizens
+	 * @return
+	 * This city's reputation
+	 */
 	public int getReputation() {
 		int tot = 0;
-		for(Citizen c : citizens) tot += c.reputation;
+		for(Citizen c : getCitizens()) tot += c.reputation;
 		return tot;
 	}
 	
+	/**
+	 * Adds a citizen to this city's list of citizens, then adds it back to the config
+	 * @param ctz
+	 * The citizen to add to this city
+	 */
 	public void addCitizen(Citizen ctz) {
-		citizens.add(ctz);
-		//TODO: Handling for when a citizen is added to a city, perhaps
-		save();
+		List<Citizen> ctzs = getCitizens();
+		ctzs.add(ctz);
+		setProperty("citizens",ctzs);
 	}
 	
+	/**
+	 * Remove a citizen from this city, and remove them from ownership of all plots
+	 * @param ctz
+	 * The citizen to remove
+	 */
 	public void removeCitizen(Citizen ctz) {
 		removeCitizen(ctz, false);
 	}
+	/**
+	 * Evict a citizen from this city, and remove them from ownership of all plots.
+	 * Costs them more reputation if this is an eviction.
+	 * @param ctz
+	 * The citizen to evict
+	 * @param evict
+	 * Whether not this is an eviction
+	 */
 	public void removeCitizen(Citizen ctz, Boolean evict) {
-		if (evict) {
-			ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100);
-		} else {
-			ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100);
-		}
-		citizens.remove(ctz);
-		//TODO: Remove plots
-		for (Plot p : plots) {
-			// I sure hope this is the right syntax
-			if (p.owners.contains(ctz)) {
-				p.removeOwner(ctz);
+		List<Citizen> ctzs = getCitizens();
+		for (Citizen c : ctzs) {
+			if (c.equals(ctz)) {
+				if (evict) {
+					ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100);
+				} else {
+					ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100);
+				}
+				ctzs.remove(ctz);
+				//TODO: Remove plots
+				for (Plot p : getPlots()) {
+					// I sure hope this is the right syntax
+					if (p.owners.contains(ctz)) {
+						p.removeOwner(ctz);
+					}
+				}
+				setProperty("citizens",ctzs);
+				return;
 			}
 		}
 	}
 	
 	public void alertCitizens(String alertText) {
-		for (Citizen c : citizens) {
+		for (Citizen c : getCitizens()) {
 			c.alert(alertText);
 		}
 	}
 	
+	/*TODO: Determine whether or not this method is necessary
+	 I believe that I could probably nix it and just go with saving the city config outright.*/
 	public void save() {
 		// This operation should be done regularly to avoid data loss if the server crashes or whatever
 		//TODO: Save all properties of city to config, then reload config
@@ -245,9 +379,11 @@ public class City {
 	}
 	
 	private String getProperty(String property) {
+		// Get the property from the city's config
 		for (String prop : properties.getKeys(false)) {
 			if (prop.equalsIgnoreCase(property)) {
 				String val = CityZen.cityConfig.getConfig().getString(properties.getString(property));
+				// If the value is not set for some reason
 				if (val.length() == 0) {
 					val = CityZen.getPlugin().getConfig().getString("cityDefaults." + property);
 					CityZen.cityConfig.getConfig().set("cities." + identifier + "." + property, val);
@@ -270,14 +406,14 @@ public class City {
 		for (String prop : properties.getKeys(false)) {
 			if (prop.equalsIgnoreCase(property)) {
 				CityZen.cityConfig.getConfig().set("cities." + identifier + "." + property, value);
-				//TODO: Reload properties into memory
+				CityZen.cityConfig.save();
 				return;
 			}
 		}
 	}
 	
 	private void wipePlots() {
-		for (Plot p : plots) {
+		for (Plot p : getPlots()) {
 			if (p.owners.size() == 0) {
 				p.wipe();
 			}
@@ -286,8 +422,8 @@ public class City {
 	
 	private String generateID() {
 		String id = "";
-		for (int i=0;i<name.length();i++) {
-			if (Character.isAlphabetic(name.charAt(i))) id += name.charAt(i);
+		for (int i = 0; i < getName().length(); i++) {
+			if (Character.isAlphabetic(getName().charAt(i))) id += getName().charAt(i);
 		}
 		
 		Boolean idChanged = false;
@@ -295,7 +431,7 @@ public class City {
 			idChanged = true;
 			for (String c : CityZen.cityConfig.getConfig().getConfigurationSection("cities").getKeys(false)) {
 				if (id.equalsIgnoreCase(c)) {
-					idhj
+					//TODO: If ID already exists, create a new one
 				}
 			}
 		}
