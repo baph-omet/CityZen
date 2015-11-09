@@ -34,6 +34,7 @@ public class City {
 	public List<Material> blacklistedBlocks;
 	
 	private ConfigurationSection properties;
+	private FileConfiguration cityConfig = CityZen.cityConfig.getConfig();
 	
 	public City(String id) {
 		properties = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + id);
@@ -53,7 +54,7 @@ public class City {
 		
 		blacklistedBlocks = getBlacklist();
 		
-		mayor = Citizen.getCitizen(UUID.fromString(getProperty("mayor")));
+		//mayor = Citizen.getCitizen(UUID.fromString(getProperty("mayor")));
 		citizens = getCitizens();
 		deputies = getDeputies();
 		
@@ -84,6 +85,64 @@ public class City {
 		return cty;
 	}
 	
+	public Citizen getMayor() {
+		return Citizen.getCitizen(UUID.fromString(getProperty("mayor")));
+	}
+	
+	public String getName() {
+		return getProperty("name");
+	}
+	
+	public String getSlogan() {
+		return getProperty("slogan");
+	}
+	
+	public ChatColor getColor() {
+		return ChatColor.getByChar(getProperty("color"));
+	}
+	
+	public int getMaxPlotSize() {
+		int maxPlotSize = Integer.valueOf(getProperty("maxPlotSize"));
+		if (maxPlotSize > -1) return maxPlotSize;
+		else return CityZen.getPlugin().getConfig().getInt("maxPlotSize");
+	}
+	
+	
+	
+	public List<Citizen> getCitizens() {
+		List<Citizen> cits = new Vector<Citizen>();
+		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".citizens")) {
+			cits.add(Citizen.getCitizen(UUID.fromString(u)));
+		}
+		return cits;
+	}
+	
+	public List<Citizen> getDeputies() {
+		List<Citizen> deps = new Vector<Citizen>();
+		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".deputies")) {
+			deps.add(Citizen.getCitizen(UUID.fromString(u)));
+		}
+		return deps;
+	}
+	
+	private List<Plot> getPlots() {
+		List<Plot> plts = new Vector<Plot>();
+		for (String key : CityZen.cityConfig.getConfig().getConfigurationSection("cities." + identifier + ".plots").getKeys(false)) {
+			//TODO: Get a plot
+			plts.add(new Plot(this, Integer.valueOf(key)));
+		} return plts;
+	}
+	
+	public List<Material> getBlacklist() {
+		List<Material> mats = new Vector<Material>();
+		for (String block : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".blacklistedBlocks")) {
+			Material mat = Material.getMaterial(block);
+			if (mat != null) {
+				mats.add(mat);
+			}
+		} return mats;
+	}
+	
 	public Location getCenter() {
 		Location center = null;
 		if (plots.size() > 0) {
@@ -112,7 +171,6 @@ public class City {
 		return color + name;
 	}
 
-	
 	public int getReputation() {
 		int tot = 0;
 		for(Citizen c : citizens) tot += c.reputation;
@@ -216,40 +274,6 @@ public class City {
 				return;
 			}
 		}
-	}
-	
-	private List<Citizen> getCitizens() {
-		List<Citizen> cits = new Vector<Citizen>();
-		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".citizens")) {
-			cits.add(Citizen.getCitizen(UUID.fromString(u)));
-		}
-		return cits;
-	}
-	
-	private List<Citizen> getDeputies() {
-		List<Citizen> deps = new Vector<Citizen>();
-		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".deputies")) {
-			deps.add(Citizen.getCitizen(UUID.fromString(u)));
-		}
-		return deps;
-	}
-	
-	private List<Material> getBlacklist() {
-		List<Material> mats = new Vector<Material>();
-		for (String block : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".blacklistedBlocks")) {
-			Material mat = Material.getMaterial(block);
-			if (mat != null) {
-				mats.add(mat);
-			}
-		} return mats;
-	}
-	
-	private List<Plot> getPlots() {
-		List<Plot> plts = new Vector<Plot>();
-		for (String key : CityZen.cityConfig.getConfig().getConfigurationSection("cities." + identifier + ".plots").getKeys(false)) {
-			//TODO: Get a plot
-			plts.add(new Plot(this, Integer.valueOf(key)));
-		} return plts;
 	}
 	
 	private void wipePlots() {
