@@ -8,9 +8,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 public class Citizen {
-	
-	public int reputation;
-	public City affiliation;
 	public Player passport;
 	public List<String> alerts;
 	
@@ -20,11 +17,8 @@ public class Citizen {
 		this((Player) CityZen.getPlugin().getServer().getOfflinePlayer(uuid));
 	}
 	public Citizen(Player player) {
-		properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId());
+		properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString());
 		passport = player;
-		reputation = Integer.valueOf(getProperty("reputation"));
-		fixRep();
-		affiliation = City.getCity(getProperty("affiliation"));
 		
 		alerts = properties.getStringList("alerts");
 	}
@@ -45,7 +39,6 @@ public class Citizen {
 				ctz = c;
 			}
 		}
-		
 		if (ctz == null) {
 			Player newCtz = CityZen.getPlugin().getServer().getPlayer(uuid);
 			ctz = new Citizen(newCtz);
@@ -60,13 +53,62 @@ public class Citizen {
 		alerts.add( + alertText);
 	}
 	
-	public void subRep(int amount) {
-		reputation -= amount;
-		fixRep();
+	public int getReputation() {
+		int rep;
+		try {
+			rep = Integer.valueOf(getProperty("reputation"));
+		} catch (NumberFormatException e) {
+			rep = -1;
+		}
+		return rep;
 	}
 	
-	private void fixRep() {
-		if (reputation < 0) reputation = 0;
+	public void addReputation(int amount) {
+		int rep = getReputation() + amount;
+		fixRep();
+		setProperty("reputation",rep);
+	}
+	
+	public void subReputation(int amount) {
+		int rep = getReputation() - amount;
+		fixRep();
+		setProperty("reputation",rep);
+	}
+	
+	public City getAffiliation() {
+		City aff = null;
+		String affname = getProperty("affiliation");
+		if (affname.length() > 0) {
+			aff = City.getCity(affname);
+		}
+		return City.getCity(getProperty("affiliation"));
+	}
+	
+	/**
+	 * Used to set which city this Citizen is affiliated with. DO NOT USE to add a player to a city.
+	 * You should instead call addCitizen() on the city.
+	 * @param city
+	 * The City to set as this player's affiliation
+	 */
+	public void setAffiliation(City city) {
+		if (city != null) setProperty("affiliation",city.identifier);
+		else setProperty("affiliation",null);
+	}
+	
+	public Player getPassport() {
+		String foundUUID = null;
+		Player passport = null;
+		ConfigurationSection cits = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens")
+		for (String key : cits.getKeys(false)) {
+			if (cits.getString(key + ".name").equalsIgnoreCase(CityZen.getPlugin().getServer().getOfflinePlayer(key).getName())) {
+				foundUUID = key;
+				break;
+			}
+		}
+		if (foundUUID != null) {
+			passport = CityZen.getPlugin().getServer().getOfflinePlayer(foundUUID)
+		}
+		return passport;
 	}
 	
 	public void save() {
@@ -90,6 +132,10 @@ public class Citizen {
 		return passport.getUniqueId().equals(citizen.passport.getUniqueId());
 	}
 	
+	private void fixRep() {
+		if (reputation < 0) reputation = 0;
+	}
+	
 	private String getProperty(String property) {
 		for (String prop : properties.getKeys(false)) {
 			if (prop.equalsIgnoreCase(property)) {
@@ -100,5 +146,14 @@ public class Citizen {
 			}
 		}
 		return "";
+	}
+	
+	private void setProperty(String property, Object value) {
+		for (String prop : properties.getKeys(false)) {
+			if (prop.equalsIgnoreCase(property)) {
+				CityZen.citizenConfig.getConfig().setValue("citizens." + passport.getUniqueId().toString() + property,value);
+				CityZen.citizenConfig.save();
+			}
+		}
 	}
 }
