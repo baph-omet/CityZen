@@ -11,27 +11,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class City {
-	//public Citizen mayor;
-	//public List<Citizen> citizens;
-	//public List<Citizen> deputies;
-	
-	//public List<Plot> plots;
-	
-	//public String name;
-	//public String slogan;
-	//public ChatColor color;
 	public String identifier;
-	
-	public int maxPlotSize;
-	public int minPlotSize;
-	
-	public Boolean freeJoin;
-	public Boolean openPlotting;
-	public Boolean naturalWipe;
-	public Boolean blockBlacklist;
-	public Boolean useBlacklistAsWhitelist;
-	
-	public List<Material> blacklistedBlocks;
 	
 	private ConfigurationSection properties;
 	private FileConfiguration cityConfig = CityZen.cityConfig.getConfig();
@@ -39,25 +19,6 @@ public class City {
 	public City(String id) {
 		properties = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + id);
 		identifier = id;
-		name = getProperty("name");
-		slogan = getProperty("slogan");
-		color = ChatColor.getByChar(getProperty("color"));
-		
-		maxPlotSize = Integer.parseInt(getProperty("maxPlotSize"));
-		minPlotSize = Integer.parseInt(getProperty("minPlotSize"));
-		
-		freeJoin = Boolean.valueOf(getProperty("freeJoin"));
-		openPlotting = Boolean.valueOf(getProperty("openPlotting"));
-		naturalWipe = Boolean.valueOf(getProperty("naturalWipe"));
-		blockBlacklist = Boolean.valueOf(getProperty("blockBlacklist"));
-		if (blockBlacklist) useBlacklistAsWhitelist = Boolean.valueOf(getProperty("useBlacklistAsWhitelist"));
-		
-		blacklistedBlocks = getBlacklist();
-		
-		//mayor = Citizen.getCitizen(UUID.fromString(getProperty("mayor")));
-		citizens = getCitizens();
-		deputies = getDeputies();
-		
 	}
 	
 	/**
@@ -69,18 +30,23 @@ public class City {
 	 * @return
 	 * A city from list of cities in memory
 	 */
-	public static City getCity(String name) {
+	public static City getCity(String id) {
 		City cty = null;
-		for(City c : CityZen.cities) {
-			if (c.getName().equalsIgnoreCase(name)) {
+		for(City c : City.getCities()) {
+			if (c.identifier.equalsIgnoreCase(id)) {
 				cty = c;
 			}
 		}
-		if (cty == null) {
-			cty = new City(name);
-			CityZen.cities.add(cty);
-		}
 		return cty;
+	}
+	
+	public static List<City> getCities() {
+		List<City> cities = new Vector<City>();
+		ConfigurationSection citydata = CityZen.cityconfig.getConfig().getConfigurationSection("cities");
+		for (String c : citydata.getKeys(false)) {
+			cities.add(new City(c));
+		}
+		return cities;
 	}
 	
 	/**
@@ -119,6 +85,12 @@ public class City {
 		return getProperty("name");
 	}
 	
+	public void setName(String name) {
+		if (name.charAt(0).isAlphabetic() && name.length() < 50) {
+			setProperty("name",name);
+		}
+	}
+	
 	/**
 	 * Simply gets this city's slogan
 	 * @return
@@ -126,6 +98,12 @@ public class City {
 	 */
 	public String getSlogan() {
 		return getProperty("slogan");
+	}
+	
+	public void setSlogan(String slogan) {
+		if (slogan.charAt(0).isAlphabetic() && slogan.length() < 100) {
+			setProperty("slogan",slogan);
+		}
 	}
 	
 	/**
@@ -141,6 +119,81 @@ public class City {
 			color = ChatColor.WHITE;
 		}
 		return color;
+	}
+	
+	public void setColor(char colorCharacter) {
+		//TODO: See what type of exception this throws.
+		try {
+			ChatColor.getByChar(colorCharacter);
+			setProperty("color","&" + colorCharacter);
+		} catch (Exception e) {}
+	}
+	
+	/**
+	 * Gets whether or not this City allows any player to join. Default: false. Defaults if property is set incorrectly.
+	 * @return
+	 * Whether or not this City allows FreeJoin
+	 */
+	public Boolean isFreeJoin() {
+		return Boolean.valueOf(getProperty("freeJoin"));
+	}
+	
+	public void setFreeJoin(Boolean state) {
+		setProperty("freeJoin",state);
+	}
+	
+	/**
+	 * Gets whether or not this City allows citizens to place plots. Defaults to false. Defaults if property is set incorrectly.
+	 * @return
+	 * Whether or not this City allows OpenPlotting
+	 */
+	public Boolean isOpenPlotting() {
+		return Boolean.valueOf(getProperty("openPlotting"));
+	}
+	
+	public void setOpenPlotting(Boolean state) {
+		setProperty("openPlotting",state);
+	}
+	
+	/**
+	 * Gets whether or not this City is set to wipe plots to natural terrain from seed. Defaults to false (wipes to flatlands).
+	 * Defaults if property is not set correctly.
+	 * @returns
+	 * Whether or not this City does NaturalWipe
+	 */
+	public Boolean isNaturalWipe() {
+		return Boolean.valueOf(getProperty("naturalWipe"));
+	}
+	
+	public void setNaturalWipe(Boolean state) {
+		setProperty("naturalWipe",state);
+	}
+	
+	/**
+	 * Gets whether or not block restrictions are enabled. Defaults to false. Defaults if property is set incorrectly.
+	 * @returns
+	 * Whether or not this City uses block restrictions
+	 */
+	public Boolean isBlockExclusion() {
+		return Boolean.valueOf(getProperty("blockBlacklist"));
+	}
+	
+	public void setBlockExclusion(Boolean state) {
+		setProperty("blockBlacklist",state);
+	}
+	
+	/**
+	 * Gets whether this City is using Whitelist or Blacklist exclusion mode. True = Whitelist, False = Blacklist.
+	 * Defaults to false, and always returns false if block exclusion is disabled.
+	 * @returns
+	 * Whether this City uses Whitelist or Blacklist exclusion mode
+	 */
+	public Boolean isWhitelisted() {
+		return isBlockExclusion() && Boolean.valueOf(getProperty("useBlacklistAsWhitelist"));
+	}
+	
+	public void setWhitelisted(Boolean state) {
+		setProperty("useBlacklistAsWhitelist",state);
 	}
 	
 	/**
@@ -160,6 +213,12 @@ public class City {
 		else return CityZen.getPlugin().getConfig().getInt("maxPlotSize");
 	}
 	
+	public void setMaxPlotSize(int size) {
+		int globalMax = CityZen.getConfig().getInt("maxPlotSize");
+		if (size > globalMax) size = globalMax;
+		setProperty("maxPlotSize",size);
+	}
+	
 	/**
 	 * Gets the minimum size of plots for this City. If the value in config is set to ignore (is less than 0),
 	 * or otherwise can't be converted, the server default is used instead.
@@ -175,6 +234,12 @@ public class City {
 		}
 		if (minPlotSize > -1) return minPlotSize;
 		else return CityZen.getPlugin().getConfig().getInt("minPlotSize");
+	}
+	
+	public void setMinPlotSize(int size) {
+		int globalMin = CityZen.getConfig().getInt("minPlotSize");
+		if (size < globalMin) size = globalMin;
+		setProperty("minPlotSize",size);
 	}
 	
 	/**
@@ -193,6 +258,58 @@ public class City {
 	}
 	
 	/**
+	 * Adds a citizen to this city's list of citizens, then adds it back to the config
+	 * @param ctz
+	 * The citizen to add to this city
+	 */
+	public void addCitizen(Citizen ctz) {
+		//TODO: Needs to set it as a string list of their UUID's
+		List<Citizen> ctzs = getCitizens();
+		ctzs.add(ctz);
+		setProperty("citizens",ctzs);
+	}
+	
+	/**
+	 * Remove a citizen from this city, and remove them from ownership of all plots
+	 * @param ctz
+	 * The citizen to remove
+	 */
+	public void removeCitizen(Citizen ctz) {
+		removeCitizen(ctz, false);
+	}
+	/**
+	 * Evict a citizen from this city, and remove them from ownership of all plots.
+	 * Costs them more reputation if this is an eviction.
+	 * @param ctz
+	 * The citizen to evict
+	 * @param evict
+	 * Whether not this is an eviction
+	 */
+	public void removeCitizen(Citizen ctz, Boolean evict) {
+		List<Citizen> ctzs = getCitizens();
+		for (Citizen c : ctzs) {
+			if (c.equals(ctz)) {
+				if (evict) {
+					ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100);
+				} else {
+					ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100);
+				}
+				ctzs.remove(ctz);
+				//TODO: Remove plots
+				for (Plot p : getPlots()) {
+					// I sure hope this is the right syntax
+					if (p.owners.contains(ctz)) {
+						p.removeOwner(ctz);
+					}
+				}
+				//TODO: Need to properly set citizens here as well
+				setProperty("citizens",ctzs);
+				return;
+			}
+		}
+	}
+	
+	/**
 	 * Gets a list of deputies from their UUID's in file. If a line cannot be converted, it will be ignored.
 	 * @return
 	 * A list of Citizens who are deputies of this City
@@ -205,6 +322,34 @@ public class City {
 			} catch (IllegalArgumentException e) {}
 		}
 		return deps;
+	}
+	
+	public void addDeputy(Citizen deputy) {
+		Citizen dep = null;
+		for (Citizen c : getCitizens()) {
+			if (c.equals(deputy)) {
+				dep = deputy;
+				break;
+			}
+		}
+		if (dep != null) {
+			List<String> deps = new Vector<String>();
+			for (Citizen d : getDeputies()) {
+				deps.add(d.passport.getUniqueId().toString());
+			}
+			deps.add(deputy.passport.getUniqueId().toString());
+			setProperty("deputies",deps);
+		}
+	}
+	
+	public void removeDeputy(Citizen deputy) {
+		List<String> deps = new Vector<String>();
+		for (Citizen d : getDeputies()) {
+			if (!d.equals(deputy)) {
+				deps.add(d.passport.getUniqueId().toString());
+			}
+			setProperty("deputies",deps);
+		}
 	}
 	
 	/**
@@ -220,6 +365,20 @@ public class City {
 		} return plts;
 	}
 	
+	public void addPlot(Plot plot) {
+		//TODO: check to see if the city does not already contain this plot.
+		// It's a weird oblique case, but I think it could still help prevent weird multiples
+		List<Plot> plots = getPlots();
+		plots.add(plot);
+		for (Plot p : plots) p.save();
+	}
+	
+	public void removePlot(Plot plot) {
+		List<Plots> plots = getPlots();
+		plots.remove(plot);
+		for (Plot p : plots) p.save();
+	}
+	
 	/**
 	 * Returns a list of materials that are blacklisted in this city. Illegible lines are ignored.
 	 * @return
@@ -233,6 +392,24 @@ public class City {
 				mats.add(mat);
 			}
 		} return mats;
+	}
+	
+	public void addBlock(Material block) {
+		//TODO: Verify this
+		List<String> mats = new Vector<String>
+		for (Material m : getBlacklist()) {
+			mats.add(m.getName());
+		}
+		mats.add(block.getName());
+		setProperty("blacklistedBlocks",mats);
+	}
+	
+	public void removeBlock(Material block) {
+		List<String> mats = new Vector<String>
+		for (Material m : getBlacklist()) {
+			if (m != block) mats.add(m.getName());
+		}
+		setProperty("blacklistedBlocks",mats);
 	}
 	
 	/**
@@ -282,56 +459,6 @@ public class City {
 		int tot = 0;
 		for(Citizen c : getCitizens()) tot += c.reputation;
 		return tot;
-	}
-	
-	/**
-	 * Adds a citizen to this city's list of citizens, then adds it back to the config
-	 * @param ctz
-	 * The citizen to add to this city
-	 */
-	public void addCitizen(Citizen ctz) {
-		List<Citizen> ctzs = getCitizens();
-		ctzs.add(ctz);
-		setProperty("citizens",ctzs);
-	}
-	
-	/**
-	 * Remove a citizen from this city, and remove them from ownership of all plots
-	 * @param ctz
-	 * The citizen to remove
-	 */
-	public void removeCitizen(Citizen ctz) {
-		removeCitizen(ctz, false);
-	}
-	/**
-	 * Evict a citizen from this city, and remove them from ownership of all plots.
-	 * Costs them more reputation if this is an eviction.
-	 * @param ctz
-	 * The citizen to evict
-	 * @param evict
-	 * Whether not this is an eviction
-	 */
-	public void removeCitizen(Citizen ctz, Boolean evict) {
-		List<Citizen> ctzs = getCitizens();
-		for (Citizen c : ctzs) {
-			if (c.equals(ctz)) {
-				if (evict) {
-					ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100);
-				} else {
-					ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100);
-				}
-				ctzs.remove(ctz);
-				//TODO: Remove plots
-				for (Plot p : getPlots()) {
-					// I sure hope this is the right syntax
-					if (p.owners.contains(ctz)) {
-						p.removeOwner(ctz);
-					}
-				}
-				setProperty("citizens",ctzs);
-				return;
-			}
-		}
 	}
 	
 	public void alertCitizens(String alertText) {
