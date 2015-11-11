@@ -1,6 +1,7 @@
 package io.github.griffenx.CityZen;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 
@@ -14,35 +15,45 @@ public class City {
 	public String identifier;
 	
 	private ConfigurationSection properties;
-	private FileConfiguration cityConfig = CityZen.cityConfig.getConfig();
 	
 	public City(String id) {
-		properties = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + id);
+		FileConfiguration cityConfig = CityZen.cityConfig.getConfig();
+		if (!cityConfig.contains("cities." + id)) {
+			cityConfig.createSection("cities." + id);
+			cityConfig.createSection("cities." + id + ".plots");
+		}
+		properties = cityConfig.getConfigurationSection("cities." + id);
 		identifier = id;
 	}
 	
-	/**
-	 * Gets a City by name from list of cities in memory.
-	 * If somehow that city is not in memory, it will be added.
-	 * This method should be used exclusively for getting cities, NOT initializing a new City.
-	 * @param name
-	 * The name of the city to get.
-	 * @return
-	 * A city from list of cities in memory
-	 */
-	public static City getCity(String id) {
-		City cty = null;
-		for(City c : City.getCities()) {
-			if (c.identifier.equalsIgnoreCase(id)) {
-				cty = c;
+	public static City createCity(String name) {
+		City newCity = null;
+		if (Character.isAlphabetic(name.charAt(0))) {
+			for (City c : City.getCities()) {
+				if (c.getName().equalsIgnoreCase(name)) return newCity;
 			}
+			
+			String id = generateID(name);
+			newCity = new City(id);
+			FileConfiguration cnfg = CityZen.getPlugin().getConfig();
+			ConfigurationSection defaults = cnfg.getConfigurationSection("cityDefaults");
+			newCity.setName(name);
+			newCity.setColor(defaults.getString("color").charAt(1));
+			newCity.setSlogan(defaults.getString("slogan"));
+			newCity.setFreeJoin(defaults.getBoolean("freeJoin"));
+			newCity.setOpenPlotting(defaults.getBoolean("openPlotting"));
+			newCity.setNaturalWipe(defaults.getBoolean("naturalWipe"));
+			newCity.setBlockExclusion(defaults.getBoolean("blockBlacklist"));
+			newCity.setWhitelisted(defaults.getBoolean("useBlacklistAsWhitelist"));
+			newCity.setMaxPlotSize(cnfg.getInt("maxPlotSize"));
+			newCity.setMinPlotSize(cnfg.getInt("minPlotSize"));
 		}
-		return cty;
+		return newCity;
 	}
 	
 	public static List<City> getCities() {
 		List<City> cities = new Vector<City>();
-		ConfigurationSection citydata = CityZen.cityconfig.getConfig().getConfigurationSection("cities");
+		ConfigurationSection citydata = CityZen.cityConfig.getConfig().getConfigurationSection("cities");
 		for (String c : citydata.getKeys(false)) {
 			cities.add(new City(c));
 		}
@@ -86,7 +97,7 @@ public class City {
 	}
 	
 	public void setName(String name) {
-		if (name.charAt(0).isAlphabetic() && name.length() < 50) {
+		if (Character.isAlphabetic(name.charAt(0)) && name.length() < 50) {
 			setProperty("name",name);
 		}
 	}
@@ -101,7 +112,7 @@ public class City {
 	}
 	
 	public void setSlogan(String slogan) {
-		if (slogan.charAt(0).isAlphabetic() && slogan.length() < 100) {
+		if (Character.isAlphabetic(slogan.charAt(0)) && slogan.length() < 100) {
 			setProperty("slogan",slogan);
 		}
 	}
@@ -114,7 +125,7 @@ public class City {
 	public ChatColor getColor() {
 		ChatColor color;
 		try {
-			color = ChatColor.getByChar(getProperty("color"));
+			color = ChatColor.getByChar(getProperty("color").charAt(1));
 		} catch(Exception e) {
 			color = ChatColor.WHITE;
 		}
@@ -214,7 +225,7 @@ public class City {
 	}
 	
 	public void setMaxPlotSize(int size) {
-		int globalMax = CityZen.getConfig().getInt("maxPlotSize");
+		int globalMax = CityZen.getPlugin().getConfig().getInt("maxPlotSize");
 		if (size > globalMax) size = globalMax;
 		setProperty("maxPlotSize",size);
 	}
@@ -237,7 +248,7 @@ public class City {
 	}
 	
 	public void setMinPlotSize(int size) {
-		int globalMin = CityZen.getConfig().getInt("minPlotSize");
+		int globalMin = CityZen.getPlugin().getConfig().getInt("minPlotSize");
 		if (size < globalMin) size = globalMin;
 		setProperty("minPlotSize",size);
 	}
@@ -287,13 +298,15 @@ public class City {
 	 */
 	public void removeCitizen(Citizen ctz, Boolean evict) {
 		List<Citizen> ctzs = getCitizens();
+		int reduction = 0;
 		for (Citizen c : ctzs) {
 			if (c.equals(ctz)) {
 				if (evict) {
-					ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100);
+					reduction = (int) (ctz.getReputation() * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100);
 				} else {
-					ctz.reputation -= (ctz.reputation * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100);
+					reduction = (int) (ctz.getReputation() * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100);
 				}
+				ctz.subReputation(reduction);
 				ctzs.remove(ctz);
 				//TODO: Remove plots
 				for (Plot p : getPlots()) {
@@ -365,16 +378,26 @@ public class City {
 		} return plts;
 	}
 	
+	
+	public void addPlot(Location corner1, Location corner2) {
+		
+	}
 	public void addPlot(Plot plot) {
-		//TODO: check to see if the city does not already contain this plot.
-		// It's a weird oblique case, but I think it could still help prevent weird multiples
 		List<Plot> plots = getPlots();
+		for (Plot p : plots) {
+			if (p.equals(plot)) {
+				return;
+			}
+			if (plot.overlaps(p)) {
+				return;
+			}
+		}
 		plots.add(plot);
 		for (Plot p : plots) p.save();
 	}
 	
 	public void removePlot(Plot plot) {
-		List<Plots> plots = getPlots();
+		List<Plot> plots = getPlots();
 		plots.remove(plot);
 		for (Plot p : plots) p.save();
 	}
@@ -396,18 +419,18 @@ public class City {
 	
 	public void addBlock(Material block) {
 		//TODO: Verify this
-		List<String> mats = new Vector<String>
+		List<String> mats = new Vector<String>();
 		for (Material m : getBlacklist()) {
-			mats.add(m.getName());
+			mats.add(m.toString());
 		}
-		mats.add(block.getName());
+		mats.add(block.toString());
 		setProperty("blacklistedBlocks",mats);
 	}
 	
 	public void removeBlock(Material block) {
-		List<String> mats = new Vector<String>
+		List<String> mats = new Vector<String>();
 		for (Material m : getBlacklist()) {
-			if (m != block) mats.add(m.getName());
+			if (m != block) mats.add(m.toString());
 		}
 		setProperty("blacklistedBlocks",mats);
 	}
@@ -457,52 +480,14 @@ public class City {
 	 */
 	public int getReputation() {
 		int tot = 0;
-		for(Citizen c : getCitizens()) tot += c.reputation;
+		for(Citizen c : getCitizens()) tot += c.getReputation();
 		return tot;
 	}
 	
 	public void alertCitizens(String alertText) {
 		for (Citizen c : getCitizens()) {
-			c.alert(alertText);
+			c.addAlert(alertText);
 		}
-	}
-	
-	/*TODO: Determine whether or not this method is necessary
-	 I believe that I could probably nix it and just go with saving the city config outright.*/
-	public void save() {
-		// This operation should be done regularly to avoid data loss if the server crashes or whatever
-		//TODO: Save all properties of city to config, then reload config
-		String path = "cities." + identifier + ".";
-		FileConfiguration config = CityZen.cityConfig.getConfig();
-		
-		config.set(path + "name", name);
-		config.set(path + "slogan", slogan);
-		config.set(path + "color", color);
-		config.set(path + "mayor", mayor);
-		config.set(path + "maxPlotSize",maxPlotSize);
-		config.set(path + "minPlotSize", minPlotSize);
-		config.set(path + "freeJoin", freeJoin);
-		config.set(path + "openPlotting", openPlotting);
-		config.set(path + "naturalWipe", naturalWipe);
-		config.set(path + "blockBlacklist", blockBlacklist);
-		config.set(path + "useBlacklistAsWhitelist", useBlacklistAsWhitelist);
-		
-		List<String> cits = new Vector<String>();
-		for (Citizen c : citizens) cits.add(c.passport.getUniqueId().toString());
-		config.set(path + "citizens", cits);
-		
-		List<String> deps = new Vector<String>();
-		for (Citizen d : deputies) deps.add(d.passport.getUniqueId().toString());
-		config.set(path + "deputies", deps);
-		
-		//TODO: Save plots
-		
-		for (Plot p : plots) p.save();
-	}
-	
-	public void reload() {
-		CityZen.cityConfig.save();
-		CityZen.cityConfig.reload();
 	}
 	
 	private String getProperty(String property) {
@@ -547,21 +532,25 @@ public class City {
 		}
 	}
 	
-	private String generateID() {
+	private static String generateID(String name) {
 		String id = "";
-		for (int i = 0; i < getName().length(); i++) {
-			if (Character.isAlphabetic(getName().charAt(i))) id += getName().charAt(i);
+		for (int i = 0; i < name.length(); i++) {
+			if (Character.isAlphabetic(name.charAt(i))) id += name.charAt(i);
 		}
 		
 		Boolean idChanged = false;
-		while (!idChanged) {
-			idChanged = true;
-			for (String c : CityZen.cityConfig.getConfig().getConfigurationSection("cities").getKeys(false)) {
-				if (id.equalsIgnoreCase(c)) {
-					//TODO: If ID already exists, create a new one
-				}
+		int modifier = 0;
+		Set<String> keys = CityZen.cityConfig.getConfig().getConfigurationSection("cities").getKeys(false);
+		do {
+			if (keys.contains(id + (modifier != 0 ? modifier : "")) && !(new City(id + (modifier != 0 ? modifier : "")).getName().equalsIgnoreCase(name))) {
+				modifier++;
+			}
+			else {
+				if (modifier > 0) id += modifier;
+				idChanged = true;
 			}
 		}
-			
+		while (modifier > 0 && !idChanged);
+		return id;
 	}
 }

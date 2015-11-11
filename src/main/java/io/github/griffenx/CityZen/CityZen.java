@@ -37,8 +37,6 @@ public final class CityZen extends JavaPlugin {
 		plugin = null;
 		saveConfig();
 		citizenConfig.save();
-		
-		for (City c : cities) c.save();
 		cityConfig.save();
 	}
 	

@@ -4,13 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 public class Citizen {
-	public Player passport;
-	public List<String> alerts;
-	
 	private ConfigurationSection properties;
 	
 	public Citizen(UUID uuid) {
@@ -18,9 +14,11 @@ public class Citizen {
 	}
 	public Citizen(Player player) {
 		properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString());
-		passport = player;
 		
-		alerts = properties.getStringList("alerts");
+		//TODO: write setter methods for passport and alerts
+		//passport = player;
+		
+		//alerts = properties.getStringList("alerts");
 	}
 	
 	/**
@@ -35,7 +33,7 @@ public class Citizen {
 	public static Citizen getCitizen(UUID uuid) {
 		Citizen ctz = null;
 		for(Citizen c : CityZen.citizens) {
-			if (c.passport.getUniqueId().equals(uuid)) {
+			if (c.getPassport().getUniqueId().equals(uuid)) {
 				ctz = c;
 			}
 		}
@@ -45,12 +43,6 @@ public class Citizen {
 			if (newCtz.isOnline()) CityZen.citizens.add(ctz);
 		}
 		return ctz;
-	}
-	
-	public void alert(String alertText) {
-		//TODO: Date of today + alertText, then write back to citizen file
-		// SimpleDateFormat?
-		alerts.add( + alertText);
 	}
 	
 	public int getReputation() {
@@ -75,13 +67,17 @@ public class Citizen {
 		setProperty("reputation",rep);
 	}
 	
+	public void setReputation(int amount) {
+		if (amount >= 0 && amount < Integer.MAX_VALUE) setProperty("reputation",amount);
+	}
+	
 	public City getAffiliation() {
 		City aff = null;
 		String affname = getProperty("affiliation");
 		if (affname.length() > 0) {
-			aff = City.getCity(affname);
+			aff = new City(affname);
 		}
-		return City.getCity(getProperty("affiliation"));
+		return aff;
 	}
 	
 	/**
@@ -98,27 +94,27 @@ public class Citizen {
 	public Player getPassport() {
 		String foundUUID = null;
 		Player passport = null;
-		ConfigurationSection cits = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens")
+		ConfigurationSection cits = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens");
 		for (String key : cits.getKeys(false)) {
-			if (cits.getString(key + ".name").equalsIgnoreCase(CityZen.getPlugin().getServer().getOfflinePlayer(key).getName())) {
+			if (cits.getString(key + ".name").equalsIgnoreCase(CityZen.getPlugin().getServer().getOfflinePlayer(UUID.fromString(key)).getName())) {
 				foundUUID = key;
 				break;
 			}
 		}
 		if (foundUUID != null) {
-			passport = CityZen.getPlugin().getServer().getOfflinePlayer(foundUUID)
+			passport = (Player) CityZen.getPlugin().getServer().getOfflinePlayer(UUID.fromString(foundUUID));
 		}
 		return passport;
 	}
 	
-	public void save() {
-		FileConfiguration cnfg = CityZen.citizenConfig.getConfig();
-		String pName = passport.getName();
-		String pPath = "citizens." + pName;
-		cnfg.set(pPath + ".name", pName);
-		cnfg.set(pPath + ".uuid", passport.getUniqueId());
-		cnfg.set(pPath + ".reputation", reputation);
-		cnfg.set(pPath + ".affiliation", affiliation.name);
+	public List<String> getAlerts() {
+		return CityZen.citizenConfig.getConfig().getStringList("citizens." + getPassport().getUniqueId().toString() + ".alerts");
+	}
+	
+	public void addAlert(String alertText) {
+		//TODO: Date of today + alertText, then write back to citizen file
+		// SimpleDateFormat?
+		//alerts.add( + alertText);
 	}
 	
 	/**
@@ -129,11 +125,11 @@ public class Citizen {
 	 * Whether or not these Citizens are the same
 	 */
 	public Boolean equals(Citizen citizen) {
-		return passport.getUniqueId().equals(citizen.passport.getUniqueId());
+		return getPassport().getUniqueId().equals(citizen.getPassport().getUniqueId());
 	}
 	
 	private void fixRep() {
-		if (reputation < 0) reputation = 0;
+		if (getReputation() < 0) setReputation(0);
 	}
 	
 	private String getProperty(String property) {
@@ -151,7 +147,7 @@ public class Citizen {
 	private void setProperty(String property, Object value) {
 		for (String prop : properties.getKeys(false)) {
 			if (prop.equalsIgnoreCase(property)) {
-				CityZen.citizenConfig.getConfig().setValue("citizens." + passport.getUniqueId().toString() + property,value);
+				CityZen.citizenConfig.getConfig().set("citizens." + getPassport().getUniqueId().toString() + property,value);
 				CityZen.citizenConfig.save();
 			}
 		}

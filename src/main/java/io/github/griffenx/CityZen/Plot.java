@@ -40,13 +40,34 @@ public class Plot {
 	}
 	
 	public Boolean isInPlot(Location location) {
-		//TODO: return if X and Z values of location are between corner1 and corner2
+		return isInPlot((int) location.getX(), (int) location.getY());
+	}
+	public Boolean isInPlot(int x, int z) {
+		if ((x < corner2.getX() && x > corner1.getX()) || (x > corner2.getX() && x < corner1.getX())) {
+			if ((z < corner2.getZ() && z > corner1.getZ()) || (z > corner2.getZ() && z < corner1.getZ())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public Boolean overlaps(Plot plot) {
+		int xDirection = 1;
+		int zDirection = 1;
+		if (corner1.getX() > corner2.getX()) xDirection = -1;
+		if (corner1.getZ() > corner2.getZ()) zDirection = -1;
+		for (int x = (int) corner1.getX(); x < ((int) corner2.getX() * xDirection); x = x + (1 * xDirection)) {
+			for (int z = (int) corner1.getZ(); x < ((int) corner2.getZ() * zDirection); x = x + (1 * zDirection)) {
+				if (plot.isInPlot(x, z)) return true;
+			}
+		}
+		return false;
 	}
 	
 	public void wipe() {
 		//TODO: restore the plot to a blank plot, method depends on city's wipe settings
 		if (owners.size() == 0) {
-			if (affiliation.naturalWipe) {
+			if (affiliation.isNaturalWipe()) {
 				//TODO: Restore plot to natural terrain
 			} else {
 				//TODO: Set plot to flatlands
