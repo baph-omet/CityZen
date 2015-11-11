@@ -14,10 +14,8 @@ public class Plot {
 	
 	public Plot(City city, int id) {
 		identifier = id;
-		
 	}
 	
-	//TODO: Method to create a new plot
 	public static createPlot(City city, Location corner1, Location corner2, Citizen creator) {
 		Plot newPlot = null;
 		for (Plot p : city.getPlots()) {
@@ -35,6 +33,10 @@ public class Plot {
 		newPlot.addOwner(creator);
 		newPlot.setBaseHeight((int) (corner1.getY() + corner2.getY()) / 2);
 		return newPlot;
+	}
+	
+	public void delete() {
+		//TODO: Remove configuration section
 	}
 	
 	public Location getCorner1() {
@@ -193,33 +195,51 @@ public class Plot {
 	}
 	
 	public void wipe() {
-		//TODO: restore the plot to a blank plot, method depends on city's wipe settings
 		if (owners.size() == 0) {
+			int xDirection = 1;
+			int zDirection = 1;
+			if (getCorner1().getX() > getCorner2().getX()) xDirection = -1;
+			if (getCorner1().getZ() > getCorner2().getZ()) zDirection = -1;
 			if (affiliation.isNaturalWipe()) {
 				//TODO: Restore plot to natural terrain
 			} else {
 				//TODO: Set plot to flatlands
+				for (int y = 1; y <= getBaseHeight; y++) {
+					for (int x = (int) getCorner1().getX(); x < ((int) getCorner2().getX() * xDirection); x = x + (1 * xDirection)) {
+						for (int z = (int) getCorner1().getZ(); x < ((int) getCorner2().getZ() * zDirection); x = x + (1 * zDirection)) {
+							if (/* world type is nether */) {
+								//lava
+								//netherrack
+							} else if (/* world type is end */) {
+								//air
+								//endstone
+							} else /* world is overworld, or something else */ {
+								if (y < 5) {
+									//TODO: Set block to bedrock
+								} else if (y < getBaseHeight() - 5) {
+									//TODO: Set block to stone
+								} else if (y < getBaseHeight()) {
+									//TODO: Set block to dirt
+								} else {
+									//TODO: Set block to grass
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
 	
-	public void save() {
-		FileConfiguration config = CityZen.cityConfig.getConfig();
-		String path = "cities." + affiliation.identifier + ".plots." + identifier;
-		if (config.contains(path)) {
-			config.createSection(path);
-		}
-		ConfigurationSection props = config.getConfigurationSection(path);
-		props.set(".corner1", (int) corner1.getX() + "," + (int) corner1.getZ());
-		props.set(".corner2", (int) corner2.getX() + "," + (int) corner2.getZ());
-		props.set(".height",baseHeight);
-		props.set(".mega",isMega);
-		props.set(".protection", protection);
-		props.set(".creator", creator.passport.getUniqueId());
-		
-		List<String> ownrs = new Vector<String>();
-		for (Citizen c : owners) ownrs.add(c.passport.getUniqueId().toString());
-		props.set(".owners", ownrs);
+	/**
+	 * Compares plot corners to see if they're the same plot.
+	 * It's impossible for plots to overlap, so if a plot's corners match, they must be the same.
+	 * @param plot The plot to compare to this one
+	 * @returns True if the plots have the same corners
+	 */
+	public Boolean equals(Plot plot) {
+		return getCorner1().getX() == plot.getCorner1().getX() && getCorner1().getZ() == plot.getCorner1().getZ()
+			&& getCorner2().getX() == plot.getCorner2(d).getX() && getCorner2().getZ() == plot.getCorner2().getZ();
 	}
 	
 	private String getProperty(String property) {
