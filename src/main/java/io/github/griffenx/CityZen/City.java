@@ -117,6 +117,14 @@ public class City {
 		}
 	}
 	
+	public World getWorld() {
+		//TODO: Convert name to world
+	}
+	
+	public void setWorld() {
+		//TODO: Convert world to name and save
+	}
+	
 	/**
 	 * Gets the chat color for this City's name. If the value in config can't be converted to a color, it just uses WHITE instead.
 	 * @return
@@ -515,13 +523,8 @@ public class City {
 	}
 	
 	private void setProperty(String property, Object value) {
-		for (String prop : properties.getKeys(false)) {
-			if (prop.equalsIgnoreCase(property)) {
-				CityZen.cityConfig.getConfig().set("cities." + identifier + "." + property, value);
-				CityZen.cityConfig.save();
-				return;
-			}
-		}
+		CityZen.cityConfig.getConfig().set("cities." + identifier + "." + property, value);
+		CityZen.cityConfig.save();
 	}
 	
 	private void wipePlots() {
