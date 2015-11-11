@@ -60,13 +60,17 @@ public class City {
 		return cities;
 	}
 	
+	public void delete() {
+		//TODO: Delete config section, remove affiliation for all citizens. do not wipe plots
+	}
+	
 	/**
 	 * Gets the Mayor of this City
 	 * @return
 	 * Citizen who is the Mayor of this city
 	 */
 	public Citizen getMayor() {
-		return Citizen.getCitizen(UUID.fromString(getProperty("mayor")));
+		return new Citizen(UUID.fromString(getProperty("mayor")));
 	}
 	
 	/**
@@ -77,14 +81,14 @@ public class City {
 	public void setMayor(Citizen newMayor) {
 		Citizen ctz = null;
 		for (Citizen c : getCitizens()) {
-			if (c.passport.getUniqueId().equals(newMayor.passport.getUniqueId())) {
+			if (c.getPassport().getUniqueId().equals(newMayor.getPassport().getUniqueId())) {
 				ctz = newMayor;
 			}
 		}
 		if (ctz == null) {
 			addCitizen(newMayor);
 		}
-		setProperty("mayor",newMayor.passport.getUniqueId().toString());
+		setProperty("mayor",newMayor.getPassport().getUniqueId().toString());
 	}
 	
 	/**
@@ -270,7 +274,7 @@ public class City {
 		List<Citizen> cits = new Vector<Citizen>();
 		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".citizens")) {
 			try {
-				cits.add(Citizen.getCitizen(UUID.fromString(u)));
+				cits.add(new Citizen(UUID.fromString(u)));
 			} catch (IllegalArgumentException e) {}
 		}
 		return cits;
@@ -282,9 +286,11 @@ public class City {
 	 * The citizen to add to this city
 	 */
 	public void addCitizen(Citizen ctz) {
-		//TODO: Needs to set it as a string list of their UUID's
-		List<Citizen> ctzs = getCitizens();
-		ctzs.add(ctz);
+		List<String> ctzs = new Vector<String>();
+		for (Citizen c : getCitizens()) {
+			ctzs.add(c.getPassport().getUniqueId().toString());
+		}
+		ctzs.add(ctz.getPassport().getUniqueId().toString());
 		setProperty("citizens",ctzs);
 	}
 	
@@ -305,9 +311,9 @@ public class City {
 	 * Whether not this is an eviction
 	 */
 	public void removeCitizen(Citizen ctz, Boolean evict) {
-		List<Citizen> ctzs = getCitizens();
+		List<String> ctzs = new Vector<String>();
 		int reduction = 0;
-		for (Citizen c : ctzs) {
+		for (Citizen c : getCitizens()) {
 			if (c.equals(ctz)) {
 				if (evict) {
 					reduction = (int) (ctz.getReputation() * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100);
@@ -315,19 +321,18 @@ public class City {
 					reduction = (int) (ctz.getReputation() * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100);
 				}
 				ctz.subReputation(reduction);
-				ctzs.remove(ctz);
-				//TODO: Remove plots
 				for (Plot p : getPlots()) {
-					// I sure hope this is the right syntax
-					if (p.owners.contains(ctz)) {
+					if (p.getOwners().contains(ctz)) {
 						p.removeOwner(ctz);
 					}
 				}
-				//TODO: Need to properly set citizens here as well
-				setProperty("citizens",ctzs);
-				return;
+			}
+			else {
+				ctzs.add(c.getPassport().getUniqueId().toString());
 			}
 		}
+		setProperty("citizens",ctzs);
+		return;
 	}
 	
 	/**
