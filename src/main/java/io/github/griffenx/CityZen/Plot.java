@@ -34,6 +34,10 @@ public class Plot {
 	
 	//TODO: Method to create a new plot
 	
+	public Citizen getCreator() {
+		
+	}
+	
 	public Double getArea() {
 		//TODO: Get area from length and width from corners
 		// I sure do wish I had access to the Bukkit API >.>
@@ -75,6 +79,7 @@ public class Plot {
 		}
 	}
 	
+	
 	public void removeOwner(Citizen owner) {
 		owners.remove(owner);
 		wipe();
@@ -100,10 +105,18 @@ public class Plot {
 	}
 	
 	private String getProperty(String property) {
-		//TODO: Get property of plot from config
+		String val = "";
+		ConfigurationSection props = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + getAffiliation().identifier + ".plots." + identifier);
+		for (String prop : props.getKeys(false)) {
+			if (prop.equalsIgnoreCase(property)) {
+				val = props.getString(property);
+				break;
+			}
+		}
+		return val;
 	}
 	
-	private List<Citizen> getOwners() {
-		//TODO: Get owners from file
+	private void setProperty(String property, Object value) {
+		CityZen.cityConfig.getConfig().set("cities." + getAffiliation().identifier + ".plots." + identifier + "." + property,value);
 	}
 }
