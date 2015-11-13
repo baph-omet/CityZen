@@ -155,30 +155,28 @@ public class Citizen {
 		else setProperty("reputation",0);
 	}
 	
-	/**
-	 * Gets a City object of the city with which this player is affiliated
-	 * @returns
-	 * This player's city
-	 */
-	public City getAffiliation() {
-		City aff = null;
-		String affname = getProperty("affiliation");
-		if (affname.length() > 0) {
-			aff = new City(affname);
+	public long getMaxReputation() {
+		long rep;
+		try {
+			rep = Long.valueOf(getProperty("maxReputation"));
+		} catch (NumberFormatException e) {
+			rep = -1;
 		}
-		return aff;
+		return rep;
 	}
 	
 	/**
-	 * Used to set which city this Citizen is affiliated with. Mostly for internal use.
-	 * DO NOT USE to add a player to a city.
-	 * You should instead call addCitizen() on the city.
-	 * @param city
-	 * The City to set as this player's affiliation
+	 * Gets a City object of the city with which this player is affiliated
+	 * @returns
+	 * This Citizen's city. If this Citizen does not belong to a City, returns {@literal null}.
 	 */
-	public void setAffiliation(City city) {
-		if (city != null) setProperty("affiliation",city.getIdentifier());
-		else setProperty("affiliation",null);
+	public City getAffiliation() {
+		for (City c : City.getCities()) {
+			for (Citizen z : c.getCitizens()) {
+				if (equals(z)) return c;
+			}
+		}
+		return null;
 	}
 	
 	/**
