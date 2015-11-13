@@ -1,7 +1,10 @@
 package io.github.griffenx.CityZen;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.Vector;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -9,17 +12,21 @@ import org.bukkit.entity.Player;
 public class Citizen {
 	private ConfigurationSection properties;
 	
+	/**
+	 * Initializes a new Citizen object based on their UUID
+	 * @param uuid
+	 * The UUID to use to identify this Citizen
+	 */
 	public Citizen(UUID uuid) {
 		this((Player) CityZen.getPlugin().getServer().getOfflinePlayer(uuid));
 	}
+	/**
+	 * Initializes a new Citizen object based on the corresponding player
+	 * @param player
+	 * The player whose Citizen record to initialize
+	 */
 	public Citizen(Player player) {
-		FileConfiguration citizenConfig = CityZen.citizenConfig.getConfig();
-		if (!citizenConfig.contains("citizens." + player.getUniqueId().toString())) {
-			citizenConfig.createSection("citizens." + player.getUniqueId().toString()));
-		}
-		properties = citizenConfig.getConfigurationSection("citizens." + player.getUniqueId().toString());
-		
-		//alerts = properties.getStringList("alerts");
+		properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString());
 	}
 	
 	/**
@@ -33,14 +40,22 @@ public class Citizen {
 		for (Citizen c : getCitizens()) {
 			if (player.getUniqueId().equals(c.getPassport().getUniqueId())) return ctz;
 		}
+		CityZen.citizenConfig.getConfig().createSection("citizens." + player.getUniqueId().toString());
 		ctz = new Citizen(player);
-		ctz.setReputation(CityZen.getPlugin().getConfig().getInt("reputation.default");
+		ctz.setReputation(CityZen.getPlugin().getConfig().getLong("reputation.default"));
 		return ctz;
 	}
 	
+	/**
+	 * Deletes the record for this Citizen. Should not be used lightly.
+	 * @param citizen
+	 * The Citizen to delete
+	 */
 	public static void deleteCitizen(Citizen citizen) {
-		//TODO: Remove their configuration section
-		//All city/plot related stuff should be handled by the city
+		if (!citizen.isMayor()) {
+			citizen.getAffiliation().removeCitizen(citizen);
+			CityZen.citizenConfig.getConfig().set("citizens." + citizen.getUUID().toString(), null);
+		}
 	}
 	
 	/**
@@ -55,6 +70,15 @@ public class Citizen {
 			citizens.add(new Citizen(UUID.fromString(c)));
 		}
 		return citizens;
+	}
+	
+	/**
+	 * Shortcut method to get this Citizen's UUID
+	 * @return
+	 * This Citizen's UUID
+	 */
+	public UUID getUUID() {
+		return getPassport().getUniqueId();
 	}
 	
 	/**
@@ -81,10 +105,10 @@ public class Citizen {
 	 * @returns
 	 * The reputation of this player
 	 */
-	public int getReputation() {
-		int rep;
+	public long getReputation() {
+		long rep;
 		try {
-			rep = Integer.valueOf(getProperty("reputation"));
+			rep = Long.valueOf(getProperty("reputation"));
 		} catch (NumberFormatException e) {
 			rep = -1;
 		}
@@ -92,15 +116,15 @@ public class Citizen {
 	}
 	
 	/**
-	 * Increases the reptuation of this player. Negative amounts are allowed.
-	 * Does not let the player's reputation drop below 0 or rise above Integer.MAX_VALUE
+	 * Increases the reputation of this player. Negative amounts are allowed.
+	 * Does not let the player's reputation drop below 0 or rise above Long.MAX_VALUE (>9 Quintillion)
 	 * @param amount
 	 * The amount by which to increase this player's reputation
 	 */
-	public void addReputation(int amount) {
-		if (amount > (Integer.MAX_VALUE - getReputation()) setReputation(Integer.MAX_VALUE - 1);
+	public void addReputation(long amount) {
+		if (amount > (Long.MAX_VALUE - getReputation())) setReputation(Long.MAX_VALUE - 1);
 		else {
-			int rep = getReputation() + amount;
+			long rep = getReputation() + amount;
 			fixRep();
 			setReputation(rep);
 		}
@@ -108,13 +132,13 @@ public class Citizen {
 	
 	/**
 	 * Subtract reputation from this player. Negative amounts are allowed.
-	 * Will not let the player's reputation drop below 0 or rise above Integer.MAX_VALUE
+	 * Will not let the player's reputation drop below 0 or rise above Long.MAX_VALUE (>9 Quintillion)
 	 * @param amount
 	 * The amount by which to decrease this player's reputation.
 	 */
-	public void subReputation(int amount) {
-		int rep;
-		if (amount < 0 && (Math.Abs(amount) > (Integer.MAX_VALUE - getReputation()))) rep = Integer.MAX_VALUE - 1;
+	public void subReputation(long amount) {
+		long rep;
+		if (amount < 0 && (Math.abs(amount) > (Long.MAX_VALUE - getReputation()))) rep = Long.MAX_VALUE - 1;
 		else rep = getReputation() - amount;
 		fixRep();
 		setProperty("reputation",rep);
@@ -122,12 +146,12 @@ public class Citizen {
 	
 	/**
 	 * Sets the reputation of the player to a certain amount. 
-	 * Must be between 0 and the maximum value of a 32-bit signed Integer (a little over 2 billion)
+	 * Must be between 0 and Long.MAX_VALUE (>9 Quintillion)
 	 * @param amount
 	 * The amount of reputation to set to this player
 	 */
-	public void setReputation(int amount) {
-		if (amount >= 0 && amount < Integer.MAX_VALUE) setProperty("reputation",amount);
+	public void setReputation(long amount) {
+		if (amount >= 0 && amount < Long.MAX_VALUE) setProperty("reputation",amount);
 		else setProperty("reputation",0);
 	}
 	
@@ -153,10 +177,15 @@ public class Citizen {
 	 * The City to set as this player's affiliation
 	 */
 	public void setAffiliation(City city) {
-		if (city != null) setProperty("affiliation",city.identifier);
+		if (city != null) setProperty("affiliation",city.getIdentifier());
 		else setProperty("affiliation",null);
 	}
 	
+	/**
+	 * Gets the Player object associated with this Citizen
+	 * @return
+	 * This Citizen's Player
+	 */
 	public Player getPassport() {
 		String foundUUID = null;
 		Player passport = null;
@@ -173,14 +202,37 @@ public class Citizen {
 		return passport;
 	}
 	
+	/**
+	 * Gets a list of alerts for this Citizen
+	 * @return
+	 * A List of alert messages
+	 */
 	public List<String> getAlerts() {
 		return CityZen.citizenConfig.getConfig().getStringList("citizens." + getPassport().getUniqueId().toString() + ".alerts");
 	}
 	
+	/**
+	 * Add an alert to this Citizen's list of alerts
+	 * @param alertText
+	 * The text of the alert to add
+	 */
 	public void addAlert(String alertText) {
-		//TODO: Date of today + alertText, then write back to citizen file
-		// SimpleDateFormat?
-		//alerts.add( + alertText);
+		List<String> alerts = new Vector<String>();
+		for (String a : getAlerts()) {
+			alerts.add(a);
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		alerts.add(sdf.format(new Date()) + alertText);
+		setProperty("alerts",alerts);
+	}
+	
+	/**
+	 * Determines if this Citizen is the Mayor of their City.
+	 * @return
+	 * True if this Citizen is the Mayor of their City, else false.
+	 */
+	public Boolean isMayor() {
+		return equals(getAffiliation().getMayor());
 	}
 	
 	/**
@@ -201,8 +253,6 @@ public class Citizen {
 	private String getProperty(String property) {
 		for (String prop : properties.getKeys(false)) {
 			if (prop.equalsIgnoreCase(property)) {
-				//TODO: I'm not sure this is correct
-				// Check this in the city class as well
 				return CityZen.citizenConfig.getConfig().getString(properties.getString(property));
 				// No need to set defaults, as there are no defaults for citizens
 			}

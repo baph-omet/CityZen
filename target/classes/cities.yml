@@ -19,6 +19,9 @@ cities:
         # Publicly visible slogan. Must be less than 100 characters or it will be truncated.
         slogan: "Hello world!"
         
+        # Name of the world in which this City resides. All plots must be in the same world
+        world: "world"
+        
         # UUID of player that is this city's mayor
         mayor: "778310a6219c43599d19271573d98b7c"
         
@@ -53,6 +56,7 @@ cities:
         
         # If true, wiped plots will reset to the natural terrain from seed
         # If false, wiped plots will generate flatlands at their height
+        # CURRENTLY UNUSED! Possibility for future update.
         naturalWipe: false
         
         # If true, item restricting will be enabled
@@ -77,6 +81,7 @@ cities:
             0:
                 
                 # Location of the plot's two corners, assumes same world as city
+                # Values must be comma-separated X,Z pairs! i.e. "150,-201"
                 corner1: "150,-150"
                 corner2: "166,-134"
                 
