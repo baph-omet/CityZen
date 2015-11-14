@@ -13,8 +13,13 @@ citizens:
         # This player's reputation
         reputation: 100
         
-        # The city with which this player is affiliated
-        affiliation: "testCity"
+        # The highest that this Citizen's reputation has ever been.
+        # Used for rewards calculations
+        maxReputation: 120
+        
+        # Date that this Citizen record was created
+        # Uses yyyyMMdd format
+        issueDate: "20151101"
         
         # Any pending alerts for this player
         # Once alerts are read, they are automatically erased from this list

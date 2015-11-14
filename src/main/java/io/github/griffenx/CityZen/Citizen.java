@@ -1,15 +1,23 @@
 package io.github.griffenx.CityZen;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.Vector;
 
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 public class Citizen {
+	private static final Plugin plugin = CityZen.getPlugin();
+	private static FileConfiguration citizenConfig = CityZen.citizenConfig.getConfig();
 	private ConfigurationSection properties;
 	
 	/**
@@ -17,7 +25,7 @@ public class Citizen {
 	 * @param uuid
 	 * The UUID to use to identify this Citizen
 	 */
-	public Citizen(UUID uuid) {
+	private Citizen(UUID uuid) {
 		this((Player) CityZen.getPlugin().getServer().getOfflinePlayer(uuid));
 	}
 	/**
@@ -25,7 +33,7 @@ public class Citizen {
 	 * @param player
 	 * The player whose Citizen record to initialize
 	 */
-	public Citizen(Player player) {
+	private Citizen(Player player) {
 		properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString());
 	}
 	
@@ -42,7 +50,10 @@ public class Citizen {
 		}
 		CityZen.citizenConfig.getConfig().createSection("citizens." + player.getUniqueId().toString());
 		ctz = new Citizen(player);
-		ctz.setReputation(CityZen.getPlugin().getConfig().getLong("reputation.default"));
+		long defaultRep = CityZen.getPlugin().getConfig().getLong("reputation.default");
+		ctz.setReputation(defaultRep);
+		ctz.setMaxReputation(defaultRep);
+		ctz.setIssueDate(new Date());
 		return ctz;
 	}
 	
@@ -56,6 +67,69 @@ public class Citizen {
 			citizen.getAffiliation().removeCitizen(citizen);
 			CityZen.citizenConfig.getConfig().set("citizens." + citizen.getUUID().toString(), null);
 		}
+	}
+	
+	/**
+	 * Gets a Citizen from the config based on their name
+	 * @param name
+	 * The name of the Citizen to get based on their last known username.
+	 * @return
+	 * A Citizen that corresponds to this name, if one exists, else {@literal null}.
+	 */
+	public static Citizen getCitizen(String name) {
+		ConfigurationSection config = citizenConfig.getConfigurationSection("citizens");
+		for (String c : config.getKeys(false)) {
+			if (citizenConfig.getString("citizens." + c + ".name").equalsIgnoreCase(name)) {
+				return new Citizen(UUID.fromString(c));
+			}
+		}
+		return null;
+	}
+	/**
+	 * Gets a Citizen from the config based on their UUID
+	 * @param uuid
+	 * The UUID of the Citizen to get
+	 * @return
+	 * A Citizen that corresponds to this UUID if one exists, else {@literal null}.
+	 */
+	public static Citizen getCitizen(UUID uuid) {
+		return getCitizen(plugin.getServer().getOfflinePlayer(uuid));
+	}
+	/**
+	 * Gets a Citizen from the config based on an OfflinePlayer reference
+	 * @param player
+	 * The player whose Citizen record should be returned
+	 * @return
+	 * A Citizen that corresponds to this OfflinePlayer if one exists, else {@literal null}.
+	 */
+	public static Citizen getCitizen(OfflinePlayer player) {
+		return getCitizen((Player) player);
+	}
+	/**
+	 * Gets a Citizen from the config based on a Player reference
+	 * @param player
+	 * The player whose Citizen record should be returned
+	 * @return
+	 * A Citizen that corresponds to this Player if one exists, else {@literal null}.
+	 */
+	public static Citizen getCitizen(Player player) {
+		for (Citizen c : getCitizens()) {
+			if (c.getPassport().equals(player)) return c;
+		}
+		return null;
+	}
+	/**
+	 * Gets a Citizen from the config based on a CommandSender reference
+	 * @param player
+	 * The player whose Citizen record should be returned
+	 * @return
+	 * A Citizen that corresponds to this CommandSender if one exists, else {@literal null}.
+	 */
+	public static Citizen getCitizen(CommandSender sender) {
+		if (sender instanceof Player) {
+			return Citizen.getCitizen((Player) sender);
+		}
+		return null;
 	}
 	
 	/**
@@ -97,7 +171,7 @@ public class Citizen {
 	public void setName(String newName) {
 		setProperty("name",newName);
 	}
-	
+
 	/**
 	 * Gets the reputation of this player.
 	 * If the reputation field in the config is not set properly, it sets it to -1.
@@ -117,12 +191,13 @@ public class Citizen {
 	
 	/**
 	 * Increases the reputation of this player. Negative amounts are allowed.
-	 * Does not let the player's reputation drop below 0 or rise above Long.MAX_VALUE (>9 Quintillion)
+	 * Does not let the player's reputation drop below 0 or rise above the maximum value in config
 	 * @param amount
 	 * The amount by which to increase this player's reputation
 	 */
 	public void addReputation(long amount) {
-		if (amount > (Long.MAX_VALUE - getReputation())) setReputation(Long.MAX_VALUE - 1);
+		long globalMax = CityZen.getPlugin().getConfig().getLong("reputation.maximum");
+		if (amount > (globalMax - getReputation())) setReputation(Long.MAX_VALUE - 1);
 		else {
 			long rep = getReputation() + amount;
 			fixRep();
@@ -132,13 +207,14 @@ public class Citizen {
 	
 	/**
 	 * Subtract reputation from this player. Negative amounts are allowed.
-	 * Will not let the player's reputation drop below 0 or rise above Long.MAX_VALUE (>9 Quintillion)
+	 * Will not let the player's reputation drop below 0 or rise above the maximum value in config
 	 * @param amount
 	 * The amount by which to decrease this player's reputation.
 	 */
 	public void subReputation(long amount) {
+		long globalMax = CityZen.getPlugin().getConfig().getLong("reputation.maximum");
 		long rep;
-		if (amount < 0 && (Math.abs(amount) > (Long.MAX_VALUE - getReputation()))) rep = Long.MAX_VALUE - 1;
+		if (amount < 0 && (Math.abs(amount) > (globalMax - getReputation()))) rep = globalMax;
 		else rep = getReputation() - amount;
 		fixRep();
 		setProperty("reputation",rep);
@@ -146,15 +222,21 @@ public class Citizen {
 	
 	/**
 	 * Sets the reputation of the player to a certain amount. 
-	 * Must be between 0 and Long.MAX_VALUE (>9 Quintillion)
+	 * Must be between 0 and the maximum value in config
 	 * @param amount
-	 * The amount of reputation to set to this player
+	 * The amount of reputation to set to this player. If outside of the allowed bounds, rep is set to 0
 	 */
 	public void setReputation(long amount) {
-		if (amount >= 0 && amount < Long.MAX_VALUE) setProperty("reputation",amount);
+		long globalMax = CityZen.getPlugin().getConfig().getLong("reputation.maximum");
+		if (amount >= 0 && amount < globalMax) setProperty("reputation",amount);
 		else setProperty("reputation",0);
 	}
 	
+	/**
+	 * Gets the highest amount of reputation that this Citizen has ever achieved
+	 * @return
+	 * This Citizen's record highest reputation
+	 */
 	public long getMaxReputation() {
 		long rep;
 		try {
@@ -163,6 +245,9 @@ public class Citizen {
 			rep = -1;
 		}
 		return rep;
+	}
+	
+	private void setMaxReputation(long amount) {
 	}
 	
 	/**
@@ -177,6 +262,24 @@ public class Citizen {
 			}
 		}
 		return null;
+	}
+	
+	/** 
+	 * Gets a List of Plots owned by this Citizen
+	 * @return
+	 * List of Plots owned by this Citizen
+	 */
+	public List<Plot> getPlots() {
+		List<Plot> plots = new Vector<Plot>();
+		for (Plot p : getAffiliation().getPlots()) {
+			for (Citizen c : p.getOwners()) {
+				if (equals(c)) {
+					plots.add(p);
+					break;
+				}
+			}
+		}
+		return plots;
 	}
 	
 	/**
@@ -201,6 +304,36 @@ public class Citizen {
 	}
 	
 	/**
+	 * Gets the date that this Citizen's record was created as a Date
+	 * @return
+	 * Date representing when this record was issued
+	 */
+	public Date getIssueDate() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd",Locale.US);
+		try {
+			return sdf.parse(getProperty("issueDate"));
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	/**
+	 * Gets the date that this Citizen's record was created as a formatted String
+	 * @param dateFormat
+	 * A format string used to format the date.
+	 * @return
+	 * Date representing when this record was issued, as a string
+	 */
+	public String getIssueDate(String dateFormat) {
+		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat,Locale.US);
+		return sdf.format(getIssueDate());
+	}
+	
+	private void setIssueDate(Date date) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd",Locale.US);
+		setProperty("issueDate",sdf.format(date));		
+	}
+	
+	/**
 	 * Gets a list of alerts for this Citizen
 	 * @return
 	 * A List of alert messages
@@ -219,7 +352,7 @@ public class Citizen {
 		for (String a : getAlerts()) {
 			alerts.add(a);
 		}
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd",Locale.US);
 		alerts.add(sdf.format(new Date()) + alertText);
 		setProperty("alerts",alerts);
 	}
@@ -231,6 +364,18 @@ public class Citizen {
 	 */
 	public Boolean isMayor() {
 		return equals(getAffiliation().getMayor());
+	}
+	
+	/**
+	 * Determines if this Citizen is a Deputy of their City.
+	 * @return
+	 * True if this Citizen is a Deputy of their City, else false.
+	 */
+	public Boolean isDeputy() {
+		for (Citizen c : getAffiliation().getDeputies()) {
+			if (equals(c)) return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -263,6 +408,7 @@ public class Citizen {
 			if (prop.equalsIgnoreCase(property)) {
 				CityZen.citizenConfig.getConfig().set("citizens." + getPassport().getUniqueId().toString() + property,value);
 				CityZen.citizenConfig.save();
+				citizenConfig = CityZen.citizenConfig.getConfig();
 			}
 		}
 	}

@@ -1,6 +1,10 @@
 package io.github.griffenx.CityZen;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
@@ -62,7 +66,15 @@ public class City {
 			newCity.setWhitelisted(defaults.getBoolean("useBlacklistAsWhitelist"));
 			newCity.setMaxPlotSize(cnfg.getInt("maxPlotSize"));
 			newCity.setMinPlotSize(cnfg.getInt("minPlotSize"));
+			newCity.setFoundingDate(new Date());
 		}
+		return newCity;
+	}
+	public static City createCity(String name, Citizen founder) {
+		City newCity = City.createCity(name);
+		newCity.setFounder(founder);
+		newCity.setMayor(founder);
+		newCity.addCitizen(founder);
 		return newCity;
 	}
 	
@@ -84,9 +96,6 @@ public class City {
 	 * Deletes this city from config
 	 */
 	public void delete() {
-		for (Citizen c : getCitizens()) {
-			c.setAffiliation(null);
-		}
 		CityZen.cityConfig.getConfig().set("cities." + identifier, null);
 		CityZen.citizenConfig.save();
 	}
@@ -126,7 +135,50 @@ public class City {
 	 * Citizen who is the Mayor of this city
 	 */
 	public Citizen getMayor() {
-		return new Citizen(UUID.fromString(getProperty("mayor")));
+		return Citizen.getCitizen(UUID.fromString(getProperty("mayor")));
+	}
+	
+	/**
+	 * Gets the Citizen who created this City
+	 * @return
+	 * The Citizen who founded this City
+	 */
+	public Citizen getFounder() {
+		return Citizen.getCitizen(UUID.fromString(getProperty("founder")));
+	}
+	
+	private void setFounder(Citizen founder) {
+		setProperty("founder",founder.getUUID().toString());
+	}
+	
+	/**
+	 * Gets the date that this City's record was created as a Date
+	 * @return
+	 * Date representing when this record was issued
+	 */
+	public Date getFoundingDate() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd",Locale.US);
+		try {
+			return sdf.parse(getProperty("foundingDate"));
+		} catch (ParseException e) {
+			return null;
+		}
+	}
+	/**
+	 * Gets the date that this City's record was created as a formatted String
+	 * @param dateFormat
+	 * A format string used to format the date.
+	 * @return
+	 * Date representing when this record was issued, as a string
+	 */
+	public String getFoundingDate(String dateFormat) {
+		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat,Locale.US);
+		return sdf.format(getFoundingDate());
+	}
+	
+	private void setFoundingDate(Date date) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd",Locale.US);
+		setProperty("foundingDate",sdf.format(date));		
 	}
 	
 	/**
@@ -371,7 +423,7 @@ public class City {
 		List<Citizen> cits = new Vector<Citizen>();
 		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".citizens")) {
 			try {
-				cits.add(new Citizen(UUID.fromString(u)));
+				cits.add(Citizen.getCitizen(UUID.fromString(u)));
 			} catch (IllegalArgumentException e) {}
 		}
 		return cits;
@@ -443,7 +495,7 @@ public class City {
 		List<Citizen> deps = new Vector<Citizen>();
 		for (String u : CityZen.cityConfig.getConfig().getStringList("cities." + identifier + ".deputies")) {
 			try {
-				deps.add(new Citizen(UUID.fromString(u)));
+				deps.add(Citizen.getCitizen(UUID.fromString(u)));
 			} catch (IllegalArgumentException e) {}
 		}
 		return deps;
@@ -495,7 +547,7 @@ public class City {
 	public List<Plot> getPlots() {
 		List<Plot> plts = new Vector<Plot>();
 		for (String key : CityZen.cityConfig.getConfig().getConfigurationSection("cities." + identifier + ".plots").getKeys(false)) {
-			plts.add(new Plot(this, Integer.valueOf(key)));
+			plts.add(Plot.getPlot(this,Integer.valueOf(key)));
 		} return plts;
 	}
 	

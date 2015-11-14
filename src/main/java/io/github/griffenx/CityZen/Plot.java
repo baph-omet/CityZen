@@ -21,7 +21,7 @@ public class Plot {
 	 * @param id
 	 * The ID number of this Plot
 	 */
-	public Plot(City city, int id) {
+	private Plot(City city, int id) {
 		identifier = id;
 	}
 	
@@ -71,6 +71,21 @@ public class Plot {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Gets a specific plot from a City.
+	 * @param city
+	 * The City to which this plot belongs
+	 * @param identifier
+	 * The ID number of the plot to get
+	 * @return
+	 * A Plot from the specified City that has the specified identifier 
+	 */
+	public static Plot getPlot(City city, int identifier) {
+		for (String key : CityZen.cityConfig.getConfig().getConfigurationSection("cities." + city.getIdentifier() + ".plots").getKeys(false)) {
+			if (Integer.parseInt(key) == identifier) return new Plot(city,identifier);
+		} return null;
 	}
 	
 	/**
@@ -226,7 +241,7 @@ public class Plot {
 		List<Citizen> owners = new Vector<Citizen>();
 		ConfigurationSection section = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + getAffiliation().getIdentifier() + ".plots." + identifier);
 		for (String u : section.getStringList("owners")) {
-			owners.add(new Citizen(UUID.fromString(u)));
+			owners.add(Citizen.getCitizen(UUID.fromString(u)));
 		}
 		return owners;
 	}
@@ -272,7 +287,7 @@ public class Plot {
 	 */
 	public Citizen getCreator() {
 		try {
-			return new Citizen(UUID.fromString(getProperty("creator")));
+			return Citizen.getCitizen(UUID.fromString(getProperty("creator")));
 		}
 		catch (IllegalArgumentException e) {
 			return null;

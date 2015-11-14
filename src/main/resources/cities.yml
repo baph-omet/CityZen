@@ -19,6 +19,13 @@ cities:
         # Publicly visible slogan. Must be less than 100 characters or it will be truncated.
         slogan: "Hello world!"
         
+        # The Citizen who founded this city
+        founder: "778310a6219c43599d19271573d98b7c"
+        
+        # Date that this City was founded
+        # Uses yyyyMMdd format
+        foundingDate: "20151001"
+        
         # Name of the world in which this City resides. All plots must be in the same world
         world: "world"
         
@@ -37,6 +44,10 @@ cities:
         - "978310a6219c43599d19271573d98b7c"
         - "078310a6219c43599d19271573d98b7c"
         - "178310a6219c43599d19271573d98b7c"
+        
+        # The highest reputation this City has ever attained.
+        # Used for rewards purposes.
+        maxReputation: 100000
         
         # Max width of a square plot in this city 
         # (plots may be any rectangle with an area no more than this number of blocks squared)

@@ -41,6 +41,7 @@ cityDefaults:
 # Reputation may also be modified externally via commands
 reputation:
     default: 0
+    maximum: 1000000000000000
     gainedOnJoinCity: 100
     gainedOnBuyPlot: 100
     lostOnSellPlot: 100
