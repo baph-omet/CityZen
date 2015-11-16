@@ -110,4 +110,64 @@ public class CityCommand {
 		}
 		return true;
 	}
+	
+	public boolean top(CommandSender sender, String[] args) {
+		if (sender.hasPermission("cityzen.city.top")) {
+			String numberOfResults = 10;
+			try {
+				numberOfResults = Integer.parse(args[1]);
+			} catch (NumberFormatException e) {
+				numberOfResults = 10;
+			}
+			
+			if (numberOfResults < 1) numberOfResults = 1;
+			else if (numberOfResults > 10) numberOfResults = 10;
+			List<City> cities = City.getCities();
+			if (cities.size() < numberOfResults) numberOfResults = cities.size();
+			
+			String sortType = "Reputation";
+			
+			if (args[2].length == 0 || args[2].equalsIgnoreCase("reputation")) {
+				sortType = "Reputation";
+			} else if (args[2].equalsIgnoreCase("citizens") || args[2].equalsIgnoreCase("population")) {
+				sortType = "Population";
+			} else if (args[2].equalsIgnoreCase("date") || args[2].equalsIgnoreCase("age")) {
+				sortType = "Age";
+			}
+			
+			List<long> values = new ArrayList();
+			// Sort by type
+			for (City c : cities) {
+				switch (sortType) {
+					case "Reputation":
+						values.add(c.getReputation());
+						break;
+					case "Population":
+						values.add((long) c.getCitizens().size());
+						break;
+					case "Age":
+						Date foundingDate = c.getFoundingDate();
+						//TODO: Check this
+						values.add(foundingDate.Milliseconds);
+						break;
+				}
+			}
+			Collections.sort(values)
+			if (!sortType.equals("Age")) Collections.reverse(values);
+			
+			sender.sendMessage(ChatColor.RED + "Top " + ChatColor.GOLD + numberOfResults + " Cities by " + sortType + ":");
+			for (int i = 0; i < numberOfResults; i++) {
+				for (City c : cities) {
+					if (values.get(i) != null && values.get(i) == c.getReputation()) {
+						sender.sendMessage(ChatColor.BLUE + "| " + i + ". " + ChatColor.RED + values.get(i)
+							+ ChatColor.BLUE + " - " + c.getChatName());
+						cities.remove(c);
+					}
+				}
+			}
+		} else {
+			sender.sendMessage(InfoCommand.noPermMessage("cityzen.city.top");
+		}
+		return true;
+	}
 }
