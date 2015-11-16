@@ -85,6 +85,12 @@ cities:
         - "netherbrick"
         - "tnt"
         
+        # A list of Citizens who have requested to join this City
+        # A City official can approve or deny each request
+        waitlist:
+        - "278310a6219c43599d19271573d98b7c"
+        - "378310a6219c43599d19271573d98b7c"
+        
         # A list of all plots in this city
         plots:
             

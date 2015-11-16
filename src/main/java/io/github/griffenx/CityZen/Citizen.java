@@ -379,6 +379,26 @@ public class Citizen {
 	}
 	
 	/**
+	 * Determines whether or not this Citizen is a member of any City's waitlist
+	 * @return
+	 * True if this Citizen is waitlisted anywhere, else false
+	 */
+	public Boolean isWaitlisted() {
+		return getWaitlistedCity() != null;
+	}
+	
+	/**
+	 * Finds a City in which this Citizen is waitlisted
+	 * @return
+ * The City in which this Citizen is waitlisted, or null if this Citizen is not waitlisted anywhere.
+	 */
+	public City getWaitlistedCity() {
+		for (City c : City.getCities()) {
+			if (c.isInWaitlist(this)) return c;
+		} return null;
+	}
+	
+	/**
 	 * Determines if two Citizen objects are the same by their UUID
 	 * @param citizen
 	 * The citizen to compare to this one

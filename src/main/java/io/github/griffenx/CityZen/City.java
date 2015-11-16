@@ -26,7 +26,7 @@ public class City {
 	 * @param id
 	 * The ID of the City to load
 	 */
-	public City(String id) {
+	private City(String id) {
 		properties = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + id);
 		identifier = id;
 	}
@@ -90,6 +90,13 @@ public class City {
 			cities.add(new City(c));
 		}
 		return cities;
+	}
+	
+	public static City getCity(String name) {
+		for (City c : getCities()) {
+			if (c.getName() == name) return c;
+		}
+		return null;
 	}
 	
 	/**
@@ -540,6 +547,66 @@ public class City {
 	}
 	
 	/**
+	 * Gets a list of Citizens who have requested to join this City
+	 * @return
+	 * A List of Citizens who have requested to join this City. Returns null if freeJoin is false.
+	 */
+	public List<Citizen> getWaitlist() {
+		if (isFreeJoin()) return null;
+		List<Citizen> citizens = new Vector<Citizen>();
+		for (String u : properties.getStringList("waitlist")) {
+			citizens.add(Citizen.getCitizen(UUID.fromString(u)));
+		}
+		return citizens;
+	}
+	
+	/**
+	 * Adds a Citizen to this City's waitlist if they are not already on it.
+	 * @param citizen
+	 * The Citizen to add
+	 */
+	public void addWaitlist(Citizen citizen) {
+		List<String> citizens = new Vector<String>();
+		for (Citizen c : getWaitlist()) {
+			if (c.equals(citizen)) return;
+			citizens.add(c.getUUID().toString());
+		}
+		setProperty("waitlist", citizens);
+	}
+	
+	/**
+	 * Removes a Citizen from this City's waitlist
+	 * @param citizen
+	 * The Citizen to remove
+	 */
+	public void removeWaitlist(Citizen citizen) {
+		List<String> citizens = new Vector<String>();
+		for (Citizen c : getWaitlist()) if (!c.equals(citizen)) citizens.add(c.getUUID().toString());
+		setProperty("waitlist", citizens);
+	}
+	
+	/**
+	 * Completely empties out this City's waitlist
+	 */
+	public void clearWaitlist() {
+		setProperty("waitlist", new Vector<String>());
+	}
+	
+	/**
+	 * Checks to see if the Citizen is on this City's waitlist
+	 * @param citizen
+	 * The Citizen to check
+	 * @return
+	 * True if the Citizen is on this City's waitlist, else false
+	 */
+	public Boolean isInWaitlist(Citizen citizen) {
+		for (Citizen c : getWaitlist()) {
+			if (citizen.equals(c)) return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * Gets a list of this City's plots.
 	 * @return
 	 * A List of this city's plots.
@@ -650,7 +717,7 @@ public class City {
 	 * Color + Name
 	 */
 	public String getChatName() {
-		return getColor() + getName();
+		return getColor() + getName() + ChatColor.RESET;
 	}
 
 	/**
