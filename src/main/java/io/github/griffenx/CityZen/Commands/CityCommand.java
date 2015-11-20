@@ -14,7 +14,30 @@ import io.github.griffenx.CityZen.CityZen;
 public class CityCommand {
 	private static final Plugin plugin = CityZen.getPlugin();
 	
-	public static boolean join(CommandSender sender, String[] args) {
+	public static boolean delegate(CommandSender sender, String[] args) {
+		switch (args[0].toLowerCase()) {
+			case "join":
+				join(sender,args);
+				break;
+			case "list":
+				list(sender,args);
+				break;
+			case "top":
+				top(sender,args);
+				break;
+			case "leave":
+				leave(sender,args);
+				break;
+			case "info":
+				info(sender,args);
+				break;
+			default:
+				return false;
+		}
+		return true;
+	}
+	
+	private static void join(CommandSender sender, String[] args) {
 		if (sender instanceof Player) {
 			if (sender.hasPermission("cityzen.city.join")) {
 				
@@ -67,10 +90,9 @@ public class CityCommand {
 		} else {
 			sender.sendMessage(InfoCommand.playersOnlyMessage());
 		}
-		return true;
 	}
 	
-	public static boolean list(CommandSender sender, String[] args) {
+	private static void list(CommandSender sender, String[] args) {
 		if (sender.hasPermission("cityzen.city.list")) {
 			List<City> cities = City.getCities();
 			if (cities.size() > 0) {
@@ -108,10 +130,9 @@ public class CityCommand {
 		} else {
 			sender.sendMessage(InfoCommand.noPermMessage("cityzen.city.list"));
 		}
-		return true;
 	}
 	
-	public boolean top(CommandSender sender, String[] args) {
+	private static boolean top(CommandSender sender, String[] args) {
 		if (sender.hasPermission("cityzen.city.top")) {
 			String numberOfResults = 10;
 			try {
@@ -169,5 +190,90 @@ public class CityCommand {
 			sender.sendMessage(InfoCommand.noPermMessage("cityzen.city.top");
 		}
 		return true;
+	}
+	
+	private static void create(CommandSender sender, String[] args) {
+		if (args.length > 1) {
+			if (sender.hasPermission("cityzen.city.create") {
+				if (Character.isAlphabetic(args[1].charAt(0))) {
+					City newCity;
+					String cityName = "";
+					for (int i = 1; i < args.length; i++) {
+						cityName += args[i];
+					}
+					if (sender instanceof Player) {
+						Citizen creator = Citizen.getCitizen(sender);
+						if (creator != null) {
+							if (creator.getAffilitaion() == null && !creator.isWaitlisted()) {
+								newCity = City.createCity(cityName,creator);
+								if (newCity != null) creator.addReputation(CityZen.getConfig().getLong("reputation.gainedOnCreateCity"));
+							} else {
+								sender.sendMessage(ChatColor.RED + "You cannot create a City if you are already a Citizen of a City, or are on the Waitlist for a City.");
+								return;
+							}
+						} else {
+							sender.sendMessage(InfoCommand.citizenNotFoundMessage());
+							return;
+						}
+					} else newCity = City.createCity(cityName);
+					if (newCity != null) sender.sendMessage(ChatColor.BLUE + "Congratulations! You founded " + ChatColor.GOLD + cityName);
+					else sender.sendMessage(ChatColor.RED + "A city already exists by the name " + ChatColor.GOLD + cityName + ChatColor.RED + ". Please try again with a unique name.");
+				} else sender.sendMessage(ChatColor.RED + "City names must start with a letter. Please use a valid City name."); 
+			} else sender.sendMessage(InfoCommand.noPermMessage("cityzen.city.create"));
+		} else sender.sendMessage(ChatColor.RED + "Not enough arguments. Usage: \"/city create <City Name...>\"");
+	}
+	
+	private static void leave(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			Citizen citizen = Citizen.getCitizen(sender);
+			if (sender.hasPermission("cityzen.city.leave")) {
+				City aff = citizen.getAffiliation();
+				if (aff != null) {
+					long rep = citizen.getReputation();
+					aff.removeCitizen(citizen);
+					sender.sendMessage(ChatColor.BLUE + "You have left " + ChatColor.GOLD + aff.getChatName() + ChatColor.BLUE + ". "
+						+ (CityZen.getConfig().getInt("lostOnLeaveCityPercent") > 0 ? " You lost " + ChatColor.GOLD + (rep - citizen.getReputation())
+						+ " Reputation" + ChatColor.BLUE + ". You now have " + ChatColor.GOLD + citizen.getReputation() + " Reputation" + ChatColor.BLUE + "." : "");
+				} else sender.sendMessage(ChatColor.RED + "You have no city to leave.");
+			} else sender.sendMessage(InfoCommand.noPermMessage("cityzen.city.leave"));
+		} else sender.sendMessage(InfoCommand.playersOnlyMessage());
+	}
+	
+	private static void info(CommandSender sender, String[] args) {
+		if (sender.hasPermission("cityzen.city.info") {
+			City city;
+			if (sender instanceof Player && args.length == 1) {
+				Citizen citizen = Citizen.getCitizen(sender);
+				city = citizen.getAffiliation();
+				if (city == null) {
+					sender.sendMessage(ChatColor.RED + "You are not a Citizen of any City."
+						+ " Please specify a City to look up. Useage: \"/city info <City>\"");
+					return;
+				}
+			} else if (args.length > 1) {
+				city = getCity()
+			} else {
+				sender.sendMessage(ChatColor.RED + "You must specify a City in order to run this command from Console."
+					+ "Useage:\"/city info <City>\"");
+				return;
+			}
+			
+			int deps = city.getDeputies().size();
+			String[] messages = {
+				ChatColor.BLUE + "==============================",
+				ChatColor.GOLD + "     " + city.getChatName(),
+				ChatColor.BLUE + "| Slogan: " + ChatColor.WHITE + "\"" + city.getSlogan() + "\"",
+				ChatColor.BLUE + "| Date Founded: " + ChatColor.WHITE + city.getFoundingDate("dd MMM yyyy"),
+				ChatColor.BLUE + "| Population: " + ChatColor.WHITE + city.getCitizens().size(),
+				ChatColor.BLUE + "| Reputation: " + ChatColor.GOLD + city.getReputation(),
+				ChatColor.BLUE + "| Mayor: " + ChatColor.GOLD + city.getMayor().getName() 
+					+ (deps > 0 ? "(" + deps + " Deput" + (deps > 1 ? "ies" : "y") + ")" : ""),
+				ChatColor.BLUE + "| Plots: " + ChatColor.WHITE + city.getPlots().size(),
+				ChatColor.BLUE + "| FreeJoin: " + city.isFreeJoin() + " OpenPlotting: " + city.isOpenPlotting() + " BlockExclusion: " 
+					+ (city.isBlockExclusion() ? (city.isWhitelisted() ? "Whitelist" : "Blacklist") : "None")
+			};
+			
+			sender.sendMessage(messages);
+		} else sender.sendMessage(noPermMessage("cityzen.city.info"));
 	}
 }
