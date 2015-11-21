@@ -1,5 +1,8 @@
 package io.github.griffenx.CityZen.Commands;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.bukkit.ChatColor;
@@ -10,6 +13,7 @@ import org.bukkit.plugin.Plugin;
 import io.github.griffenx.CityZen.Citizen;
 import io.github.griffenx.CityZen.City;
 import io.github.griffenx.CityZen.CityZen;
+import io.github.griffenx.CityZen.Messaging;
 
 public class CityCommand {
 	private static final Plugin plugin = CityZen.getPlugin();
@@ -24,6 +28,9 @@ public class CityCommand {
 				break;
 			case "top":
 				top(sender,args);
+				break;
+			case "create":
+				create(sender,args);
 				break;
 			case "leave":
 				leave(sender,args);
@@ -79,16 +86,16 @@ public class CityCommand {
 								+ ChatColor.RED + ". Please cancel your request there or wait for it to be denied before attempting to join another city.");
 						}
 					} else {
-						sender.sendMessage(InfoCommand.missingCitizenRecordMessage());
+						sender.sendMessage(Messaging.missingCitizenRecordMessage());
 					}
 				} else {
-					sender.sendMessage(InfoCommand.cityNotFoundMessage(cityName));
+					sender.sendMessage(Messaging.cityNotFoundMessage(cityName));
 				}
 			} else {
-				sender.sendMessage(InfoCommand.noPermMessage("cityzen.city.join"));
+				sender.sendMessage(Messaging.noPermMessage("cityzen.city.join"));
 			}
 		} else {
-			sender.sendMessage(InfoCommand.playersOnlyMessage());
+			sender.sendMessage(Messaging.playersOnlyMessage());
 		}
 	}
 	
@@ -128,15 +135,15 @@ public class CityCommand {
 				sender.sendMessage(ChatColor.BLUE + "There are no Cities on this server.");
 			}
 		} else {
-			sender.sendMessage(InfoCommand.noPermMessage("cityzen.city.list"));
+			sender.sendMessage(Messaging.noPermMessage("cityzen.city.list"));
 		}
 	}
 	
 	private static boolean top(CommandSender sender, String[] args) {
 		if (sender.hasPermission("cityzen.city.top")) {
-			String numberOfResults = 10;
+			int numberOfResults = 10;
 			try {
-				numberOfResults = Integer.parse(args[1]);
+				numberOfResults = Integer.parseInt(args[1]);
 			} catch (NumberFormatException e) {
 				numberOfResults = 10;
 			}
@@ -148,7 +155,7 @@ public class CityCommand {
 			
 			String sortType = "Reputation";
 			
-			if (args[2].length == 0 || args[2].equalsIgnoreCase("reputation")) {
+			if (args[2].length() == 0 || args[2].equalsIgnoreCase("reputation")) {
 				sortType = "Reputation";
 			} else if (args[2].equalsIgnoreCase("citizens") || args[2].equalsIgnoreCase("population")) {
 				sortType = "Population";
@@ -156,7 +163,7 @@ public class CityCommand {
 				sortType = "Age";
 			}
 			
-			List<long> values = new ArrayList();
+			List<Long> values = new ArrayList<Long>();
 			// Sort by type
 			for (City c : cities) {
 				switch (sortType) {
@@ -168,12 +175,11 @@ public class CityCommand {
 						break;
 					case "Age":
 						Date foundingDate = c.getFoundingDate();
-						//TODO: Check this
-						values.add(foundingDate.Milliseconds);
+						values.add(foundingDate.getTime());
 						break;
 				}
 			}
-			Collections.sort(values)
+			Collections.sort(values);
 			if (!sortType.equals("Age")) Collections.reverse(values);
 			
 			sender.sendMessage(ChatColor.RED + "Top " + ChatColor.GOLD + numberOfResults + " Cities by " + sortType + ":");
@@ -187,14 +193,14 @@ public class CityCommand {
 				}
 			}
 		} else {
-			sender.sendMessage(InfoCommand.noPermMessage("cityzen.city.top");
+			sender.sendMessage(Messaging.noPermMessage("cityzen.city.top"));
 		}
 		return true;
 	}
 	
 	private static void create(CommandSender sender, String[] args) {
 		if (args.length > 1) {
-			if (sender.hasPermission("cityzen.city.create") {
+			if (sender.hasPermission("cityzen.city.create")) {
 				if (Character.isAlphabetic(args[1].charAt(0))) {
 					City newCity;
 					String cityName = "";
@@ -204,22 +210,22 @@ public class CityCommand {
 					if (sender instanceof Player) {
 						Citizen creator = Citizen.getCitizen(sender);
 						if (creator != null) {
-							if (creator.getAffilitaion() == null && !creator.isWaitlisted()) {
+							if (creator.getAffiliation() == null && !creator.isWaitlisted()) {
 								newCity = City.createCity(cityName,creator);
-								if (newCity != null) creator.addReputation(CityZen.getConfig().getLong("reputation.gainedOnCreateCity"));
+								if (newCity != null) creator.addReputation(CityZen.getPlugin().getConfig().getLong("reputation.gainedOnCreateCity"));
 							} else {
 								sender.sendMessage(ChatColor.RED + "You cannot create a City if you are already a Citizen of a City, or are on the Waitlist for a City.");
 								return;
 							}
 						} else {
-							sender.sendMessage(InfoCommand.citizenNotFoundMessage());
+							sender.sendMessage(Messaging.missingCitizenRecordMessage());
 							return;
 						}
 					} else newCity = City.createCity(cityName);
 					if (newCity != null) sender.sendMessage(ChatColor.BLUE + "Congratulations! You founded " + ChatColor.GOLD + cityName);
 					else sender.sendMessage(ChatColor.RED + "A city already exists by the name " + ChatColor.GOLD + cityName + ChatColor.RED + ". Please try again with a unique name.");
 				} else sender.sendMessage(ChatColor.RED + "City names must start with a letter. Please use a valid City name."); 
-			} else sender.sendMessage(InfoCommand.noPermMessage("cityzen.city.create"));
+			} else sender.sendMessage(Messaging.noPermMessage("cityzen.city.create"));
 		} else sender.sendMessage(ChatColor.RED + "Not enough arguments. Usage: \"/city create <City Name...>\"");
 	}
 	
@@ -232,15 +238,15 @@ public class CityCommand {
 					long rep = citizen.getReputation();
 					aff.removeCitizen(citizen);
 					sender.sendMessage(ChatColor.BLUE + "You have left " + ChatColor.GOLD + aff.getChatName() + ChatColor.BLUE + ". "
-						+ (CityZen.getConfig().getInt("lostOnLeaveCityPercent") > 0 ? " You lost " + ChatColor.GOLD + (rep - citizen.getReputation())
-						+ " Reputation" + ChatColor.BLUE + ". You now have " + ChatColor.GOLD + citizen.getReputation() + " Reputation" + ChatColor.BLUE + "." : "");
+						+ (CityZen.getPlugin().getConfig().getInt("lostOnLeaveCityPercent") > 0 ? " You lost " + ChatColor.GOLD + (rep - citizen.getReputation())
+						+ " Reputation" + ChatColor.BLUE + ". You now have " + ChatColor.GOLD + citizen.getReputation() + " Reputation" + ChatColor.BLUE + "." : ""));
 				} else sender.sendMessage(ChatColor.RED + "You have no city to leave.");
-			} else sender.sendMessage(InfoCommand.noPermMessage("cityzen.city.leave"));
-		} else sender.sendMessage(InfoCommand.playersOnlyMessage());
+			} else sender.sendMessage(Messaging.noPermMessage("cityzen.city.leave"));
+		} else sender.sendMessage(Messaging.playersOnlyMessage());
 	}
 	
 	private static void info(CommandSender sender, String[] args) {
-		if (sender.hasPermission("cityzen.city.info") {
+		if (sender.hasPermission("cityzen.city.info")) {
 			City city;
 			if (sender instanceof Player && args.length == 1) {
 				Citizen citizen = Citizen.getCitizen(sender);
@@ -251,7 +257,7 @@ public class CityCommand {
 					return;
 				}
 			} else if (args.length > 1) {
-				city = getCity()
+				city = City.getCity(args[1]);
 			} else {
 				sender.sendMessage(ChatColor.RED + "You must specify a City in order to run this command from Console."
 					+ "Useage:\"/city info <City>\"");
@@ -274,6 +280,6 @@ public class CityCommand {
 			};
 			
 			sender.sendMessage(messages);
-		} else sender.sendMessage(noPermMessage("cityzen.city.info"));
+		} else sender.sendMessage(Messaging.noPermMessage("cityzen.city.info"));
 	}
 }

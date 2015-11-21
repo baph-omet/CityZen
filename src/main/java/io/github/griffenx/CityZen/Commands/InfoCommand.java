@@ -8,30 +8,11 @@ import org.bukkit.plugin.Plugin;
 
 import io.github.griffenx.CityZen.Citizen;
 import io.github.griffenx.CityZen.CityZen;
+import io.github.griffenx.CityZen.Messaging;
 
 public class InfoCommand {
 	
 	private static final Plugin plugin = CityZen.getPlugin();
-	
-	public static String noPermMessage(String node) {
-		return ChatColor.RED + "You don't have permission to do that. Required permission: " + node;
-	}
-	
-	public static String playersOnlyMessage() {
-		return ChatColor.RED + "Only Players can run this command. Try \"/cityzen help\" for more info.";
-	}
-	
-	public static String cityNotFoundMessage(String cityName) {
-		return ChatColor.RED + "Could not find a city by the name of \"" + cityName + ".\" Try \"/city list\" for a list of cities. ";
-	}
-	
-	public static String citizenNotFoundMessage(String citizenName) {
-		return ChatColor.RED + "Could not find a Citizen named \"" + citizenName + ".\"";
-	}
-	
-	public static String missingCitizenRecordMessage() {
-		return ChatColor.RED + "Your Citizen record does not seem to exist. Try logging in again or contacting an admin for help with this issue.";
-	}
 	
 	public static boolean reputation(CommandSender sender, String[] args) {
 		if (args.length == 0) {
@@ -42,13 +23,13 @@ public class InfoCommand {
 						sender.sendMessage(ChatColor.GOLD + sender.getName() + ChatColor.BLUE + ", Your Reputation is:");
 						sender.sendMessage(ChatColor.GOLD + "" + snd.getReputation());
 					} else {
-						sender.sendMessage(missingCitizenRecordMessage());
+						sender.sendMessage(Messaging.missingCitizenRecordMessage());
 					}
 				} else {
-					sender.sendMessage(noPermMessage("cityzen.reputation"));
+					sender.sendMessage(Messaging.noPermMessage("cityzen.reputation"));
 				}
 			} else {
-				sender.sendMessage(playersOnlyMessage());
+				sender.sendMessage(Messaging.playersOnlyMessage());
 			}
 			return true;
 		} else {
@@ -59,11 +40,11 @@ public class InfoCommand {
 					sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " has a Reputation of:");
 					sender.sendMessage(ChatColor.GOLD + "" + target.getReputation());
 				} else {
-					sender.sendMessage(citizenNotFoundMessage(args[0]));
+					sender.sendMessage(Messaging.citizenNotFoundMessage(args[0]));
 				}
 				
 			} else {
-				sender.sendMessage(noPermMessage("cityzen.reputation.others"));
+				sender.sendMessage(Messaging.noPermMessage("cityzen.reputation.others"));
 			}
 			return true;
 		}
@@ -92,7 +73,7 @@ public class InfoCommand {
 						sender.sendMessage(ChatColor.RED + "Contact an admin for help with this issue.");
 					}
 				} else {
-					sender.sendMessage(noPermMessage("cityzen.passport"));
+					sender.sendMessage(Messaging.noPermMessage("cityzen.passport"));
 				}
 			} else {
 				sender.sendMessage("Consoles and Command Blocks have no passport to look up. Try adding a player name instead.");
@@ -118,7 +99,7 @@ public class InfoCommand {
 					sender.sendMessage(ChatColor.RED + "Couldn't find a Citizen named \"" + args[0] + ".\" That Citizen record may not exist.");
 				}
 			} else {
-				sender.sendMessage(noPermMessage("cityzen.passport.others"));
+				sender.sendMessage(Messaging.noPermMessage("cityzen.passport.others"));
 			}
 		}
 		return true;

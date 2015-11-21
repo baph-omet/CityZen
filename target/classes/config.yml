@@ -42,8 +42,10 @@ cityDefaults:
 reputation:
     default: 0
     maximum: 1000000000000000
+    gainedOnCreateCity: 1000
     gainedOnJoinCity: 100
     gainedOnBuyPlot: 100
+    lostOnDeleteCity: 1000
     lostOnSellPlot: 100
     lostOnLeaveCityPercent: 25
     lostOnEvictionPercent: 50
