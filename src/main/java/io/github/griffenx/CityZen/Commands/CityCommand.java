@@ -282,4 +282,40 @@ public class CityCommand {
 			sender.sendMessage(messages);
 		} else sender.sendMessage(Messaging.noPermMessage("cityzen.city.info"));
 	}
+	
+	private static void evict(CommandSender sender, String[] args) {
+		Citizen citizen;
+		if (sender instanceof Player) citizen = Citizen.getCitizen(sender);
+		if (sender.hasPermission("cityzen.city.evict") || (citizen != null && (citizen.isMayor() || citizen.isDeputy()))) {
+			if (args.length > 1) {
+				Citizen target = Citizen.getCitizen(args[1]);
+				if (target != null) {
+					if (citizen != null && (citizen.isMayor() || citizen.isDeputy())) {
+						if (!target.getAffiliation().equals(citizen.getAffiliation())) {
+							sender.sendMessage(ChatColor.RED + "You can only evict players from your City.");
+							return;
+						}
+					}
+					City city = target.getAffiliation();
+					if (city != null) {
+						long rep = target.getReputation();
+						city.removeCitizen(target,true);
+						//TODO: Add citizen to city ban list (possibly do this in the removeCitizen method)
+						if (target.getPassport().isOnline()) {
+							String message = ChatColor.RED + "You were evicted from " + city.getChatName() + ChatColor.RED + " by " 
+								+ sender.getName() + ". You lost " + ChatColor.GOLD + (rep - target.getReputation()) 
+								+ ChatColor.RED + " Reputation. You have been removed from ownership of all plots"
+								+ " and may not rejoin this City unless approved by a City official.";
+							target.getPassport().sendMessage(message);
+						} else {
+							target.addAlert("[CityZen] You were evicted from " + city.getName() + " by " + sender.getName() + ". You lost "
+								+ (rep - target.getReputation()) + " Reputation. You have been removed from ownership of all plots"
+								+ " and may not rejoin this City unless approved by a City official.");
+						}
+						sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was evicted from " + city.getChatName());
+					} sender.sendMessage(Messaging.noAffiliationMessage(target));
+				} sender.sendMessage(Messaging.citizenNotFoundMessage(args[1]));
+			} sender.sendMessage(ChatColor.RED + "Not enough arguments. Please specify a Citizen to evict from their City.");
+		} sender.sendMessage(ChatColor.RED + "You must either be a City official or have permission node cityzen.city.evict to run this command.");
+	}
 }
