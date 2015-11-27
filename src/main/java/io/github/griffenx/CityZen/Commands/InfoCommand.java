@@ -23,13 +23,13 @@ public class InfoCommand {
 						sender.sendMessage(ChatColor.GOLD + sender.getName() + ChatColor.BLUE + ", Your Reputation is:");
 						sender.sendMessage(ChatColor.GOLD + "" + snd.getReputation());
 					} else {
-						sender.sendMessage(Messaging.missingCitizenRecordMessage());
+						sender.sendMessage(Messaging.missingCitizenRecord());
 					}
 				} else {
-					sender.sendMessage(Messaging.noPermMessage("cityzen.reputation"));
+					sender.sendMessage(Messaging.noPerms("cityzen.reputation"));
 				}
 			} else {
-				sender.sendMessage(Messaging.playersOnlyMessage());
+				sender.sendMessage(Messaging.playersOnly());
 			}
 			return true;
 		} else {
@@ -40,11 +40,11 @@ public class InfoCommand {
 					sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " has a Reputation of:");
 					sender.sendMessage(ChatColor.GOLD + "" + target.getReputation());
 				} else {
-					sender.sendMessage(Messaging.citizenNotFoundMessage(args[0]));
+					sender.sendMessage(Messaging.citizenNotFound(args[0]));
 				}
 				
 			} else {
-				sender.sendMessage(Messaging.noPermMessage("cityzen.reputation.others"));
+				sender.sendMessage(Messaging.noPerms("cityzen.reputation.others"));
 			}
 			return true;
 		}
@@ -73,7 +73,7 @@ public class InfoCommand {
 						sender.sendMessage(ChatColor.RED + "Contact an admin for help with this issue.");
 					}
 				} else {
-					sender.sendMessage(Messaging.noPermMessage("cityzen.passport"));
+					sender.sendMessage(Messaging.noPerms("cityzen.passport"));
 				}
 			} else {
 				sender.sendMessage("Consoles and Command Blocks have no passport to look up. Try adding a player name instead.");
@@ -99,7 +99,7 @@ public class InfoCommand {
 					sender.sendMessage(ChatColor.RED + "Couldn't find a Citizen named \"" + args[0] + ".\" That Citizen record may not exist.");
 				}
 			} else {
-				sender.sendMessage(Messaging.noPermMessage("cityzen.passport.others"));
+				sender.sendMessage(Messaging.noPerms("cityzen.passport.others"));
 			}
 		}
 		return true;

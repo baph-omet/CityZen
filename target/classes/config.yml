@@ -6,6 +6,10 @@
 # Distance (in blocks) minimum between city centers
 minCitySeparation: 1000
 
+# The interval (in minutes) in which to auto-save configs
+# Set to -1 to disable autosave
+saveInterval: 10
+
 # Number of blocks around each plot that are protected as part of the city
 # Also serves as the maximum spacing between new plots
 plotBuffer: 16

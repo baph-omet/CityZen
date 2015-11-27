@@ -45,6 +45,12 @@ cities:
         - "078310a6219c43599d19271573d98b7c"
         - "178310a6219c43599d19271573d98b7c"
         
+        # List of UUID's of players who are not allowed to join this city
+        # Also blocks join request for closed cities
+        banlist:
+        - "578310a6219c43599d19271573d98b7c"
+        - "678310a6219c43599d19271573d98b7c"
+        
         # The highest reputation this City has ever attained.
         # Used for rewards purposes.
         maxReputation: 100000

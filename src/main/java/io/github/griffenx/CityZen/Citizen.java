@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.Vector;
 
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -202,6 +203,7 @@ public class Citizen {
 			long rep = getReputation() + amount;
 			fixRep();
 			setReputation(rep);
+			if (rep > getMaxReputation()) setMaxReputation(rep);
 		}
 	}
 	
@@ -218,6 +220,7 @@ public class Citizen {
 		else rep = getReputation() - amount;
 		fixRep();
 		setProperty("reputation",rep);
+		if (rep > getMaxReputation()) setMaxReputation(rep);
 	}
 	
 	/**
@@ -230,6 +233,7 @@ public class Citizen {
 		long globalMax = CityZen.getPlugin().getConfig().getLong("reputation.maximum");
 		if (amount >= 0 && amount < globalMax) setProperty("reputation",amount);
 		else setProperty("reputation",0);
+		if (amount > getMaxReputation()) setMaxReputation(amount);
 	}
 	
 	/**
@@ -358,12 +362,26 @@ public class Citizen {
 	}
 	
 	/**
+	 * If the player is online, send them a chat message. Else, send them an alert.
+	 * @param message
+	 * The message to send to this Citizen
+	 */
+	public void sendMessage(String message) {
+		if (getPassport().isOnline()) {
+			getPassport().sendMessage(message);
+		} else {
+			addAlert(ChatColor.stripColor(message));
+		}
+	}
+	
+	/**
 	 * Determines if this Citizen is the Mayor of their City.
 	 * @return
 	 * True if this Citizen is the Mayor of their City, else false.
 	 */
 	public Boolean isMayor() {
-		return equals(getAffiliation().getMayor());
+		if (getAffiliation() != null) return equals(getAffiliation().getMayor());
+		else return false;
 	}
 	
 	/**

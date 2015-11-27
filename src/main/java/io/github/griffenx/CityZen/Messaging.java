@@ -3,27 +3,47 @@ package io.github.griffenx.CityZen;
 import org.bukkit.ChatColor;
 
 public class Messaging {
-	public static String noPermMessage(String node) {
+	public static String noPerms(String node) {
 		return ChatColor.RED + "You don't have permission to do that. Required permission: " + node;
 	}
 	
-	public static String playersOnlyMessage() {
+	public static String playersOnly() {
 		return ChatColor.RED + "Only Players can run this command. Try \"/cityzen help\" for more info.";
 	}
 	
-	public static String cityNotFoundMessage(String cityName) {
+	public static String cityNotFound(String cityName) {
 		return ChatColor.RED + "Could not find a city by the name of \"" + cityName + ".\" Try \"/city list\" for a list of cities. ";
 	}
 	
-	public static String noAffiliationMessage(Citizen citizen) {
+	public static String noAffiliation(Citizen citizen) {
 		return ChatColor.RED + citizen.getName() + " is not a Citizen of any City.";
 	}
 	
-	public static String citizenNotFoundMessage(String citizenName) {
+	public static String noAffiliation() {
+		return ChatColor.RED + "You are not a Citizen of any City";
+	}
+	
+	public static String citizenNotFound(String citizenName) {
 		return ChatColor.RED + "Could not find a Citizen named \"" + citizenName + ".\"";
 	}
 	
-	public static String missingCitizenRecordMessage() {
+	public static String missingCitizenRecord() {
 		return ChatColor.RED + "Your Citizen record does not seem to exist. Try logging in again or contacting an admin for help with this issue.";
+	}
+	
+	public static String notMayor() {
+		return ChatColor.RED + "This command can only be run by the Mayor of this City.";
+	}
+	
+	public static String notCityOfficial() {
+		return ChatColor.RED + "This command can only be run by the Mayor or a Deputy of this City";
+	}
+	
+	public static String noArguments() {
+		return ChatColor.RED + "No arguments supplied. Type \"/cityzen help\" for a list of useable commands.";
+	}
+	
+	public static String notEnoughArguments(String useage) {
+		return ChatColor.RED + "Not enough arguments. Useage: \"" + useage + "\""; 
 	}
 }

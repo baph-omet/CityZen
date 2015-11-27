@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -448,6 +449,9 @@ public class City {
 		}
 		ctzs.add(ctz.getPassport().getUniqueId().toString());
 		setProperty("citizens",ctzs);
+		long rep = 0;
+		rep = CityZen.getPlugin().getConfig().getLong("reputation.gainedOnJoinCity");
+		ctz.addReputation(rep);
 	}
 	
 	/**
@@ -475,6 +479,7 @@ public class City {
 				if (c.equals(ctz)) {
 					if (evict) {
 						reduction = (int) (ctz.getReputation() * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100);
+						ban(ctz);
 					} else {
 						reduction = (int) (ctz.getReputation() * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100);
 					}
@@ -509,7 +514,7 @@ public class City {
 	}
 	
 	/**
-	 * Adds a Citizen to the list of Deputies for this City
+	 * Adds a Citizen to the list of Deputies for this City. Ignores players who are not a Citizen of the City or don't exist.
 	 * @param deputy
 	 * The player to add as a new Deputy
 	 */
@@ -590,6 +595,70 @@ public class City {
 	 */
 	public void clearWaitlist() {
 		setProperty("waitlist", new Vector<String>());
+	}
+	
+	/**
+	 * Gets a List of all Citizens who are on this City's banlist
+	 * @return
+	 * A List of all Citizens who are on this City's banlist
+	 */
+	public List<Citizen> getBanlist() {
+		List<Citizen> banned = new Vector<Citizen>();
+		for (String key : properties.getConfigurationSection("banlist").getKeys(false)) {
+			Citizen c = null;
+			try {
+				c = Citizen.getCitizen(UUID.fromString(key));
+			} catch (IllegalArgumentException e) {
+				CityZen.getPlugin().getLogger().log(Level.INFO,"Unable to parse player in banlist for city " + getName() + ": " + key);
+			}
+			if (c != null) banned.add(c);
+		}
+		return banned;
+	}
+	
+	/**
+	 * Adds a Citizen to this City's banlist. If that Citizen is already banned, this method does nothing.
+	 * @param citizen
+	 * The Citizen to ban
+	 */
+	public void ban(Citizen citizen) {
+		List<Citizen> banlist = getBanlist();
+		if (!banlist.contains(citizen)) banlist.add(citizen);
+		List<String> newBanlist = new Vector<String>();
+		for (Citizen c : banlist) newBanlist.add(c.getUUID().toString());
+		setProperty("banlist", newBanlist);
+		
+	}
+	
+	/**
+	 * Removes a Citizen to this City's banlist. If that player is not banned, this method does nothing.
+	 * @param citizen
+	 * The Citizen to pardon.
+	 */
+	public void pardon(Citizen citizen) {
+		if (getBanlist().contains(citizen)) {
+			List<String> banlist = new Vector<String>();
+			for (Citizen c : getBanlist()) if (!c.equals(citizen)) banlist.add(c.getUUID().toString());
+			setProperty("banlist", banlist);
+		}
+	}
+	
+	/**
+	 * Empties out this City's banlist. Doesn't give a damn whether it exists or not.
+	 */
+	public void clearBanlist() {
+		setProperty("banlist", null);
+	}
+	
+	/**
+	 * Determines whether or not this Citizen is banned from this City.
+	 * @param citizen
+	 * The Citizen to check.
+	 * @return
+	 * True if this player is banned, else false.
+	 */
+	public boolean isBanned(Citizen citizen) {
+		return getBanlist().contains(citizen);
 	}
 	
 	/**
@@ -742,6 +811,10 @@ public class City {
 		}
 	}
 	
+	public boolean equals(City city) {
+		return identifier.equalsIgnoreCase(city.getIdentifier());
+	}
+
 	private String getProperty(String property) {
 		// Get the property from the city's config
 		for (String prop : properties.getKeys(false)) {

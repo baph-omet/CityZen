@@ -6,7 +6,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import io.github.griffenx.CityZen.Commands.CitizenCommand;
+import io.github.griffenx.CityZen.Commands.CityCommand;
+import io.github.griffenx.CityZen.Commands.CityDeputyCommand;
 import io.github.griffenx.CityZen.Commands.InfoCommand;
+import io.github.griffenx.CityZen.Commands.PlotCommand;
 
 public class Commander implements CommandExecutor {
 	private final CityZen plugin;
@@ -26,19 +30,27 @@ public class Commander implements CommandExecutor {
 				return InfoCommand.passport(sender,command,args);
 			case "rep":
 			case "reputation":
-				return InfoCommand.reputation(sender,command,args);
+				return InfoCommand.reputation(sender,args);
 			case "ctz":
 			case "citizen":
-				return citizenCommand(sender, command, args);
+				return CitizenCommand.delegate(sender, args);
 			case "cty":
 			case "city":
-				return cityCommand(sender, command, args);
+				if (args.length > 0) {
+					switch (args[0].toLowerCase()) {
+						case "deputy":
+							return CityDeputyCommand.delegate(sender, args);
+						default:
+							return CityCommand.delegate(sender, args);
+					}
+				} else {
+					sender.sendMessage(Messaging.noArguments());
+					break;
+				}
 			case "plt":
 			case "plot":
-				return plotCommand(sender, command, args);
+				return PlotCommand.delegate(sender, args);
 		}
 		return false;
 	}
-	
-	public boolean
 }

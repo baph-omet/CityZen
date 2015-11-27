@@ -8,12 +8,15 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.Plugin;
 
 import io.github.griffenx.CityZen.Citizen;
 import io.github.griffenx.CityZen.City;
 import io.github.griffenx.CityZen.CityZen;
 import io.github.griffenx.CityZen.Messaging;
+import io.github.griffenx.CityZen.Tasks.ClearMetadataTask;
 
 public class CityCommand {
 	private static final Plugin plugin = CityZen.getPlugin();
@@ -37,6 +40,28 @@ public class CityCommand {
 				break;
 			case "info":
 				info(sender,args);
+				break;
+			case "evict":
+				evict(sender,args);
+				break;
+			case "dissolve":
+				dissolve(sender,args);
+				break;
+			case "ban":
+				ban(sender,args);
+				break;
+			case "unban":
+			case "pardon":
+				pardon(sender,args);
+				break;
+			case "accept":
+				accept(sender,args);
+				break;
+			case "deny":
+				deny(sender,args);
+				break;
+			case "banlist":
+				banlist(sender,args);
 				break;
 			default:
 				return false;
@@ -86,16 +111,16 @@ public class CityCommand {
 								+ ChatColor.RED + ". Please cancel your request there or wait for it to be denied before attempting to join another city.");
 						}
 					} else {
-						sender.sendMessage(Messaging.missingCitizenRecordMessage());
+						sender.sendMessage(Messaging.missingCitizenRecord());
 					}
 				} else {
-					sender.sendMessage(Messaging.cityNotFoundMessage(cityName));
+					sender.sendMessage(Messaging.cityNotFound(cityName));
 				}
 			} else {
-				sender.sendMessage(Messaging.noPermMessage("cityzen.city.join"));
+				sender.sendMessage(Messaging.noPerms("cityzen.city.join"));
 			}
 		} else {
-			sender.sendMessage(Messaging.playersOnlyMessage());
+			sender.sendMessage(Messaging.playersOnly());
 		}
 	}
 	
@@ -127,7 +152,7 @@ public class CityCommand {
 					}
 				}
 				sender.sendMessage(ChatColor.RED + "Cities on " + ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() 
-						+ ChatColor.RESET + "" + ChatColor.RED + "(" + pageNumber + "/" + listCities);
+						+ ChatColor.RESET + "" + ChatColor.RED + "(" + pageNumber + "/" + numberOfPages);
 				sender.sendMessage(listCities[pageNumber - 1]);
 				if (numberOfPages > 1 && pageNumber < numberOfPages) sender.sendMessage(ChatColor.BLUE + "Type \"/cities list " + (pageNumber + 1) + "\" to view the next page.");
 				sender.sendMessage(ChatColor.BLUE + "See more info about a city with \"/city info <City Name...>\"");
@@ -135,7 +160,7 @@ public class CityCommand {
 				sender.sendMessage(ChatColor.BLUE + "There are no Cities on this server.");
 			}
 		} else {
-			sender.sendMessage(Messaging.noPermMessage("cityzen.city.list"));
+			sender.sendMessage(Messaging.noPerms("cityzen.city.list"));
 		}
 	}
 	
@@ -193,7 +218,7 @@ public class CityCommand {
 				}
 			}
 		} else {
-			sender.sendMessage(Messaging.noPermMessage("cityzen.city.top"));
+			sender.sendMessage(Messaging.noPerms("cityzen.city.top"));
 		}
 		return true;
 	}
@@ -218,14 +243,14 @@ public class CityCommand {
 								return;
 							}
 						} else {
-							sender.sendMessage(Messaging.missingCitizenRecordMessage());
+							sender.sendMessage(Messaging.missingCitizenRecord());
 							return;
 						}
 					} else newCity = City.createCity(cityName);
 					if (newCity != null) sender.sendMessage(ChatColor.BLUE + "Congratulations! You founded " + ChatColor.GOLD + cityName);
 					else sender.sendMessage(ChatColor.RED + "A city already exists by the name " + ChatColor.GOLD + cityName + ChatColor.RED + ". Please try again with a unique name.");
 				} else sender.sendMessage(ChatColor.RED + "City names must start with a letter. Please use a valid City name."); 
-			} else sender.sendMessage(Messaging.noPermMessage("cityzen.city.create"));
+			} else sender.sendMessage(Messaging.noPerms("cityzen.city.create"));
 		} else sender.sendMessage(ChatColor.RED + "Not enough arguments. Usage: \"/city create <City Name...>\"");
 	}
 	
@@ -241,8 +266,8 @@ public class CityCommand {
 						+ (CityZen.getPlugin().getConfig().getInt("lostOnLeaveCityPercent") > 0 ? " You lost " + ChatColor.GOLD + (rep - citizen.getReputation())
 						+ " Reputation" + ChatColor.BLUE + ". You now have " + ChatColor.GOLD + citizen.getReputation() + " Reputation" + ChatColor.BLUE + "." : ""));
 				} else sender.sendMessage(ChatColor.RED + "You have no city to leave.");
-			} else sender.sendMessage(Messaging.noPermMessage("cityzen.city.leave"));
-		} else sender.sendMessage(Messaging.playersOnlyMessage());
+			} else sender.sendMessage(Messaging.noPerms("cityzen.city.leave"));
+		} else sender.sendMessage(Messaging.playersOnly());
 	}
 	
 	private static void info(CommandSender sender, String[] args) {
@@ -280,11 +305,11 @@ public class CityCommand {
 			};
 			
 			sender.sendMessage(messages);
-		} else sender.sendMessage(Messaging.noPermMessage("cityzen.city.info"));
+		} else sender.sendMessage(Messaging.noPerms("cityzen.city.info"));
 	}
 	
 	private static void evict(CommandSender sender, String[] args) {
-		Citizen citizen;
+		Citizen citizen = null;
 		if (sender instanceof Player) citizen = Citizen.getCitizen(sender);
 		if (sender.hasPermission("cityzen.city.evict") || (citizen != null && (citizen.isMayor() || citizen.isDeputy()))) {
 			if (args.length > 1) {
@@ -300,7 +325,6 @@ public class CityCommand {
 					if (city != null) {
 						long rep = target.getReputation();
 						city.removeCitizen(target,true);
-						//TODO: Add citizen to city ban list (possibly do this in the removeCitizen method)
 						if (target.getPassport().isOnline()) {
 							String message = ChatColor.RED + "You were evicted from " + city.getChatName() + ChatColor.RED + " by " 
 								+ sender.getName() + ". You lost " + ChatColor.GOLD + (rep - target.getReputation()) 
@@ -313,9 +337,280 @@ public class CityCommand {
 								+ " and may not rejoin this City unless approved by a City official.");
 						}
 						sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was evicted from " + city.getChatName());
-					} sender.sendMessage(Messaging.noAffiliationMessage(target));
-				} sender.sendMessage(Messaging.citizenNotFoundMessage(args[1]));
-			} sender.sendMessage(ChatColor.RED + "Not enough arguments. Please specify a Citizen to evict from their City.");
-		} sender.sendMessage(ChatColor.RED + "You must either be a City official or have permission node cityzen.city.evict to run this command.");
+					} else sender.sendMessage(Messaging.noAffiliation(target));
+				} else sender.sendMessage(Messaging.citizenNotFound(args[1]));
+			} else sender.sendMessage(ChatColor.RED + "Not enough arguments. Please specify a Citizen to evict from their City.");
+		} else sender.sendMessage(ChatColor.RED + "You must either be a City official or have permission node cityzen.city.evict to run this command.");
+	}
+	
+	private static void dissolve(CommandSender sender, String[] args) {
+		if (args.length == 1) {
+			if (sender.hasPermission("cityzen.city.dissolve")) {
+				if (sender instanceof Player) {
+					Citizen citizen = Citizen.getCitizen(sender);
+					if (citizen != null) {
+						if (citizen.isMayor()) {
+							if (citizen.getPassport().hasMetadata("deleteConfirm")) {
+								City city = citizen.getAffiliation();
+								citizen.getPassport().removeMetadata("deleteConfirm", CityZen.getPlugin());
+								List<Citizen> refugees = city.getCitizens();
+								citizen.getAffiliation().delete();
+								for (Citizen r : refugees) {
+									if (r.getPassport().isOnline()) r.getPassport().sendMessage(ChatColor.RED + "Your city has been deleted."
+										+ " You have not lost any reputation from this and are free to join another city.");
+									else r.addAlert("Your city has been deleted."
+										+ " You have not lost any reputation from this and are free to join another city.");
+								}
+								sender.sendMessage(ChatColor.BLUE + "Your city has been completely deleted!");
+							} else {
+								sender.sendMessage(ChatColor.RED + "Are you sure you want to delete " + citizen.getAffiliation().getChatName()
+										+ ChatColor.RED + "? It will be gone forever (a long time). This action cannot be reversed. Type the command"
+												+ " again in the next 60 seconds to confirm.");
+								citizen.getPassport().setMetadata("deleteConfirm", new FixedMetadataValue(CityZen.getPlugin(),"asked"));
+								new ClearMetadataTask((Metadatable) citizen.getPassport(),"deleteConfirm").runTaskLater(CityZen.getPlugin(), 20 * 60);
+							}
+						} else sender.sendMessage(Messaging.notMayor());
+					} else sender.sendMessage(Messaging.missingCitizenRecord());
+				} else sender.sendMessage(ChatColor.RED + "To use this command as Console or Command block, please specify a City to dissolve.");
+			} else sender.sendMessage(Messaging.noPerms("cityzen.city.dissolve"));
+		} else {
+			if (sender.hasPermission("cityzen.city.dissolve.others")) {
+				City city = City.getCity(args[1]);
+				if (city != null) {
+					List<Citizen> refugees = city.getCitizens();
+					sender.sendMessage(ChatColor.BLUE + "You deleted the City " + city.getChatName());
+					city.delete();
+					for (Citizen r : refugees) {
+						if (r.getPassport().isOnline()) r.getPassport().sendMessage(ChatColor.RED + "Your city has been deleted."
+							+ " You have not lost any reputation from this and are free to join another city.");
+						else r.addAlert("Your city has been deleted."
+							+ " You have not lost any reputation from this and are free to join another city.");
+					}
+				} else sender.sendMessage(Messaging.cityNotFound(args[1]));
+			} else sender.sendMessage(Messaging.noPerms("cityzen.city.dissolve.others"));
+		}
+	}
+	
+	private static void ban(CommandSender sender, String[] args) {
+		City city = null;
+		if (args.length == 2) {
+			if (sender.hasPermission("cityzen.city.ban")) {
+				if (sender instanceof Player) {
+					Citizen citizen = Citizen.getCitizen(sender);
+					if (citizen != null) {
+						city = citizen.getAffiliation();
+						if (city == null) {
+							sender.sendMessage(Messaging.noAffiliation());
+							return;
+						}
+						if (!(citizen.isMayor() || citizen.isDeputy())) {
+							sender.sendMessage(Messaging.notCityOfficial());
+							return;
+						}
+					}
+				} else {
+					sender.sendMessage(ChatColor.RED + "You have to specify a city to use this command"
+							+ " from console or a command block. Useage:\"/city ban <player> (city)");
+					return;
+				}
+			} else sender.sendMessage(Messaging.noPerms("cityzen.city.ban"));
+		} else {
+			if (sender.hasPermission("cityzen.city.ban.others")) {
+				city = City.getCity(args[2]);
+				
+				if (city == null) {
+					sender.sendMessage(Messaging.cityNotFound(args[2]));
+					return;
+				}
+			} else sender.sendMessage(Messaging.noPerms("cityzen.city.ban.others"));
+		}
+		if (city != null) {
+			Citizen target = Citizen.getCitizen(args[1]);
+			if (target != null) {
+				if (!city.isBanned(target)) {
+					city.ban(target);
+					sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " has been banned from " + city.getChatName());
+				} else sender.sendMessage(ChatColor.RED + "That player is already banned from " + city.getChatName());
+			} else sender.sendMessage(Messaging.citizenNotFound(args[1]));
+		}
+	}
+	
+	private static void pardon(CommandSender sender, String[] args) {
+		City city = null;
+		if (args.length == 2) {
+			if (sender.hasPermission("cityzen.city.pardon")) {
+				if (sender instanceof Player) {
+					Citizen citizen = Citizen.getCitizen(sender);
+					if (citizen != null) {
+						city = citizen.getAffiliation();
+						if (city == null) {
+							sender.sendMessage(Messaging.noAffiliation());
+							return;
+						}
+						if (!(citizen.isMayor() || citizen.isDeputy())) {
+							sender.sendMessage(Messaging.notCityOfficial());
+							return;
+						}
+					}
+				} else {
+					sender.sendMessage(ChatColor.RED + "You have to specify a city to use this command"
+							+ " from console or a command block. Useage:\"/city ban <player> (city)");
+					return;
+				}
+			} else sender.sendMessage(Messaging.noPerms("cityzen.city.pardon"));
+		} else {
+			if (sender.hasPermission("cityzen.city.pardon.others")) {
+				city = City.getCity(args[2]);
+				
+				if (city == null) {
+					sender.sendMessage(Messaging.cityNotFound(args[2]));
+					return;
+				}
+			} else sender.sendMessage(Messaging.noPerms("cityzen.city.pardon.others"));
+		}
+		if (city != null) {
+			Citizen target = Citizen.getCitizen(args[1]);
+			if (target != null) {
+				if (city.isBanned(target)) {
+					city.pardon(target);
+					sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " has been pardoned from " + city.getChatName());
+				} else sender.sendMessage(ChatColor.RED + "That player is not banned from " + city.getChatName());
+			} else sender.sendMessage(Messaging.citizenNotFound(args[1]));
+		}
+	}
+	
+	private static void accept(CommandSender sender, String[] args) {
+		if (sender.hasPermission("cityzen.city.accept")) {
+			if (sender instanceof Player) {
+				Citizen citizen = Citizen.getCitizen(sender);
+				if (citizen != null) {
+					City city = citizen.getAffiliation();
+					if (city != null) {
+						if (citizen.isMayor() || citizen.isDeputy()) {
+							if (args.length > 1) {
+								Citizen target = Citizen.getCitizen(args[2]);
+								if (target != null) {
+									if (city.isInWaitlist(target)) {
+										long rep = target.getReputation();
+										city.addCitizen(target);
+										city.removeWaitlist(target);
+										sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " is now a Citizen of " + city.getChatName());
+										target.sendMessage(ChatColor.GOLD + "Congratulations!" + ChatColor.BLUE + " Your request to join "
+												+ city.getChatName() + ChatColor.BLUE + " has been accepted. You are now an official Citizen"
+												+ " of this City." + (target.getReputation() > rep ? " You gained " + ChatColor.GOLD 
+												+ (target.getReputation() - rep) + " Reputation." : ""));
+									} else sender.sendMessage(ChatColor.RED + target.getName() + " is not on the waitlist for " + city.getChatName());
+								} else sender.sendMessage(Messaging.citizenNotFound(args[2]));
+							} else sender.sendMessage(ChatColor.RED + "Not enough arguments. Please specify a player whose join request to accept.");
+						} else sender.sendMessage(Messaging.notCityOfficial());
+					} else sender.sendMessage(Messaging.noAffiliation());
+				} else sender.sendMessage(Messaging.missingCitizenRecord());
+			} else sender.sendMessage(Messaging.playersOnly());
+		} else sender.sendMessage(Messaging.noPerms("cityzen.city.accept"));
+	}
+	
+	private static void deny(CommandSender sender, String[] args) {
+		if (sender.hasPermission("cityzen.city.accept")) {
+			if (sender instanceof Player) {
+				Citizen citizen = Citizen.getCitizen(sender);
+				if (citizen != null) {
+					City city = citizen.getAffiliation();
+					if (city != null) {
+						if (citizen.isMayor() || citizen.isDeputy()) {
+							if (args.length > 1) {
+								Citizen target = Citizen.getCitizen(args[2]);
+								if (target != null) {
+									if (city.isInWaitlist(target)) {
+										city.removeWaitlist(target);
+										sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " has been removed from the waitlist for "
+											+ city.getChatName() + ChatColor.BLUE + ". If you want to prevent this Citizen from reapplying, you can ban them"
+											+ " with /city ban <Citizen>");
+										target.sendMessage(ChatColor.BLUE + "Sorry, your request to join " + city.getChatName() + ChatColor.BLUE 
+											+ " has been denied.");
+									} else sender.sendMessage(ChatColor.RED + target.getName() + " is not on the waitlist for " + city.getChatName());
+								} else sender.sendMessage(Messaging.citizenNotFound(args[2]));
+							} else sender.sendMessage(ChatColor.RED + "Not enough arguments. Please specify a player whose join request to accept.");
+						} else sender.sendMessage(Messaging.notCityOfficial());
+					} else sender.sendMessage(Messaging.noAffiliation());
+				} else sender.sendMessage(Messaging.missingCitizenRecord());
+			} else sender.sendMessage(Messaging.playersOnly());
+		} else sender.sendMessage(Messaging.noPerms("cityzen.city.accept"));
+	}
+	
+	private static void banlist(CommandSender sender, String[] args) {
+		City city = null;
+		if (args.length <= 2) {
+			if (sender.hasPermission("cityzen.city.banlist")) {
+				if (sender instanceof Player) {
+					Citizen citizen = Citizen.getCitizen(sender);
+					if (citizen != null) {
+						if (!(citizen.isMayor() || citizen.isDeputy())) {
+							sender.sendMessage(Messaging.notCityOfficial());
+							return;
+						} else {
+							city = citizen.getAffiliation();
+							if (city == null) {
+								sender.sendMessage(Messaging.noAffiliation());
+								return;
+							}
+						}
+					} else {
+						sender.sendMessage(Messaging.missingCitizenRecord());
+						return;
+					}
+				} else {
+					sender.sendMessage(Messaging.playersOnly());
+					return;
+				}
+			} else {
+				sender.sendMessage(Messaging.noPerms("cityzen.city.banlist"));
+				return;
+			}
+		} else {
+			if (sender.hasPermission("cityzen.city.banlist.others")) {
+				city = City.getCity(args[2]);
+				if (city == null) {
+					sender.sendMessage(Messaging.cityNotFound(args[2]));
+					return;
+				}
+			} else {
+				sender.sendMessage(Messaging.noPerms("cityzen.city.banlist.others"));
+			}
+		}
+		if (city != null) {
+			
+			int pageNumber;
+			if (args.length > 1) {
+				try {
+					pageNumber = Integer.parseInt(args[1]);
+				} catch (NumberFormatException e) {
+					pageNumber = 1;
+				}
+			}
+			else pageNumber = 1;
+			
+			List<Citizen> banlist = city.getBanlist();
+			
+			int numberOfPages = (int) Math.ceil(banlist.size() / 5);
+			
+			String[][] pages = new String[numberOfPages][5];
+			
+			for (int page=0;page<numberOfPages;page++) {
+				for (int i=0; i < 5;i++) {
+					try {
+						Citizen banee = banlist.get(page * 5 + i);
+						pages[page][i] = banee.getName();
+					} catch (IndexOutOfBoundsException e) {
+						pages[page][i] = null;
+					}
+				}
+			}
+			
+			sender.sendMessage(ChatColor.RED + "Citizens banned from " + city.getChatName()
+					+ ChatColor.RED + "(" + pageNumber + "/" + numberOfPages);
+			sender.sendMessage(pages[pageNumber - 1]);
+			if (numberOfPages > 1 && pageNumber < numberOfPages) sender.sendMessage(ChatColor.BLUE + "Type \"/city banlist " 
+				+ (pageNumber + 1) + "\" to view the next page.");
+		}
 	}
 }
