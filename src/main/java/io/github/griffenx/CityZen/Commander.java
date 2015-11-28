@@ -9,6 +9,8 @@ import org.bukkit.entity.Player;
 import io.github.griffenx.CityZen.Commands.CitizenCommand;
 import io.github.griffenx.CityZen.Commands.CityCommand;
 import io.github.griffenx.CityZen.Commands.CityDeputyCommand;
+import io.github.griffenx.CityZen.Commands.CityExclusionCommand;
+import io.github.griffenx.CityZen.Commands.CitySetCommand;
 import io.github.griffenx.CityZen.Commands.InfoCommand;
 import io.github.griffenx.CityZen.Commands.PlotCommand;
 
@@ -40,6 +42,10 @@ public class Commander implements CommandExecutor {
 					switch (args[0].toLowerCase()) {
 						case "deputy":
 							return CityDeputyCommand.delegate(sender, args);
+						case "exclusion":
+							return CityExclusionCommand.delegate(sender, args);
+						case "set":
+							return CitySetCommand.delegate(sender, args);
 						default:
 							return CityCommand.delegate(sender, args);
 					}
