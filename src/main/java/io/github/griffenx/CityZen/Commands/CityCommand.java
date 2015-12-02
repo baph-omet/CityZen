@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Vector;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -62,6 +64,15 @@ public class CityCommand {
 				break;
 			case "banlist":
 				banlist(sender,args);
+				break;
+			case "distance":
+				distance(sender, args);
+				break;
+			case "who":
+			case "whois":
+			case "people":
+			case "visitors":
+				visitors(sender, args);
 				break;
 			default:
 				return false;
@@ -611,6 +622,150 @@ public class CityCommand {
 			sender.sendMessage(pages[pageNumber - 1]);
 			if (numberOfPages > 1 && pageNumber < numberOfPages) sender.sendMessage(ChatColor.BLUE + "Type \"/city banlist " 
 				+ (pageNumber + 1) + "\" to view the next page.");
+		}
+	}
+	
+	private static void distance(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			City city = null;
+			if (args.length == 1) {
+				if (sender.hasPermission("cityzen.city.distance")) {
+					Citizen citizen = Citizen.getCitizen(sender);
+					if (citizen != null) {
+						city = citizen.getAffiliation();
+						if (city == null) {
+							sender.sendMessage(Messaging.noAffiliation());
+							return;
+						}
+					} else {
+						sender.sendMessage(Messaging.missingCitizenRecord());
+						return;
+					}
+				} else {
+					sender.sendMessage(Messaging.noPerms("cityzen.city.distance"));
+					return;
+				}
+			} else {
+				if (sender.hasPermission("cityzen.city.distance.others")) {
+					city = City.getCity(args[2]);
+					if (city == null) {
+						sender.sendMessage(Messaging.cityNotFound(args[1]));
+						return;
+					}
+				} else {
+					sender.sendMessage(Messaging.noPerms("cityzen.city.distance.others"));
+				}
+			}
+			if (city != null) {
+				Location position = ((Player) sender).getLocation();
+				Location cityLocation = city.getCenter();
+				double x = position.getX();
+				double z = position.getZ();
+				double cityX = cityLocation.getX();
+				double cityZ = cityLocation.getZ();
+				double distance = Math.sqrt(Math.pow(x - cityX,2.0) + Math.pow(z - cityZ, 2.0));
+				String direction = "";
+				if (cityZ - z > 100) direction += "South";
+				else if (cityZ - z < -100) direction += "North";
+				else direction += "Due ";
+				if (cityX - x > 100) direction += "West";
+				else if (cityX - x < -100) direction += "East";
+				else direction += "ward";
+				
+				sender.sendMessage(ChatColor.BLUE + "Distance to the center of " + city.getChatName() + ChatColor.BLUE + String.format("(%.2d,%.2d):\n", cityX,cityZ)
+						+ String.format("| %.2d Blocks %s of your location",distance,direction));
+			}
+		} else {
+			sender.sendMessage(Messaging.playersOnly());
+			return;
+		}
+	}
+	
+	private static void visitors(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			City city = null;
+			if (args.length == 1) {
+				if (sender.hasPermission("cityzen.city.distance")) {
+					Citizen citizen = Citizen.getCitizen(sender);
+					if (citizen != null) {
+						city = citizen.getAffiliation();
+						if (city == null) {
+							sender.sendMessage(Messaging.noAffiliation());
+							return;
+						}
+					} else {
+						sender.sendMessage(Messaging.missingCitizenRecord());
+						return;
+					}
+				} else {
+					sender.sendMessage(Messaging.noPerms("cityzen.city.distance"));
+					return;
+				}
+			} else {
+				if (sender.hasPermission("cityzen.city.distance.others")) {
+					city = City.getCity(args[2]);
+					if (city == null) {
+						sender.sendMessage(Messaging.cityNotFound(args[1]));
+						return;
+					}
+				} else {
+					sender.sendMessage(Messaging.noPerms("cityzen.city.distance.others"));
+				}
+			}
+			if (city != null) {
+				Player mayor = null;
+				Vector<Player> deputies = new Vector<Player>();
+				Vector<Player> citizens = new Vector<Player>();
+				Vector<Player> visitors = new Vector<Player>();
+				for (Player p : plugin.getServer().getOnlinePlayers()) {
+					if (city.isInCity(p.getLocation().getX(), p.getLocation().getZ())) {
+						Citizen citizen = Citizen.getCitizen(p);
+						if (city.equals(citizen.getAffiliation())) {
+							if (citizen.isMayor()) mayor = p;
+							else if (citizen.isDeputy()) deputies.add(p);
+							else citizens.add(p);
+						}
+						else visitors.add(p);
+					}
+				}
+				
+				if (mayor != null || deputies.size() > 0 || citizens.size() > 0 || visitors.size() > 0) {
+					String playerList = "";
+					
+					sender.sendMessage(ChatColor.BLUE + "Players currently located in " + city.getChatName());
+					if (mayor != null) sender.sendMessage(ChatColor.RED + "Mayor: " + ChatColor.RESET + mayor.getDisplayName());
+					if (deputies.size() > 0) {
+						sender.sendMessage(ChatColor.YELLOW + "Deputies:\n");
+						for (Player p : deputies) {
+							playerList += p.getDisplayName() + " ";
+						}
+						sender.sendMessage(playerList);
+						playerList = "";
+					}
+					if (citizens.size() > 0) {
+						sender.sendMessage(ChatColor.GREEN + "Citizens:\n");
+						for (Player p : citizens) {
+							playerList += p.getDisplayName() + " ";
+						}
+						sender.sendMessage(playerList);
+						playerList = "";
+					}
+					if (visitors.size() > 0) {
+						sender.sendMessage(ChatColor.BLUE + "Visitors:\n");
+						for (Player p : visitors) {
+							playerList += p.getDisplayName() + " ";
+						}
+						sender.sendMessage(playerList);
+						playerList = "";
+					}
+					
+				} else {
+					sender.sendMessage(ChatColor.BLUE + "Nobody is in " + city.getChatName());
+				}
+			}
+		} else {
+			sender.sendMessage(Messaging.playersOnly());
+			return;
 		}
 	}
 }

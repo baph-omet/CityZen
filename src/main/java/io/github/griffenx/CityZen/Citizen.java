@@ -423,7 +423,11 @@ public class Citizen {
 	 * @return
 	 * Whether or not these Citizens are the same
 	 */
-	public Boolean equals(Citizen citizen) {
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (this.getClass() != obj.getClass()) return false;
+		Citizen citizen = (Citizen)obj; 
 		return getPassport().getUniqueId().equals(citizen.getPassport().getUniqueId());
 	}
 	

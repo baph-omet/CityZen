@@ -279,7 +279,7 @@ public class City {
 	 * @return
 	 * Whether or not this City allows FreeJoin
 	 */
-	public Boolean isFreeJoin() {
+	public boolean isFreeJoin() {
 		return Boolean.valueOf(getProperty("freeJoin"));
 	}
 	
@@ -297,7 +297,7 @@ public class City {
 	 * @return
 	 * Whether or not this City allows OpenPlotting
 	 */
-	public Boolean isOpenPlotting() {
+	public boolean isOpenPlotting() {
 		return Boolean.valueOf(getProperty("openPlotting"));
 	}
 	
@@ -316,7 +316,7 @@ public class City {
 	 * @returns
 	 * Whether or not this City does NaturalWipe
 	 */
-	public Boolean isNaturalWipe() {
+	public boolean isNaturalWipe() {
 		return Boolean.valueOf(getProperty("naturalWipe"));
 	}
 	
@@ -334,7 +334,7 @@ public class City {
 	 * @returns
 	 * Whether or not this City uses block restrictions
 	 */
-	public Boolean isBlockExclusion() {
+	public boolean isBlockExclusion() {
 		return Boolean.valueOf(getProperty("blockBlacklist"));
 	}
 	
@@ -353,7 +353,7 @@ public class City {
 	 * @returns
 	 * Whether this City uses Whitelist or Blacklist exclusion mode
 	 */
-	public Boolean isWhitelisted() {
+	public boolean isWhitelisted() {
 		return isBlockExclusion() && Boolean.valueOf(getProperty("useBlacklistAsWhitelist"));
 	}
 	
@@ -668,7 +668,7 @@ public class City {
 	 * @return
 	 * True if the Citizen is on this City's waitlist, else false
 	 */
-	public Boolean isInWaitlist(Citizen citizen) {
+	public boolean isInWaitlist(Citizen citizen) {
 		for (Citizen c : getWaitlist()) {
 			if (citizen.equals(c)) return true;
 		}
@@ -708,6 +708,13 @@ public class City {
 	public void removePlot(Plot plot) {
 		plot.wipe();
 		plot.delete();
+	}
+	
+	public boolean isInCity(double x, double z) {
+		for (Plot p : getPlots()) {
+			if (p.isInPlot(x, z) || p.isInBuffer(x, z)) return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -811,7 +818,11 @@ public class City {
 		}
 	}
 	
-	public boolean equals(City city) {
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (this.getClass() != obj.getClass()) return false;
+		City city = (City)obj;
 		return identifier.equalsIgnoreCase(city.getIdentifier());
 	}
 

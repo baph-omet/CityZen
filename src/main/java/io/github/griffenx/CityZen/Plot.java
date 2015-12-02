@@ -5,6 +5,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 
+import javax.swing.plaf.FontUIResource;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -320,7 +322,7 @@ public class Plot {
 	 * True if location is inside the plot, else false
 	 */
 	public Boolean isInPlot(Location location) {
-		return isInPlot((int) location.getX(), (int) location.getY());
+		return isInPlot(location.getX(), location.getY());
 	}
 	/**
 	 * Determines whether or not the specified coordinates are inside this Plot.
@@ -331,9 +333,25 @@ public class Plot {
 	 * @return
 	 * True if (x,z) is inside this plot, else false
 	 */
-	public Boolean isInPlot(int x, int z) {
+	public Boolean isInPlot(double x, double z) {
 		if ((x < getCorner2().getX() && x > getCorner1().getX()) || (x > getCorner2().getX() && x < getCorner1().getX())) {
 			if ((z < getCorner2().getZ() && z > getCorner1().getZ()) || (z > getCorner2().getZ() && z < getCorner1().getZ())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isInBuffer(double x, double z) {
+		if (isInPlot(x,z)) return false;
+		double buffer = CityZen.getPlugin().getConfig().getDouble("plotBuffer");
+		if (buffer <= 0) return false;
+		double[] bufferX = {getCorner1().getX() + (Math.abs(getCorner1().getX()) / getCorner1().getX()) * buffer,
+				getCorner2().getX() + (Math.abs(getCorner2().getX()) / getCorner2().getX()) * buffer};
+		double[] bufferZ = {getCorner1().getZ() + (Math.abs(getCorner1().getZ()) / getCorner1().getZ()) * buffer,
+				getCorner2().getZ() + (Math.abs(getCorner2().getZ()) / getCorner2().getZ()) * buffer};
+		if ((x < bufferX[0] && x > bufferX[1]) || (x > bufferX[0] && x < bufferX[1])) {
+			if ((z < bufferZ[0] && z > bufferZ[1]) || (z > bufferZ[0] && z < bufferZ[1])) {
 				return true;
 			}
 		}
