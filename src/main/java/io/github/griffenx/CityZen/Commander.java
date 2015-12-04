@@ -15,11 +15,11 @@ import io.github.griffenx.CityZen.Commands.InfoCommand;
 import io.github.griffenx.CityZen.Commands.PlotCommand;
 
 public class Commander implements CommandExecutor {
-	private final CityZen plugin;
+	/*private final CityZen plugin;
 	
 	public Commander(CityZen plugin) {
 		this.plugin = plugin;
-	}
+	}*/
 	
 	public boolean onCommand(CommandSender sender, Command command,
 			String label, String[] args) {
@@ -35,7 +35,11 @@ public class Commander implements CommandExecutor {
 				return InfoCommand.reputation(sender,args);
 			case "ctz":
 			case "citizen":
-				return CitizenCommand.delegate(sender, args);
+				if (args.length > 0) return CitizenCommand.delegate(sender, args);
+				else {
+					sender.sendMessage(Messaging.noArguments());
+					break;
+				}
 			case "cty":
 			case "city":
 				if (args.length > 0) {

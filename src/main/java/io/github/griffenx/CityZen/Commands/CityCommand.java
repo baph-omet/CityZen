@@ -218,7 +218,7 @@ public class CityCommand {
 			Collections.sort(values);
 			if (!sortType.equals("Age")) Collections.reverse(values);
 			
-			sender.sendMessage(ChatColor.RED + "Top " + ChatColor.GOLD + numberOfResults + " Cities by " + sortType + ":");
+			sender.sendMessage(ChatColor.BLUE + "Top " + ChatColor.GOLD + numberOfResults + ChatColor.BLUE + " Cities by " + sortType + ":");
 			for (int i = 0; i < numberOfResults; i++) {
 				for (City c : cities) {
 					if (values.get(i) != null && values.get(i) == c.getReputation()) {
