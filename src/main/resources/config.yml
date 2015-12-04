@@ -29,6 +29,11 @@ minPlotSize: 4
 # Plot may not contain more than this many blocks squared on the X/Z plane
 maxMegaPlotSize: 128
 
+# Defines how many plots a City is allowed per Citizen of the City
+# Must be greater than 0
+# maxPlots = Math.round(plotDensity * numberOfCitizens)
+plotDensity: 2.0
+
 # Default city config values
 # If these values are absent from a city's config, they will be drawn from here
 # Additionally, all new cities will get these values, however they may be overwritten
