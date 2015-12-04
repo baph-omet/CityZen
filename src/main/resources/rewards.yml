@@ -1,0 +1,31 @@
+# # # # # # # # # # # # # # # # # # # # # # #
+#     Welcome to the reward config          #
+#             for CityZen                   #
+# # # # # # # # # # # # # # # # # # # # # # #
+
+# A list of worlds in which rewards are enabled.
+# If this list is empty, rewards are enabled in all worlds.
+enabledWorlds:
+- world
+- world_nether
+
+# Rewards to be issued to players for their individual maximum reputations
+# Syntax: "initialRep;intervalRep;displayMessage;command..."
+#   initialRep: The reward will first be given when a player's maximum reputation exceeds this amount
+#   intervalRep: If greater than 0, will give this reward every time a player's max rep passes this interval after the initial mark
+#     For instance, if initialRep is 200 and intervalRep is 50, players will receive this reward every 50 rep starting at 200 (i.e. 200, 250, 350, etc.)
+#   displayMessage: true or false. If true, the player is shown a message when this reward is disbursed. 
+#     Otherwise, they are not alerted at all
+#   command: The command to run for this reward. Can be any commmand that the console can run.
+#     Use "%p" as a placeholder for the name of this reward's recipient.
+#     To have multiple commands, just create identical rewards with different commands
+playerRewards:
+- "100;-1;true;give %p diamond 1"
+- "200;50;false;tell %p this is a sample reward"
+
+# Rewards to be issued to all Citizens of a City once that City's maximum reputation
+# Follows the same syntax as above. Use "%c" as a placeholder for the chat-safe name of the city
+# Use "%i" for the internal name of this city
+cityRewards:
+- "10000;-1;true;give %p diamond_block 1"
+- "100;100;false;tell %p Another 100 reputation earned for %c!
