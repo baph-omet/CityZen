@@ -10,22 +10,28 @@ enabledWorlds:
 - world_nether
 
 # Rewards to be issued to players for their individual maximum reputations
-# Syntax: "initialRep;intervalRep;displayMessage;command..."
+# Syntax: "initialRep;intervalRep;isBroadcast;command...;message..."
 #   initialRep: The reward will first be given when a player's maximum reputation exceeds this amount
 #   intervalRep: If greater than 0, will give this reward every time a player's max rep passes this interval after the initial mark
 #     For instance, if initialRep is 200 and intervalRep is 50, players will receive this reward every 50 rep starting at 200 (i.e. 200, 250, 350, etc.)
-#   displayMessage: true or false. If true, the player is shown a message when this reward is disbursed. 
-#     Otherwise, they are not alerted at all
+#   isBroadcast: if true, this reward's message is sent to all online players. If false, it is only shown to the recipient
 #   command: The command to run for this reward. Can be any commmand that the console can run.
-#     Use "%p" as a placeholder for the name of this reward's recipient.
-#     To have multiple commands, just create identical rewards with different commands
+#     To have multiple commands, just create identical rewards with different commands.
+#     Leave blank if you only want to send a message
+#     Allowed variables: 
+#       - %p player username
+#       - %r player reputation
+#       - %c chat-safe name of affiliated city
+#       - %i internal name of affiliated city
+#   message: The chat-formatted message to show when this reward is disbursed.
+#     chat codes are allowed, as well as the above variables.
+#     leave this blank to make this reward silent
 playerRewards:
-- "100;-1;true;give %p diamond 1"
-- "200;50;false;tell %p this is a sample reward"
+- "100;-1;true;give %p diamond 1;&e%p received &c1 Diamond&e for reaching &c%r reputation"
+- "200;50;false;tell %p this is a sample reward;"
 
 # Rewards to be issued to all Citizens of a City once that City's maximum reputation
 # Follows the same syntax as above. Use "%c" as a placeholder for the chat-safe name of the city
-# Use "%i" for the internal name of this city
 cityRewards:
-- "10000;-1;true;give %p diamond_block 1"
-- "100;100;false;tell %p Another 100 reputation earned for %c!
+- "10000;-1;false;give %p diamond_block 1;&e%p received &c1 Diamond Block&e for reaching &c%r reputation"
+- "100;100;false;tell %p Another 100 reputation earned for %c!;"
