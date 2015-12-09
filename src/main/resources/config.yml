@@ -34,6 +34,14 @@ maxMegaPlotSize: 128
 # maxPlots = Math.round(plotDensity * numberOfCitizens)
 plotDensity: 2.0
 
+# The following strings cannot be included in a city name (case insensitive)
+# It's best to play it cautiously with this filter, as any city name containing one of these strings will be blocked.
+# Some suggested words to block are swear words, racial slurs, and words that might make a city seem falsely official
+cityNameFilter:
+- "minecraft"
+- "official"
+- "admin"
+
 # Default city config values
 # If these values are absent from a city's config, they will be drawn from here
 # Additionally, all new cities will get these values, however they may be overwritten
