@@ -5,8 +5,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 
-import javax.swing.plaf.FontUIResource;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -194,14 +192,16 @@ public class Plot {
 	 * @return
 	 * The protection level for this plot.
 	 */
-	public Integer getProtectionLevel() {
+	public ProtectionLevel getProtectionLevel() {
 		if (!isMega()) {
-			return 2;
+			return ProtectionLevel.PROTECTED;
 		}
 		try {
-			return Integer.valueOf(getProperty("protection"));
+			int levelIndex = Integer.valueOf(getProperty("protection"));
+			if (levelIndex > 2 || levelIndex < 0) levelIndex = 2;
+			return ProtectionLevel.values()[levelIndex];
 		} catch (NumberFormatException e) {
-			return null;
+			return ProtectionLevel.PROTECTED;
 		}
 	}
 	
@@ -216,6 +216,15 @@ public class Plot {
 	public void setProtectionLevel(int level) {
 		if (level >=0 && level < 3) setProperty("protection",level);
 		else setProperty("protection",2);
+	}
+	
+	/**
+	 * Sets the protection level for this Plot
+	 * @param level
+	 * The exact protection level to set
+	 */
+	public void setProtectionLevel(ProtectionLevel level) {
+		setProperty("protection",ProtectionLevel.getIndex(level));
 	}
 	
 	/**
@@ -306,6 +315,32 @@ public class Plot {
 	}
 	
 	/**
+	 * Gets the selling price of this Plot. Sets to 0 if this plot is a MegaPlot (cannot be sold)
+	 * @return
+	 * The price of this plot
+	 */
+	public double getPrice() {
+		double price;
+		try {
+			price = Double.valueOf(getProperty("price"));
+			if (price < 0 || isMega()) price = 0;
+		} catch (NumberFormatException e) {
+			price = 0;
+		}
+		return price;
+	}
+	
+	/**
+	 * Sets the price of this plot.
+	 * @param price
+	 * The price to set for this plot. Price cannot be less than 0. Price is set to 0 if this is a MegaPlot.
+	 */
+	public void setPrice(double price) {
+		if (price < 0 || isMega()) price = 0;
+		setProperty("price", price);
+	}
+	
+	/**
 	 * Calculates the area of this Plot based on the coordinates of its corners.
 	 * @return
 	 * This Plot's area, in meters squared
@@ -321,7 +356,7 @@ public class Plot {
 	 * @return
 	 * True if location is inside the plot, else false
 	 */
-	public Boolean isInPlot(Location location) {
+	public boolean isInPlot(Location location) {
 		return isInPlot(location.getX(), location.getY());
 	}
 	/**
@@ -333,7 +368,7 @@ public class Plot {
 	 * @return
 	 * True if (x,z) is inside this plot, else false
 	 */
-	public Boolean isInPlot(double x, double z) {
+	public boolean isInPlot(double x, double z) {
 		if ((x < getCorner2().getX() && x > getCorner1().getX()) || (x > getCorner2().getX() && x < getCorner1().getX())) {
 			if ((z < getCorner2().getZ() && z > getCorner1().getZ()) || (z > getCorner2().getZ() && z < getCorner1().getZ())) {
 				return true;

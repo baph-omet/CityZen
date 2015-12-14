@@ -16,6 +16,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 public class City {
 	private String identifier;
@@ -710,11 +711,40 @@ public class City {
 		plot.delete();
 	}
 	
+	/**
+	 * Returns whether or not a set of X,Z coordinates are within the bounds of this City.
+	 * @param x
+	 * The X coordinate to check
+	 * @param z
+	 * The Z coordinate to check
+	 * @return
+	 * True if this coordinate is inside a plot or plot buffer for this City
+	 */
 	public boolean isInCity(double x, double z) {
 		for (Plot p : getPlots()) {
 			if (p.isInPlot(x, z) || p.isInBuffer(x, z)) return true;
 		}
 		return false;
+	}
+	/**
+	 * Returns whether or not a Location object is within the bounds of this City.
+	 * @param location
+	 * The location to check.
+	 * @return
+	 * True if this location is inside a plot or plot buffer for this City
+	 */
+	public boolean isInCity(Location location) {
+		return isInCity(location.getX(),location.getZ());
+	}
+	/**
+	 * Returns whether or not a player is within the bounds of this City.
+	 * @param player
+	 * The player whose location should be checked
+	 * @return
+	 * True if this player is inside a plot or plot buffer for this City.
+	 */
+	public boolean isInCity(Player player) {
+		return isInCity(player.getLocation());
 	}
 	
 	/**

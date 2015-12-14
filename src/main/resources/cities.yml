@@ -112,6 +112,10 @@ cities:
                 # When a plot is wiped, it is reset to flatlands at this height
                 height: 70
                 
+                # The selling price for this plot.
+                # This is ignored if this is a MegaPlot or if this plot has no owners
+                price: 0
+                
                 # Whether or not this plot is a MegaPlot
                 mega: false
                 

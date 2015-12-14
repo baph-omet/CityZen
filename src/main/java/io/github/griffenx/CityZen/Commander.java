@@ -1,10 +1,8 @@
 package io.github.griffenx.CityZen;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import io.github.griffenx.CityZen.Commands.CitizenCommand;
 import io.github.griffenx.CityZen.Commands.CityCommand;
@@ -15,11 +13,6 @@ import io.github.griffenx.CityZen.Commands.InfoCommand;
 import io.github.griffenx.CityZen.Commands.PlotCommand;
 
 public class Commander implements CommandExecutor {
-	/*private final CityZen plugin;
-	
-	public Commander(CityZen plugin) {
-		this.plugin = plugin;
-	}*/
 	
 	public boolean onCommand(CommandSender sender, Command command,
 			String label, String[] args) {
