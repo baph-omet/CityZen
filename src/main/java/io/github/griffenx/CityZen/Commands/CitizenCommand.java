@@ -35,6 +35,14 @@ public class CitizenCommand {
 			case "top":
 				top(sender, args);
 				break;
+			case "addplot":
+			case "addplots":
+				addplots(sender,args);
+				break;
+			case "setplot":
+			case "setplots":
+				setplots(sender, args);
+				break;
 			default:
 				return false;
 		}
@@ -218,5 +226,49 @@ public class CitizenCommand {
 				}
 			}
 		} else sender.sendMessage(Messaging.noPerms("cityzen.citizen.top"));
+	}
+	
+	private static void addplots(CommandSender sender, String[] args) {
+		if (sender.hasPermission("cityzen.citizen.addplots")) {
+			if (args.length > 2) {
+				Citizen citizen = Citizen.getCitizen(args[1]);
+				if (citizen != null) {
+					int amount;
+					try {
+						amount = Integer.parseInt(args[2]);
+					} catch (NumberFormatException e) {
+						sender.sendMessage(ChatColor.RED + "Amount must be a number.");
+						return;
+					}
+					
+					if (amount > 0) {
+						citizen.setMaxPlots(citizen.getMaxPlots() + amount);
+						sender.sendMessage(ChatColor.BLUE + "Max Plots increased by " + amount + " for " + citizen.getName());
+					} else sender.sendMessage(ChatColor.RED + "Amount must be greater than 0");
+				} else sender.sendMessage(Messaging.citizenNotFound(args[1]));
+			} else sender.sendMessage(Messaging.notEnoughArguments("/citizen addplots <citizen> <amount>"));
+		} else sender.sendMessage(Messaging.noPerms("cityzen.citizen.addplots"));
+	}
+	
+	private static void setplots(CommandSender sender, String[] args) {
+		if (sender.hasPermission("cityzen.citizen.setplots")) {
+			if (args.length > 2) {
+				Citizen citizen = Citizen.getCitizen(args[1]);
+				if (citizen != null) {
+					int amount;
+					try {
+						amount = Integer.parseInt(args[2]);
+					} catch (NumberFormatException e) {
+						sender.sendMessage(ChatColor.RED + "Amount must be a number.");
+						return;
+					}
+					
+					if (amount >= 0) {
+						citizen.setMaxPlots(amount);
+						sender.sendMessage(ChatColor.BLUE + "Max Plots increased by " + amount + " for " + citizen.getName());
+					} else sender.sendMessage(ChatColor.RED + "Amount must be at least 0");
+				} else sender.sendMessage(Messaging.citizenNotFound(args[1]));
+			} else sender.sendMessage(Messaging.notEnoughArguments("/citizen setplots <citizen> <amount>"));
+		} else sender.sendMessage(Messaging.noPerms("cityzen.citizen.setplots"));
 	}
 }

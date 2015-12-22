@@ -17,6 +17,10 @@ citizens:
         # Used for rewards calculations
         maxReputation: 120
         
+        # The maximum number of plots that this player may have at any one time
+        # Increment this number through rewards and commands.
+        maxPlots: 3
+        
         # Date that this Citizen record was created
         # Uses yyyyMMdd format
         issueDate: "20151101"

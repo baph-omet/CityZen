@@ -145,6 +145,15 @@ public class Plot {
 	}
 	
 	/**
+	 * Gets the location representing the center of this plot.
+	 * @return
+	 * A Location object representing this Plot's geographic center in the XZ plane.
+	 */
+	public Location getCenter() {
+		return new Location(getCorner1().getWorld(), Math.pow((getCorner1().getX() - getCorner2().getX()),2), getBaseHeight(), Math.pow((getCorner1().getZ() - getCorner2().getZ()),2));
+	}
+	
+	/**
 	 * Gets whether or not this is a MegaPlot
 	 * @return
 	 * True if this is a MegaPlot
@@ -487,7 +496,6 @@ public class Plot {
 	
 	private void setProperty(String property, Object value) {
 		CityZen.cityConfig.getConfig().set("cities." + getAffiliation().getIdentifier() + ".plots." + identifier + "." + property,value);
-		CityZen.cityConfig.save();
 	}
 	
 	private static int generateID(City city) {

@@ -59,26 +59,18 @@ public class InfoCommand {
 						String[] messages = {
 								ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() + ChatColor.RESET + ChatColor.RED + " OFFICIAL PASSPORT",
 								ChatColor.BLUE + "| Username: " + ChatColor.WHITE + target.getPassport().getDisplayName(),
-								ChatColor.BLUE + "| City: " + (target.getAffiliation() != null ? target.getAffiliation()
-										+ (target.isMayor() ? " (Mayor)" : (target.isDeputy() ? " (Deputy)" : ""))
-										+ "\n" + ChatColor.BLUE + "| Plots Owned: " + ChatColor.WHITE + target.getPlots().size()
+								ChatColor.BLUE + "| City: " + (target.getAffiliation() != null ? target.getAffiliation().getChatName()
+										+ ChatColor.BLUE + (target.isMayor() ? " (Mayor)" : (target.isDeputy() ? " (Deputy)" : ""))
+										+ "\n" + ChatColor.BLUE + "| Plots Owned: " + ChatColor.WHITE + target.getPlots().size() + "/" + target.getMaxPlots()
 										: "None"),
 								ChatColor.BLUE + "| Date Issued: " + ChatColor.WHITE + target.getIssueDate("dd MMM yyyy"),
 								ChatColor.BLUE + "| Current Reputation: " + ChatColor.GOLD + target.getReputation(),
 								ChatColor.BLUE + "| Max Reputation: " + ChatColor.RED + target.getMaxReputation(),
 						};
 						sender.sendMessage(messages);
-					} else {
-						sender.sendMessage(ChatColor.RED + "Couldn't find your passport. Your Citizen record may not exist.");
-						sender.sendMessage(ChatColor.RED + "Contact an admin for help with this issue.");
-					}
-				} else {
-					sender.sendMessage(Messaging.noPerms("cityzen.passport"));
-				}
-			} else {
-				sender.sendMessage("Consoles and Command Blocks have no passport to look up. Try adding a player name instead.");
-				sender.sendMessage("Usage: /" + command.getName() + " <player>");
-			}
+					} else sender.sendMessage(Messaging.missingCitizenRecord());
+				} else sender.sendMessage(Messaging.noPerms("cityzen.passport"));
+			} else sender.sendMessage(Messaging.playersOnly());
 		} else {
 			if (sender.hasPermission("cityzen.passport.others")) {
 				Citizen target = Citizen.getCitizen(args[0]);
@@ -86,21 +78,17 @@ public class InfoCommand {
 					String[] messages = {
 							ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() + ChatColor.RESET + ChatColor.RED + " OFFICIAL PASSPORT",
 							ChatColor.BLUE + "| Username: " + ChatColor.WHITE + target.getPassport().getDisplayName(),
-							ChatColor.BLUE + "| City: " + (target.getAffiliation() != null ? target.getAffiliation()
-									+ (target.isMayor() ? " (Mayor)" : (target.isDeputy() ? " (Deputy)" : ""))
-									+ "\n" + ChatColor.BLUE + "| Plots Owned: " + ChatColor.WHITE + target.getPlots().size()
+							ChatColor.BLUE + "| City: " + (target.getAffiliation() != null ? target.getAffiliation().getChatName()
+									+ ChatColor.BLUE + (target.isMayor() ? " (Mayor)" : (target.isDeputy() ? " (Deputy)" : ""))
+									+ "\n" + ChatColor.BLUE + "| Plots Owned: " + ChatColor.WHITE + target.getPlots().size() + "/" + target.getMaxPlots()
 									: "None"),
 							ChatColor.BLUE + "| Date Issued: " + ChatColor.WHITE + target.getIssueDate("dd MMM yyyy"),
 							ChatColor.BLUE + "| Current Reputation: " + ChatColor.GOLD + target.getReputation(),
 							ChatColor.BLUE + "| Max Reputation: " + ChatColor.RED + target.getMaxReputation(),
 					};
 					sender.sendMessage(messages);
-				} else {
-					sender.sendMessage(ChatColor.RED + "Couldn't find a Citizen named \"" + args[0] + ".\" That Citizen record may not exist.");
-				}
-			} else {
-				sender.sendMessage(Messaging.noPerms("cityzen.passport.others"));
-			}
+				} else sender.sendMessage(Messaging.citizenNotFound(args[0]));
+			} else sender.sendMessage(Messaging.noPerms("cityzen.passport.others"));
 		}
 		return true;
 	}

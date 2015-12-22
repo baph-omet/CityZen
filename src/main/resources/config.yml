@@ -3,6 +3,11 @@
 #       (add some stuff here)               #
 # # # # # # # # # # # # # # # # # # # # # # #
 
+# Whether or not to use economy features of this plugin.
+# If set to true, you MUST have Vault and some Economy plugin enabled, or this plugin will not run.
+# Set to false to ignore all economy features (buying/selling plots, etc.)
+useEconomy: true
+
 # Distance (in blocks) minimum between city centers
 minCitySeparation: 1000
 

@@ -882,7 +882,6 @@ public class City {
 	
 	private void setProperty(String property, Object value) {
 		CityZen.cityConfig.getConfig().set("cities." + identifier + "." + property, value);
-		CityZen.cityConfig.save();
 	}
 	
 	private static String generateID(String name) {

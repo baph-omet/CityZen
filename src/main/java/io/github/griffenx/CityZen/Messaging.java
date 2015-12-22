@@ -50,4 +50,12 @@ public class Messaging {
 	public static String notEnoughArguments(String useage) {
 		return ChatColor.RED + "Not enough arguments. Useage: \"" + useage + "\""; 
 	}
+	
+	public static String econDisabled() {
+		return ChatColor.RED + "Economy features are disabled on this server.";
+	}
+	
+	public static String noPlotFound() {
+		return ChatColor.RED + "No plot found at your location.";
+	}
 }

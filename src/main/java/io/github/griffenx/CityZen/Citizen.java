@@ -287,6 +287,31 @@ public class Citizen {
 	}
 	
 	/**
+	 * Gets the maximum number of plots this Citizen is allowed to own concurrently.
+	 * @return
+	 * This Citizen's maximum number of plots. If the property cannot be read or is less than zero, returns zero.
+	 */
+	public int getMaxPlots() {
+		try {
+			int maxPlots = Integer.parseInt(getProperty("maxPlots"));
+			if (maxPlots > 0) return maxPlots;
+			else return 0;
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
+	
+	/**
+	 * Sets the maximum number of plots this Citizen can have.
+	 * @param amount
+	 * The maximum number of plots this Citizen can have. Must be at least 0.
+	 */
+	public void setMaxPlots(int amount) {
+		if (amount < 0) amount = 0;
+		setProperty("maxPlots", amount);
+	}
+	
+	/**
 	 * Gets the Player object associated with this Citizen
 	 * @return
 	 * This Citizen's Player
@@ -449,7 +474,6 @@ public class Citizen {
 		for (String prop : properties.getKeys(false)) {
 			if (prop.equalsIgnoreCase(property)) {
 				CityZen.citizenConfig.getConfig().set("citizens." + getPassport().getUniqueId().toString() + property,value);
-				CityZen.citizenConfig.save();
 				citizenConfig = CityZen.citizenConfig.getConfig();
 			}
 		}
