@@ -1,7 +1,8 @@
 package io.github.griffenx.CityZen.Commands;
 
+import java.util.List;
+
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -14,7 +15,7 @@ public class InfoCommand {
 	
 	private static final Plugin plugin = CityZen.getPlugin();
 	
-	public static boolean reputation(CommandSender sender, String[] args) {
+	public static void reputation(CommandSender sender, String[] args) {
 		if (args.length == 0) {
 			if (sender instanceof Player) {
 				if (sender.hasPermission("cityzen.reputation")) {
@@ -31,7 +32,7 @@ public class InfoCommand {
 			} else {
 				sender.sendMessage(Messaging.playersOnly());
 			}
-			return true;
+			return;
 		} else {
 			if (sender.hasPermission("cityzen.reputation.others")) {
 				@SuppressWarnings("deprecation")
@@ -46,11 +47,11 @@ public class InfoCommand {
 			} else {
 				sender.sendMessage(Messaging.noPerms("cityzen.reputation.others"));
 			}
-			return true;
+			return;
 		}
 	}
 	
-	public static boolean passport(CommandSender sender, Command command, String[] args) {
+	public static void passport(CommandSender sender, String[] args) {
 		if (args.length == 0) {
 			if (sender instanceof Player) {
 				if (sender.hasPermission("cityzen.passport")) {
@@ -90,6 +91,23 @@ public class InfoCommand {
 				} else sender.sendMessage(Messaging.citizenNotFound(args[0]));
 			} else sender.sendMessage(Messaging.noPerms("cityzen.passport.others"));
 		}
-		return true;
+	}
+	
+	public static void alert(CommandSender sender) {
+		if (sender instanceof Player) {
+			Citizen citizen = Citizen.getCitizen(sender);
+			if (citizen != null) {
+				List<String> alerts = citizen.getAlerts();
+				if (alerts.size() > 0) {
+					StringBuilder alertText = new StringBuilder(ChatColor.BLUE + "Alerts for " + citizen.getName() + ":\n");
+					for (String a : alerts) {
+						alertText.append(ChatColor.BLUE + "| " + a);
+					}
+					alertText.append(ChatColor.BLUE + "All alerts delivered. Have a nice day!");
+					sender.sendMessage(alertText.toString());
+					citizen.clearAlerts();
+				} else sender.sendMessage(ChatColor.BLUE + "No pending alerts to display.");
+			} else sender.sendMessage(Messaging.missingCitizenRecord());
+		} else sender.sendMessage(Messaging.playersOnly());
 	}
 }

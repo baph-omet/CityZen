@@ -58,4 +58,8 @@ public class Messaging {
 	public static String noPlotFound() {
 		return ChatColor.RED + "No plot found at your location.";
 	}
+	
+	public static String tooManyPlots() {
+		return ChatColor.RED + "You cannot own any more plots. Sell or remove some plots first.";
+	}
 }

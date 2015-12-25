@@ -154,6 +154,15 @@ public class Plot {
 	}
 	
 	/**
+	 * Shortcut to get the string representation of this Plot's center.
+	 * @return
+	 * This plot's X and Z coords as a string, as Cartesian coordinates.
+	 */
+	public String getCenterCoords() {
+		return "(" + getCenter().getBlockX() + "," + getCenter().getBlockZ() + ")";
+	}
+	
+	/**
 	 * Gets whether or not this is a MegaPlot
 	 * @return
 	 * True if this is a MegaPlot

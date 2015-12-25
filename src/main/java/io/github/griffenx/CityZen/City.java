@@ -14,6 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -712,6 +713,41 @@ public class City {
 	}
 	
 	/**
+	 * Checks a specific location for the existence of a plot and returns it.
+	 * @param location
+	 * The location to check.
+	 * @return
+	 * The Plot found at that location if one exists, else null
+	 */
+	public Plot getPlot(Location location) {
+		for (Plot p : getPlots()) {
+			if (p.isInPlot(location)) return p;
+		} return null;
+	}
+	/**
+	 * Checks a specific location for the existence of a plot and returns it.
+	 * @param player
+	 * The player whose location should be checked
+	 * @return
+	 * The Plot found at that location if one exists, else null
+	 */
+	public Plot getPlot(Player player) {
+		return getPlot(player.getLocation());
+	}
+	/**
+	 * Checks a specific location for the existence of a plot and returns it.
+	 * @param sender
+	 * The location associated with a Player CommandSender
+	 * @return
+	 * The Plot found at that location if one exists, else null. Returns null if sender is not an instance of a Player.
+	 */
+	public Plot getPlot(CommandSender sender) {
+		if (sender instanceof Player) {
+			return getPlot((Player)sender);
+		} return null;
+	}
+	
+	/**
 	 * Returns whether or not a set of X,Z coordinates are within the bounds of this City.
 	 * @param x
 	 * The X coordinate to check
@@ -745,6 +781,18 @@ public class City {
 	 */
 	public boolean isInCity(Player player) {
 		return isInCity(player.getLocation());
+	}
+	/**
+	 * Returns whether or not a Player CommandSender is within the bounds of this City.
+	 * @param sender
+	 * The CommandSender to check
+	 * @return
+	 * True if sender is an instance of a Player and that Player is within a Plot or plot buffer of this City.
+	 */
+	public boolean isInCity(CommandSender sender) {
+		if (sender instanceof Player) {
+			return isInCity((Player)sender);
+		} return false;
 	}
 	
 	/**

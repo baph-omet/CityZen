@@ -67,6 +67,8 @@ reputation:
     gainedOnCreateCity: 1000
     gainedOnJoinCity: 100
     gainedOnBuyPlot: 100
+    gainedOnClaimPlot: 100
+    lostOnLeavePlot: 100
     lostOnDeleteCity: 1000
     lostOnSellPlot: 100
     lostOnLeaveCityPercent: 25

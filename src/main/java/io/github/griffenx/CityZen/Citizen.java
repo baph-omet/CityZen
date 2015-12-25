@@ -377,13 +377,17 @@ public class Citizen {
 	 * The text of the alert to add
 	 */
 	public void addAlert(String alertText) {
-		List<String> alerts = new Vector<String>();
-		for (String a : getAlerts()) {
-			alerts.add(a);
-		}
+		List<String> alerts = getAlerts();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd",Locale.US);
 		alerts.add(sdf.format(new Date()) + alertText);
 		setProperty("alerts",alerts);
+	}
+	
+	/**
+	 * Removes all alerts from this Citizen.
+	 */
+	public void clearAlerts() {
+		setProperty("alerts", null);
 	}
 	
 	/**
@@ -419,6 +423,15 @@ public class Citizen {
 			if (equals(c)) return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Shortcut for isMayor() || isDeputy()
+	 * @return
+	 * isMayor() || isDeputy()
+	 */
+	public boolean isCityOfficial() {
+		return isMayor() || isDeputy();
 	}
 	
 	/**

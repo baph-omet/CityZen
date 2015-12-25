@@ -22,10 +22,16 @@ public class Commander implements CommandExecutor {
 		switch (cmdName) {
 			case "psp":
 			case "passport":
-				return InfoCommand.passport(sender,command,args);
+				InfoCommand.passport(sender,args);
+				return true;
 			case "rep":
 			case "reputation":
-				return InfoCommand.reputation(sender,args);
+				InfoCommand.reputation(sender,args);
+				return true;
+			case "alert":
+			case "alerts":
+				InfoCommand.alert(sender);
+				return true;
 			case "ctz":
 			case "citizen":
 				if (args.length > 0) return CitizenCommand.delegate(sender, args);
