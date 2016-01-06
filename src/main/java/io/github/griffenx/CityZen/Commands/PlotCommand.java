@@ -367,4 +367,36 @@ public class PlotCommand {
 			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.remove"));
 		} else sender.sendMessage(Messaging.playersOnly());
 	}
+	
+	private static void invite(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			if (sender.hasPermission("cityzen.plot.invite")) {
+				Citizen citizen = Citizen.getCitizen(sender);
+				if (citizen != null) {
+					City city = citizen.getAffiliation();
+					if (city != null) {
+						Plot plot = city.getPlot(sender);
+						if (plot != null) {
+							if (plot.getOwners().contains(citizen)) {
+								if (args.length > 1) {
+									Citizen target = Citizen.getCitizen(args[1]);
+									if (target != null) {
+										if (target.getPassport().isOnline()) {
+											if (target.getPlots().size() < target.getMaxPlots()) {
+												//TODO: Send target an invitation
+												// After 2 minutes, the invitation should expire
+											} else sender.sendMessage(ChatColor.RED + target.getName() + " cannot own any more plots.");
+										} else {
+											target.sendMessage(citizen.getName() + " wanted to invite you to a plot, but you were offline.");
+											sender.sendMessage(ChatColor.BLUE + target.getName() + " was offline, but they were notified that you want to add them to your plot. Try again when they're online.");
+										}
+									} else sender.sendMessage(Messaging.citizenNotFound(args[1]));
+								} else sender.sendMessage(Messaging.notEnoughArguments("/plot invite <Citizen>"));
+							} else sender.sendMessage(Messaging.notPlotOwner());
+						} else sender.sendMessage(Messaging.plotNotFound());
+					} else sender.sendMessage(Messaging.noAffiliation());
+				} else sender.sendMessage(Messaging.missingCitizenRecord());
+			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.invite"));
+		} else sender.sendMessage(Messaging.playersOnly());
+	}
 }
