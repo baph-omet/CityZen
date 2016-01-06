@@ -62,4 +62,8 @@ public class Messaging {
 	public static String tooManyPlots() {
 		return ChatColor.RED + "You cannot own any more plots. Sell or remove some plots first.";
 	}
+	
+	public static String notPlotOwner() {
+		return ChatColor.RED + "You must be the owner of this Plot to run this command.";
+	}
 }
