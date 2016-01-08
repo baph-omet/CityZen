@@ -399,4 +399,84 @@ public class PlotCommand {
 			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.invite"));
 		} else sender.sendMessage(Messaging.playersOnly());
 	}
+	
+	private void modifyowners(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			if (sender.hasPermission("cityzen.plot.modifyowners")) {
+				Citizen citizen = Citizen.getCitizen(sender);
+				if (citizen != null) {
+					City city = citizen.getAffiliation();
+					if (sender.hasPermission("cityzen.plot.modifyowners.others")) {
+						for (City c : City.getCities()) {
+							if (c.isInCity((Player)sender)) city = c;
+						}
+					}
+					if (city != null) {
+						Plot plot = city.getPlot(sender);
+						if (plot != null) {
+							if (citizen.isCityOfficial() || sender.hasPermission("cityzen.plot.modifyowners.others")) {
+								if (args.length > 1) {
+									Citizen target = Citizen.getCitizen(args[1]);
+									if (target != null && plot.getOwners().contains(target)) {
+										if (args[0].toLowerCase().contains("add")) {
+											if (target.getPlots().size() < target.getMaxPlots()) {
+												for (Citizen c : plot.getOwners()) {
+													c.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was added to your plot centered at (" 
+														+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBLockZ() + ") by " + sender.getName());
+												}
+												plot.addOwner(target);
+												target.sendMessage(ChatColor.BLUE + "You were added to a plot centered at (" 
+													+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBLockZ() + ") by " + sender.getName());
+											} else {
+												sender.sendMessage(ChatColor.RED + target.getName() + " cannot own any more plots.");
+											}
+										} else {
+											plot.removeOwner(target);
+												for (Citizen c : plot.getOwners()) {
+													c.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was removed from your plot centered at (" 
+														+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBLockZ() + ") by " + sender.getName());
+												}
+												target.sendMessage(ChatColor.BLUE + "You were removed from a plot centered at (" 
+													+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBLockZ() + ") by " + sender.getName());
+										}
+									} else sender.sendMessage(ChatColor.RED + "This plot is not owned by a Citizen named " + args[1]);
+								} else sender.sendMessage(Messaging.notEnoughArguments("/plot " + args[0] + " <Citizen>"));
+							} else sender.sendMessage(Messaging.notCityOfficial());
+						} else sender.sendMessage(Messaging.noPlotFound());
+					} else sender.sendMessage(Messaging.cityNotFound());
+				} else sender.sendMessage(Messaging.missingCitizenRecord());
+			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.modifyowners");
+		} else sender.sendMessage(Messaging.playersOnly());
+	}
+	
+	private void info(CommandSender sender) {
+		if (sender instanceof Player) {
+			if (sender.hasPermission("cityzen.plot.info") {
+				Plot plot;
+				for (City c : City.getCities()) {
+					if (c.isInCity(sender)) {
+						plot = c.getPlot(sender);
+						break;
+					}
+				}
+				if (plot != null) {
+					StringBuilder message = new StringBuilder();
+					message.append(ChatColor.BLUE + "This Plot:\n");
+					message.append(ChatColor.BLUE + "Affiliation: " + plot.getAffiliation().getChatName() + " ID: " + plot.getIdentifier() + "\n");
+					if (plot.isMega()) message.append(ChatColor.BLUE + "MegaPlot\n");
+					message.append(ChatColor.BLUE + "Corner 1: (" + plot.getCorner1().getBlockX() + "," + plot.getCorner1().getBlockZ() + ")\n");
+					message.append(ChatColor.BLUE + "Corner 2: (" + plot.getCorner2().getBlockX() + "," + plot.getCorner2().getBlockZ() + ")\n");
+					message.append(ChatColor.BLUE + "Center: " + plot.getCenterCoords() + "\n");
+					message.append(ChatColor.BLUE + "Size: " + (int)Math.sqrt(plot.getArea()) + " Area: " + plot.getArea() + "\n");
+					message.append(ChatColor.BLUE + "Base Height:" + plot.getBaseHeight());
+					message.append(ChatColor.BLUE + "Protection: " + plot.getProtectionLevel().toString());
+					message.append(ChatColor.BLUE + "Owners:\n");
+					for (Citizen o : plot.getOwners()) message.append(ChatColor.BLUE + "- " + o.getName() + "\n");
+					message.append(ChatColor.BLUE + "Creator: " + plot.getCreator().getName() + "\n");
+					if (CityZen.getPlugin().getConfig().getBoolean("useEconomy") && plot.getPrice() > 0) message.append(ChatColor.BLUE + 
+						"Price: " + ChatColor.LIGHTGREEN + plot.getPrice() + " " + + CityZen.econ.currencyNamePlural());
+				} else sender.sendMessage(Messaging.noPlotFound());
+			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.info"));
+		} else sender.sendMessage(Messaging.playersOnly());
+	}
 }
