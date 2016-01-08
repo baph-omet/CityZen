@@ -211,9 +211,6 @@ public class Plot {
 	 * The protection level for this plot.
 	 */
 	public ProtectionLevel getProtectionLevel() {
-		if (!isMega()) {
-			return ProtectionLevel.PROTECTED;
-		}
 		try {
 			int levelIndex = Integer.valueOf(getProperty("protection"));
 			if (levelIndex > 2 || levelIndex < 0) levelIndex = 2;
