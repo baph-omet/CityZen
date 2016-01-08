@@ -11,6 +11,10 @@ public class Messaging {
 		return ChatColor.RED + "Only Players can run this command. Try \"/cityzen help\" for more info.";
 	}
 	
+	public static String cityNotFound() {
+		return ChatColor.RED + "You either do not have an affiliation or you are not in a City in which you can run this command.";
+	}
+	
 	public static String cityNotFound(String cityName) {
 		return ChatColor.RED + "Could not find a city by the name of \"" + cityName + ".\" Try \"/city list\" for a list of cities. ";
 	}
