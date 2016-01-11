@@ -479,4 +479,18 @@ public class PlotCommand {
 			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.info"));
 		} else sender.sendMessage(Messaging.playersOnly());
 	}
+	
+	private void setprotection(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			if (sender.hasPermission("cityzen.plot.setprotection")) {
+				Citizen citizen = Citizen.getCitizen(sender);
+				if (citizen != null) {
+					City city = citizen.getAffiliation();
+					if (sender.hasPermission("cityzen.plot.setprotection.others")) {
+						
+					}
+				}
+			}
+		}
+	}
 }
