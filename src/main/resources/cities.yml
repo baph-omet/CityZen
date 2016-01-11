@@ -63,6 +63,12 @@ cities:
         # Minimum plot size, same as above, but minimum
         minPlotSize: 8
         
+        # Protection level for this plot
+        # 2 - protected - Only owners can build (default)
+        # 1 - communal - Only citizens of the city can build
+        # 0 - public - Anyone can build, even non-citizens (not recommended)
+        protection: 2
+        
         # If true, any player may join this city
         # If false, all new citizens must be invited by the mayor or a deputy
         freeJoin: false
@@ -119,11 +125,10 @@ cities:
                 # Whether or not this plot is a MegaPlot
                 mega: false
                 
-                # Protection level for MegaPlots
+                # Protection level for this plot
                 # 2 - protected - Only owners can build (default)
                 # 1 - communal - Only citizens of the city can build
-                # 0 - public - Anyone can build, even non-citizens
-                # Ignored if mega is false
+                # 0 - public - Anyone can build, even non-citizens (not recommended)
                 protection: 2
                 
                 # UUID of this plot's creator
