@@ -102,6 +102,20 @@ public class City {
 		return null;
 	}
 	
+	public static City getCity(Player player) {
+		for (City c : getCities()) if (c.isInCity(player)) return c;
+		return null;
+	}
+	
+	public static City getCity(CommandSender sender) {
+		if (sender instanceof Player) return getCity((Player)sender);
+		else return null;
+	}
+	
+	public static City getCity(Citizen citizen) {
+		return getCity(citizen.getPassport());
+	}
+	
 	/**
 	 * Deletes this city from config
 	 */
