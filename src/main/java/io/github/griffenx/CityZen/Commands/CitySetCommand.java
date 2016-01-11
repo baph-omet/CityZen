@@ -15,7 +15,7 @@ public class CitySetCommand {
 				if (sender.hasPermission("cityzen.city.set")) {
 					Citizen citizen = Citizen.getCitizen(sender);
 					if (citizen != null) {
-						if (citizen.isMayor() || citizen.isDeputy()) {
+						if (citizen.isMayor()) {
 							city = citizen.getAffiliation();
 						}
 					}
@@ -95,8 +95,42 @@ public class CitySetCommand {
 							}
 						}
 						break;
+					case "protection":
+						switch (args[2].toLowercase()) {
+							case "0":
+							case "none":
+							case "pu"
+							case "pub":
+							case "public":
+								city.setProtectionLevel(ProtectionLevel.PUBLIC);
+								sender.sendMessage(ChatColor.BLUE + "You set the protection level for " + city.getChatName()
+									+ ChatColor.BLUE + " to PUBLIC. Any player can now build in the Plot buffers.";
+								break;
+							case "1":
+							case "c":
+							case "co":
+							case "com":
+							case "comm":
+							case "communal":
+								city.setProtectionLevel(ProtectionLevel.COMMUNAL);
+								sender.sendMessage(ChatColor.BLUE + "You set the protection level for " + city.getChatName()
+									+ ChatColor.BLUE + " to COMMUNAL. Any Citizen of this City can now build in the Plot buffers.";
+								break;
+							case "2":
+							case "p":
+							case "pr":
+							case "pro":
+							case "prot":
+							case "protected":
+								city.setProtectionLevel(ProtectionLevel.PROTECTED);
+								sender.sendMessage(ChatColor.BLUE + "You set the protection level for " + city.getChatName()
+									+ ChatColor.BLUE + " to PROTECTED. Only City officials can now build in the Plot buffers.";
+								break;
+							default:
+								sender.sendMessage(ChatColor.RED + "\"" + args[2] + "\" is not a protection level.")
+						}
 					default:
-						sender.sendMessage(ChatColor.RED + value + " is not a configurable property.");
+						sender.sendMessage(ChatColor.RED + "\"" + value + "\" is not a configurable property.");
 						break;
 				}
 			}
