@@ -896,6 +896,38 @@ public class City {
 		}
 	}
 	
+	public ProtectionLevel getProtectionLevel() {
+		try { 
+			int levelIndex = Integer.valueOf(getProperty("protection")); 
+			if (levelIndex > 2 || levelIndex < 0) levelIndex = 2; 
+			return ProtectionLevel.values()[levelIndex]; 
+		} catch (NumberFormatException e) { 
+			return ProtectionLevel.PROTECTED;
+ 		}
+	}
+	
+	/**
+	 * Sets the protection level for this Plot.
+	 * 2 - Protected, only owners can build here
+	 * 1 - Communal, only citizens of the city can build here
+	 * 0 - Public, anyone can build here
+	 * @param level
+	 * The protection level to set for this plot
+	 */
+	public void setProtectionLevel(int level) {
+		if (level >=0 && level < 3) setProperty("protection",level);
+		else setProperty("protection",2);
+	}
+	
+	/**
+	 * Sets the protection level for Plot buffers in this City
+	 * @param level
+	 * The exact protection level to set
+	 */
+	public void setProtectionLevel(ProtectionLevel level) {
+		setProtectionLevel(ProtectionLevel.getIndex(level));
+	}
+	
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
 		if (obj == null) return false;
