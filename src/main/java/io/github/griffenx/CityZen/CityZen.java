@@ -15,6 +15,7 @@ public final class CityZen extends JavaPlugin {
 	
 	public static Config citizenConfig = new Config("citizens.yml");
 	public static Config cityConfig = new Config("cities.yml");
+	public static Config rewardConfig = new Config("rewards.yml");
 	
 	public static Economy econ = null;
 	
@@ -53,14 +54,14 @@ public final class CityZen extends JavaPlugin {
 	}
 	
 	private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
-        }
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            return false;
-        }
-        econ = rsp.getProvider();
-        return econ != null;
-    }
+	        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+	            return false;
+	        }
+	        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+	        if (rsp == null) {
+	            return false;
+	        }
+	        econ = rsp.getProvider();
+	        return econ != null;
+	}
 }
