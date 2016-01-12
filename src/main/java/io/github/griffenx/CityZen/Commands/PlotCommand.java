@@ -3,14 +3,18 @@ package io.github.griffenx.CityZen.Commands;
 import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import io.github.griffenx.CityZen.Citizen;
 import io.github.griffenx.CityZen.City;
 import io.github.griffenx.CityZen.CityZen;
 import io.github.griffenx.CityZen.Messaging;
 import io.github.griffenx.CityZen.Plot;
+import io.github.griffenx.CityZen.ProtectionLevel;
 
 public class PlotCommand {
 	public static boolean delegate(CommandSender sender, String[] args) {
@@ -48,6 +52,73 @@ public class PlotCommand {
 				return false;
 		}
 		return true;
+	}
+	
+	private static void select(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			if (sender.hasPermission("cityzen.plot.select")) {
+				Citizen citizen = Citizen.getCitizen(sender);
+				if (citizen != null) {
+					City city = citizen.getAffiliation();
+					if (city != null) {
+						if (city.isOpenPlotting() || citizen.isCityOfficial()) {
+							if (citizen.getPlots().size() < citizen.getMaxPlots() || citizen.isCityOfficial()) {
+								switch (args[0].toLowerCase()) {
+									case "s":
+									case "se":
+									case "sel":
+									case "sele":
+									case "selec":
+									case "select":
+										if (citizen.getPassport().hasMetadata("plotSelectEnabled")) {
+											citizen.getPassport().removeMetadata("plotSelectEnabled", CityZen.getPlugin());
+											citizen.getPassport().removeMetadata("plotSelectCorners", CityZen.getPlugin());
+											sender.sendMessage(ChatColor.BLUE + "Plot selection disabled.");
+										} else {
+											citizen.getPassport().setMetadata("plotSelectEnabled", new FixedMetadataValue(CityZen.getPlugin(), true));
+											sender.sendMessage(ChatColor.BLUE + "Plot selection enabled. Select corners with \"/plot pos1\" and \"/plot pos2\". "
+													+ "Disable plot selection with \"/plot select\"");
+										}
+										break;
+									case "1":
+									case "pos1":
+										// Format: world,x1,y1,z1;world,x2,y2,z2
+										Location pos = ((Player) sender).getLocation();
+										for (City c : City.getCities()) for (Plot p : c.getPlots()) if (p.isInPlot(pos)) {
+											sender.sendMessage(ChatColor.RED + "This location is inside an existing plot. Try a different location.");
+											return;
+										}
+										String[] positions;
+										if (citizen.getPassport().hasMetadata("plotSelectCorners")) {
+											positions = citizen.getPassport().getMetadata("plotSelectCorners").get(0).asString().split(";");
+											Location pos2 = new Location(CityZen.getPlugin().getServer().getWorld(positions[1].split(",")[0]),
+													Double.parseDouble(positions[1].split(",")[1]),Double.parseDouble(positions[1].split(",")[2]),
+													Double.parseDouble(positions[1].split(",")[3]));
+											
+											positions[0] = pos.getWorld().getName() + "," + pos.getBlockX() + "," + pos.getBlockZ();
+											citizen.getPassport().setMetadata("plotSelectCorners", new FixedMetadataValue(CityZen.getPlugin(), String.join(";", positions)));
+										} else {
+											
+										}
+										break;
+								}
+							} else sender.sendMessage(ChatColor.RED + "You cannot select plots. You have too many plots already.");
+						} else sender.sendMessage(ChatColor.RED + city.getName() + " does not allow OpenPlotting, meaning only City officials can create Plots.");
+					} else sender.sendMessage(Messaging.noAffiliation());
+				} else sender.sendMessage(Messaging.missingCitizenRecord());
+			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.select"));
+		} else sender.sendMessage(Messaging.playersOnly());
+	}
+	
+	private static void selectCorner(CommandSender sender) {
+		if (sender instanceof Player) {
+			if (sender.hasPermission("cityzen.plot.select")) {
+				Citizen citizen = Citizen.getCitizen(sender);
+				if (citizen != null) {
+					
+				}
+			}
+		}
 	}
 	
 	private static void list(CommandSender sender, String[] args) {
@@ -393,14 +464,14 @@ public class PlotCommand {
 									} else sender.sendMessage(Messaging.citizenNotFound(args[1]));
 								} else sender.sendMessage(Messaging.notEnoughArguments("/plot invite <Citizen>"));
 							} else sender.sendMessage(Messaging.notPlotOwner());
-						} else sender.sendMessage(Messaging.plotNotFound());
+						} else sender.sendMessage(Messaging.noPlotFound());
 					} else sender.sendMessage(Messaging.noAffiliation());
 				} else sender.sendMessage(Messaging.missingCitizenRecord());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.invite"));
 		} else sender.sendMessage(Messaging.playersOnly());
 	}
 	
-	private void modifyowners(CommandSender sender, String[] args) {
+	private static void modifyowners(CommandSender sender, String[] args) {
 		if (sender instanceof Player) {
 			if (sender.hasPermission("cityzen.plot.modifyowners")) {
 				Citizen citizen = Citizen.getCitizen(sender);
@@ -422,11 +493,11 @@ public class PlotCommand {
 											if (target.getPlots().size() < target.getMaxPlots()) {
 												for (Citizen c : plot.getOwners()) {
 													c.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was added to your plot centered at (" 
-														+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBLockZ() + ") by " + sender.getName());
+														+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
 												}
 												plot.addOwner(target);
 												target.sendMessage(ChatColor.BLUE + "You were added to a plot centered at (" 
-													+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBLockZ() + ") by " + sender.getName());
+													+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
 											} else {
 												sender.sendMessage(ChatColor.RED + target.getName() + " cannot own any more plots.");
 											}
@@ -434,10 +505,10 @@ public class PlotCommand {
 											plot.removeOwner(target);
 												for (Citizen c : plot.getOwners()) {
 													c.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was removed from your plot centered at (" 
-														+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBLockZ() + ") by " + sender.getName());
+														+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
 												}
 												target.sendMessage(ChatColor.BLUE + "You were removed from a plot centered at (" 
-													+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBLockZ() + ") by " + sender.getName());
+													+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
 										}
 									} else sender.sendMessage(ChatColor.RED + "This plot is not owned by a Citizen named " + args[1]);
 								} else sender.sendMessage(Messaging.notEnoughArguments("/plot " + args[0] + " <Citizen>"));
@@ -445,14 +516,14 @@ public class PlotCommand {
 						} else sender.sendMessage(Messaging.noPlotFound());
 					} else sender.sendMessage(Messaging.cityNotFound());
 				} else sender.sendMessage(Messaging.missingCitizenRecord());
-			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.modifyowners");
+			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.modifyowners"));
 		} else sender.sendMessage(Messaging.playersOnly());
 	}
 	
-	private void info(CommandSender sender) {
+	private static void info(CommandSender sender) {
 		if (sender instanceof Player) {
-			if (sender.hasPermission("cityzen.plot.info") {
-				Plot plot;
+			if (sender.hasPermission("cityzen.plot.info")) {
+				Plot plot = null;
 				for (City c : City.getCities()) {
 					if (c.isInCity(sender)) {
 						plot = c.getPlot(sender);
@@ -474,23 +545,57 @@ public class PlotCommand {
 					for (Citizen o : plot.getOwners()) message.append(ChatColor.BLUE + "- " + o.getName() + "\n");
 					message.append(ChatColor.BLUE + "Creator: " + plot.getCreator().getName() + "\n");
 					if (CityZen.getPlugin().getConfig().getBoolean("useEconomy") && plot.getPrice() > 0) message.append(ChatColor.BLUE + 
-						"Price: " + ChatColor.LIGHTGREEN + plot.getPrice() + " " + + CityZen.econ.currencyNamePlural());
+						"Price: " + ChatColor.GREEN + plot.getPrice() + " " + CityZen.econ.currencyNamePlural());
 				} else sender.sendMessage(Messaging.noPlotFound());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.info"));
 		} else sender.sendMessage(Messaging.playersOnly());
 	}
 	
-	private void setprotection(CommandSender sender, String[] args) {
+	private static void setprotection(CommandSender sender, String[] args) {
 		if (sender instanceof Player) {
 			if (sender.hasPermission("cityzen.plot.setprotection")) {
 				Citizen citizen = Citizen.getCitizen(sender);
 				if (citizen != null) {
-					City city = citizen.getAffiliation();
-					if (sender.hasPermission("cityzen.plot.setprotection.others")) {
-						
-					}
-				}
-			}
-		}
+					Plot plot = City.getCity(sender).getPlot(sender);
+					if (plot != null) {
+						if (plot.getOwners().contains(citizen) || citizen.isCityOfficial() || sender.hasPermission("cityzen.plot.setprotection.others")) {
+							switch (args[2].toLowerCase()) {
+								case "0":
+								case "none":
+								case "pu":
+								case "pub":
+								case "public":
+									plot.setProtectionLevel(ProtectionLevel.PUBLIC);
+									sender.sendMessage(ChatColor.BLUE + "You set the protection level for this plot to PUBLIC. "
+											+ "Any player can now build in this plot.");
+									break;
+								case "1":
+								case "c":
+								case "co":
+								case "com":
+								case "comm":
+								case "communal":
+									plot.setProtectionLevel(ProtectionLevel.COMMUNAL);
+									sender.sendMessage(ChatColor.BLUE + "You set the protection level for this plot to COMMUNAL. "
+											+ "Any Citizen of this City can now build in this plot.");
+									break;
+								case "2":
+								case "p":
+								case "pr":
+								case "pro":
+								case "prot":
+								case "protected":
+									plot.setProtectionLevel(ProtectionLevel.PROTECTED);
+									sender.sendMessage(ChatColor.BLUE + "You set the protection level for this plot to PROTECTED. "
+											+ "Only City officials can now build in this plot.");
+									break;
+								default:
+									sender.sendMessage(ChatColor.RED + "\"" + args[2] + "\" is not a protection level.");
+							}
+						} else sender.sendMessage(Messaging.notPlotOwner());
+					} else sender.sendMessage(Messaging.noPlotFound()); 
+				} else sender.sendMessage(Messaging.missingCitizenRecord());
+			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.setprotection"));
+		} else sender.sendMessage(Messaging.playersOnly());
 	}
 }

@@ -42,7 +42,7 @@ public class Plot {
 		Plot newPlot = null;
 		for (Plot p : city.getPlots()) {
 			if (p.overlaps(corner1,corner2) || p.getCorner1().equals(corner1) || p.getCorner2().equals(corner2)) {
-				return newPlot;
+				return null;
 			}
 		}
 		int id = generateID(city);
@@ -53,6 +53,25 @@ public class Plot {
 		newPlot.setMega(false);
 		newPlot.setProtectionLevel(2);
 		newPlot.addOwner(creator);
+		newPlot.setBaseHeight((int) (corner1.getY() + corner2.getY()) / 2);
+		return newPlot;
+	}
+	
+	public static Plot createEmptyPlot(City city, Location corner1, Location corner2, Citizen creator) {
+		if (city.isOpenPlotting()) return null;
+		Plot newPlot = null;
+		for (Plot p : city.getPlots()) {
+			if (p.overlaps(corner1,corner2) || p.getCorner1().equals(corner1) || p.getCorner2().equals(corner2)) {
+				return null;
+			}
+		}
+		int id = generateID(city);
+		newPlot = new Plot(city,id);
+		newPlot.setCorner1(corner1);
+		newPlot.setCorner2(corner2);
+		newPlot.setCreator(creator);
+		newPlot.setMega(false);
+		newPlot.setProtectionLevel(2);
 		newPlot.setBaseHeight((int) (corner1.getY() + corner2.getY()) / 2);
 		return newPlot;
 	}

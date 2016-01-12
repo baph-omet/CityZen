@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 import io.github.griffenx.CityZen.Citizen;
 import io.github.griffenx.CityZen.City;
 import io.github.griffenx.CityZen.Messaging;
+import io.github.griffenx.CityZen.ProtectionLevel;
 
 public class CitySetCommand {
 	public static boolean delegate(CommandSender sender, String[] args) {
@@ -96,15 +97,15 @@ public class CitySetCommand {
 						}
 						break;
 					case "protection":
-						switch (args[2].toLowercase()) {
+						switch (args[2].toLowerCase()) {
 							case "0":
 							case "none":
-							case "pu"
+							case "pu":
 							case "pub":
 							case "public":
 								city.setProtectionLevel(ProtectionLevel.PUBLIC);
 								sender.sendMessage(ChatColor.BLUE + "You set the protection level for " + city.getChatName()
-									+ ChatColor.BLUE + " to PUBLIC. Any player can now build in the Plot buffers.";
+									+ ChatColor.BLUE + " to PUBLIC. Any player can now build in the Plot buffers.");
 								break;
 							case "1":
 							case "c":
@@ -114,7 +115,7 @@ public class CitySetCommand {
 							case "communal":
 								city.setProtectionLevel(ProtectionLevel.COMMUNAL);
 								sender.sendMessage(ChatColor.BLUE + "You set the protection level for " + city.getChatName()
-									+ ChatColor.BLUE + " to COMMUNAL. Any Citizen of this City can now build in the Plot buffers.";
+									+ ChatColor.BLUE + " to COMMUNAL. Any Citizen of this City can now build in the Plot buffers.");
 								break;
 							case "2":
 							case "p":
@@ -124,10 +125,10 @@ public class CitySetCommand {
 							case "protected":
 								city.setProtectionLevel(ProtectionLevel.PROTECTED);
 								sender.sendMessage(ChatColor.BLUE + "You set the protection level for " + city.getChatName()
-									+ ChatColor.BLUE + " to PROTECTED. Only City officials can now build in the Plot buffers.";
+									+ ChatColor.BLUE + " to PROTECTED. Only City officials can now build in the Plot buffers.");
 								break;
 							default:
-								sender.sendMessage(ChatColor.RED + "\"" + args[2] + "\" is not a protection level.")
+								sender.sendMessage(ChatColor.RED + "\"" + args[2] + "\" is not a protection level.");
 						}
 					default:
 						sender.sendMessage(ChatColor.RED + "\"" + value + "\" is not a configurable property.");

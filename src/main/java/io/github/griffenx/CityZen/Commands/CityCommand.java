@@ -243,23 +243,31 @@ public class CityCommand {
 					for (int i = 1; i < args.length; i++) {
 						cityName += args[i];
 					}
-					if (sender instanceof Player) {
-						Citizen creator = Citizen.getCitizen(sender);
-						if (creator != null) {
-							if (creator.getAffiliation() == null && !creator.isWaitlisted()) {
-								newCity = City.createCity(cityName,creator);
-								if (newCity != null) creator.addReputation(CityZen.getPlugin().getConfig().getLong("reputation.gainedOnCreateCity"));
+					StringBuilder namingConflicts = new StringBuilder();
+					for (String s : CityZen.getPlugin().getConfig().getStringList("cityNameFilter")) {
+						if (cityName.contains(s)) namingConflicts.append(ChatColor.RED + "- \"" + s.trim() + "\"\n");
+					}
+					if (namingConflicts.length() == 0) {
+						if (sender instanceof Player) {
+							Citizen creator = Citizen.getCitizen(sender);
+							if (creator != null) {
+								if (creator.getAffiliation() == null && !creator.isWaitlisted()) {
+									newCity = City.createCity(cityName,creator);
+									if (newCity != null) creator.addReputation(CityZen.getPlugin().getConfig().getLong("reputation.gainedOnCreateCity"));
+								} else {
+									sender.sendMessage(ChatColor.RED + "You cannot create a City if you are already a Citizen of a City, or are on the Waitlist for a City.");
+									return;
+								}
 							} else {
-								sender.sendMessage(ChatColor.RED + "You cannot create a City if you are already a Citizen of a City, or are on the Waitlist for a City.");
+								sender.sendMessage(Messaging.missingCitizenRecord());
 								return;
 							}
-						} else {
-							sender.sendMessage(Messaging.missingCitizenRecord());
-							return;
-						}
-					} else newCity = City.createCity(cityName);
-					if (newCity != null) sender.sendMessage(ChatColor.BLUE + "Congratulations! You founded " + ChatColor.GOLD + cityName);
-					else sender.sendMessage(ChatColor.RED + "A city already exists by the name " + ChatColor.GOLD + cityName + ChatColor.RED + ". Please try again with a unique name.");
+						} else newCity = City.createCity(cityName);
+						if (newCity != null) sender.sendMessage(ChatColor.BLUE + "Congratulations! You founded " + ChatColor.GOLD + cityName);
+						else sender.sendMessage(ChatColor.RED + "A city already exists by the name " + ChatColor.GOLD + cityName + ChatColor.RED 
+								+ ". Please try again with a unique name.");
+					} else sender.sendMessage(ChatColor.RED + "Unable to create city. \"" + cityName + "\" contains the following blocked word(s):\n" + namingConflicts.toString() 
+						+ "Please try again with these words omitted.");
 				} else sender.sendMessage(ChatColor.RED + "City names must start with a letter. Please use a valid City name."); 
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.create"));
 		} else sender.sendMessage(ChatColor.RED + "Not enough arguments. Usage: \"/city create <City Name...>\"");
