@@ -12,9 +12,11 @@ public class SaveConfigTask extends BukkitRunnable {
 	
 	@Override
 	public void run() {
+		plugin.getLogger().info("Saving CityZen configs...");
 		plugin.saveConfig();
 		CityZen.citizenConfig.save();
 		CityZen.cityConfig.save();
+		plugin.getLogger().info("CityZen saved!");
 	}
 
 }
