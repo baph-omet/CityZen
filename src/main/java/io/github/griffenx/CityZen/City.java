@@ -19,7 +19,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-public class City {
+public class City implements Reputable {
 	private String identifier;
 	
 	private ConfigurationSection properties;
