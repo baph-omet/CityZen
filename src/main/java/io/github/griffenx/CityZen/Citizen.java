@@ -16,7 +16,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class Citizen {
+public class Citizen implements Reputable {
 	private static final Plugin plugin = CityZen.getPlugin();
 	private static FileConfiguration citizenConfig = CityZen.citizenConfig.getConfig();
 	private ConfigurationSection properties;
