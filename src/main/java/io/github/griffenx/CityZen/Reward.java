@@ -66,6 +66,13 @@ public class Reward {
         while (i<rewards.size()) {
             try {
                 if (Integer.parseInt(rewards.get(i).split(";")[0]) == id) {
+                    for (Citizen c : getCitizens()) {
+                        for (Reward r : c.getRewards()) {
+                            if (equals(r)) {
+                                c.cancelReward(r);
+                            }
+                        }
+                    }
                     rewards.remove(i);
                     return;
                 } else i++;
@@ -122,6 +129,12 @@ public class Reward {
         return command;
     }
     
+    public String getFormattedString(String input, Citizen target) {
+        return input.replace("%p",target.getName()).replace("%r",target.getReputation())
+            .replace("%c",(target.getAffiliation() != null ? target.getAffiliation().getName() : "(None)"))
+            .replace("%i",(target.getAffiliation() != null ? target.getAffiliation().getIdentifier() : "(None)"));
+    }
+    
     public void setCommand(String command) {
         this.command = command;
         saveReward();
@@ -134,6 +147,10 @@ public class Reward {
     public void setMessage(String message) {
         this.message = message;
         saveReward();
+    }
+    
+    public String toString() {
+        return id + ";" + type + ";" + initialRep + ";" + intervalRep + ";" + isBroadcast.toString() + ";" + command + ";" + message;
     }
     
     public boolean equals(Object obj) {
