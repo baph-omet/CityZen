@@ -48,19 +48,15 @@ public class Reward {
         } return rewards;
     }
     
-    public static List<Reward> getRewards(Citizen citizen) {
+    public static List<Reward> getRewards(Reputable target) {
+        String targetType = "p";
+        if (target instanceof City) targetType = "c"
         List<Reward> rewards = new Vector<Reward>();
         for (String r : getRewards()) {
-            if (citizen.getMaxReputation() == r.getInitialRep() || 
-                (citizen.getMaxReputation() - r.getInitialRep()) % r.getIntervalRep() == 0) rewards.add(r);
-        } return rewards;
-    }
-    
-    public static List<Reward> getRewards(City city) {
-        List<Reward> rewards = new Vector<Reward>();
-        for (String r : getRewards()) {
-            if (city.getMaxReputation() == r.getInitialRep() || 
-                (city.getMaxReputation() - r.getInitialRep()) % r.getIntervalRep() == 0) rewards.add(r);
+            if (r.getType().equals(targetType)) {
+                if (citizen.getMaxReputation() == r.getInitialRep() || 
+                    (citizen.getMaxReputation() - r.getInitialRep()) % r.getIntervalRep() == 0) rewards.add(r);
+            }
         } return rewards;
     }
     
