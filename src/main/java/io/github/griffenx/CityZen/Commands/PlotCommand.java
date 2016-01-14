@@ -381,63 +381,6 @@ public class PlotCommand {
 		} else sender.sendMessage(Messaging.playersOnly());
 	}
 	
-	private static void remove(CommandSender sender, String[] args) {
-		if (sender instanceof Player) {
-			if (sender.hasPermission("cityzen.plot.remove")) {
-				Citizen citizen = Citizen.getCitizen(sender);
-				if (citizen != null) {
-					City city = citizen.getAffiliation();
-					if (sender.hasPermission("cityzen.plot.remove.others")) {
-						for (City c : City.getCities()) {
-							if (c.isInCity(sender)) {
-								city = c;
-								break;
-							}
-						}
-					}
-					
-					if (city != null) {
-						Plot plot = city.getPlot(sender);
-						if (plot != null) {
-							if (sender.hasPermission("cityzen.plot.remove.others") || citizen.isCityOfficial() || plot.getOwners().contains(citizen)) {
-								if (args.length > 1) {
-									Citizen target = Citizen.getCitizen(args[1]);
-									if (target != null) {
-										if (!citizen.equals(target)) {
-											if (plot.getOwners().contains(target)) {
-												plot.removeOwner(target);
-												boolean wiped = false;
-												boolean erased = false;
-												if (plot.getOwners().size() == 0) {
-													wiped = true;
-													plot.wipe();
-													if (city.isOpenPlotting()) {
-														plot.delete();
-														erased = true;
-													}
-												}
-												long rep = CityZen.getPlugin().getConfig().getLong("reputation.lostOnLeavePlot");
-												target.subReputation(rep);
-												target.sendMessage(ChatColor.BLUE + "You were removed from ownership of your plot centered at " 
-														+ plot.getCenterCoords() + " by " + citizen.getName() + ". You lost " + ChatColor.GOLD 
-														+ rep + " Reputation.");
-												StringBuilder message = new StringBuilder(ChatColor.BLUE + "You successfully removed " + target.getName() + " from this plot.");
-												if (wiped) message.append(ChatColor.BLUE + " There were no more owners for this plot, so it was wiped.");
-												if (erased) message.append(ChatColor.BLUE + " This city has OpenPlotting enabled, so the empty plot was erased.");
-												sender.sendMessage(message.toString());
-											} else sender.sendMessage(ChatColor.RED + target.getName() + " is not an owner of this plot.");
-										} else sender.sendMessage(ChatColor.RED + "You cannot remove yourself from a plot. Try \"/plot abandon\" to leave a plot you own.");
-									} else sender.sendMessage(Messaging.citizenNotFound(args[1]));
-								} else sender.sendMessage(Messaging.notEnoughArguments("/plot remove <Citizen>"));
-							} else sender.sendMessage(ChatColor.RED + "You do not have permission to remove players from this plot. "
-									+ "Only Admins, City Officials, and owners of this plot may remove other players.");
-						} else sender.sendMessage(Messaging.noPlotFound());
-					} else sender.sendMessage(Messaging.noAffiliation());
-				} else sender.sendMessage(Messaging.missingCitizenRecord());
-			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.remove"));
-		} else sender.sendMessage(Messaging.playersOnly());
-	}
-	
 	private static void invite(CommandSender sender, String[] args) {
 		if (sender instanceof Player) {
 			if (sender.hasPermission("cityzen.plot.invite")) {
