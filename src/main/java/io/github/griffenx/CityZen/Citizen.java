@@ -253,9 +253,11 @@ public class Citizen implements Reputable {
 	
 	private void setMaxReputation(long amount) {
 		if (amount < 0) amount = 0;
-		for (int i = getMaxReputation();i<amount;i=i + (amount - i) / Math.abs(amount - i)) {
+		for (long i = getMaxReputation();i<amount;i=i + (amount - i) / Math.abs(amount - i)) {
 			setProperty("maxReputation",amount);
-			for (Reward r : Reward.getRewards(this)) {
+			City city = getAffiliation();
+			if (city != null && city.getReputation() > city.getMaxReputation()) city.setMaxReputation(city.getReputation());
+			for (Reward r : getRewards()) {
 				sendReward(r);
 			}
 		}
@@ -462,22 +464,22 @@ public class Citizen implements Reputable {
 	}
 	
 	public void sendReward(Reward r) {
-		if (getPassport.isOnline()) {
-			CityZen.getPlugin().getServer().dispatchCommand(getServer().getConsoleSender, r.getFormattedString(r.getCommand(),this));
+		if (getPassport().isOnline()) {
+			CityZen.getPlugin().getServer().dispatchCommand(plugin.getServer().getConsoleSender(), r.getFormattedString(r.getCommand(),this));
 			if (r.getIsBroadcast()) {
-				//TODO: Broadcast to all online players.
+				CityZen.getPlugin().getServer().broadcastMessage(r.getFormattedString(r.getMessage(), this));
 			} else {
-				sendMessage(r.getFormattedString(r.message,this);
+				sendMessage(r.getFormattedString(r.getMessage(),this));
 			}
 		} else queueReward(r);
 	}
 	
 	public void queueReward(Reward r) {
-		setProperty("queuedRewards",properties.getStringList("queuedRewards").add(r.getID().toString()));
+		setProperty("queuedRewards",properties.getStringList("queuedRewards").add(r.getID() + ""));
 	}
 	
 	public void cancelReward(Reward r) {
-		setProperty("queuedRewards",properties.getStringList("queuedRewards").remove(r.getID().toString()));
+		setProperty("queuedRewards",properties.getStringList("queuedRewards").remove(r.getID() + ""));
 	}
 	
 	public List<Reward> getQueuedRewards() {
@@ -485,7 +487,7 @@ public class Citizen implements Reputable {
 		for (String s : properties.getStringList("queuedRewards")) {
 			try {
 				rewards.add(new Reward(Integer.parseInt(s)));
-			} catch (NumberFormatException e) {
+			} catch (Exception e) {
 				continue;
 			}
 		} return rewards;
@@ -527,5 +529,15 @@ public class Citizen implements Reputable {
 				citizenConfig = CityZen.citizenConfig.getConfig();
 			}
 		}
+	}
+	@Override
+	public List<Reward> getRewards() {
+		List<Reward> rewards = new Vector<Reward>();
+        for (Reward r : getRewards()) {
+            if (r.getType().equals("p")) {
+                if (getMaxReputation() == r.getInitialRep() || 
+                    (getMaxReputation() - r.getInitialRep()) % r.getIntervalRep() == 0) rewards.add(r);
+            }
+        } return rewards;
 	}
 }

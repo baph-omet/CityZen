@@ -1,5 +1,7 @@
 package io.github.griffenx.CityZen;
 
+import java.util.List;
+
 public interface Reputable {
     abstract long getReputation();
     

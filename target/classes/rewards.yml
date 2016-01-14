@@ -10,28 +10,29 @@ enabledWorlds:
 - world_nether
 
 # Rewards to be issued to players for their individual maximum reputations
-# Syntax: "initialRep;intervalRep;isBroadcast;command...;message..."
+# Syntax: "id;type;initialRep;intervalRep;isBroadcast;command...;message..."
+#   id: unique integer used to index this reward. Starts with 0. Don't change this.
+#   type: p for player rewards, c for city rewards.
+#     Player: issued for any player when their individual max rep reaches a certain value
+#     City: Rewards to be issued to all Citizens of a City once that City's maximum reputation reaches a certain value
 #   initialRep: The reward will first be given when a player's maximum reputation exceeds this amount
-#   intervalRep: If greater than 0, will give this reward every time a player's max rep passes this interval after the initial mark
-#     For instance, if initialRep is 200 and intervalRep is 50, players will receive this reward every 50 rep starting at 200 (i.e. 200, 250, 350, etc.)
+#   intervalRep: If greater than 0, will give this reward every time a player's max rep passes this interval after the initial mark.
+#     For instance, if initialRep is 200 and intervalRep is 50, players will receive this reward every 50 rep starting at 200 
+#     (i.e. 200, 250, 350, etc.)
 #   isBroadcast: if true, this reward's message is sent to all online players. If false, it is only shown to the recipient
 #   command: The command to run for this reward. Can be any commmand that the console can run.
 #     To have multiple commands, just create identical rewards with different commands.
 #     Leave blank if you only want to send a message
 #     Allowed variables: 
-#       - %p player username
-#       - %r player reputation
+#       - %p player username (not available for City rewards)
+#       - %r player or city reputation
 #       - %c chat-safe name of affiliated city
 #       - %i internal name of affiliated city
 #   message: The chat-formatted message to show when this reward is disbursed.
 #     chat codes are allowed, as well as the above variables.
 #     leave this blank to make this reward silent
-playerRewards:
-- "100;-1;true;give %p diamond 1;&e%p received &c1 Diamond&e for reaching &c%r reputation"
-- "200;50;false;tell %p this is a sample reward;"
-
-# Rewards to be issued to all Citizens of a City once that City's maximum reputation
-# Follows the same syntax as above. Use "%c" as a placeholder for the chat-safe name of the city
-cityRewards:
-- "10000;-1;false;give %p diamond_block 1;&e%p received &c1 Diamond Block&e for reaching &c%r reputation"
-- "100;100;false;tell %p Another 100 reputation earned for %c!;"
+rewards:
+- "0;p;100;-1;true;give %p diamond 1;&e%p received &c1 Diamond&e for reaching &c%r reputation"
+- "1;p;200;50;false;tell %p this is a sample reward;"
+- "2;c;10000;-1;false;give %p diamond_block 1;&e%p received &c1 Diamond Block&e for reaching &c%r reputation"
+- "3;c;100;100;false;tell %p Another 100 reputation earned for %c!;"

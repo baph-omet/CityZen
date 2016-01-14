@@ -24,8 +24,8 @@ enabledWorlds:
 #     To have multiple commands, just create identical rewards with different commands.
 #     Leave blank if you only want to send a message
 #     Allowed variables: 
-#       - %p player username
-#       - %r player reputation
+#       - %p player username (not available for City rewards)
+#       - %r player or city reputation
 #       - %c chat-safe name of affiliated city
 #       - %i internal name of affiliated city
 #   message: The chat-formatted message to show when this reward is disbursed.

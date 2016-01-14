@@ -34,6 +34,10 @@ minPlotSize: 4
 # Plot may not contain more than this many blocks squared on the X/Z plane
 maxMegaPlotSize: 128
 
+# Minimum width of any of a plot's sides. This prevents players from making really long plots.
+# Recommended: set equal to the minPlotSize
+minPlotWidth: 4
+
 # Defines how many plots a City is allowed per Citizen of the City
 # Must be greater than 0
 # maxPlots = Math.round(plotDensity * numberOfCitizens)
@@ -41,7 +45,9 @@ plotDensity: 2.0
 
 # The following strings cannot be included in a city name (case insensitive)
 # It's best to play it cautiously with this filter, as any city name containing one of these strings will be blocked.
-# Some suggested words to block are swear words, racial slurs, and words that might make a city seem falsely official
+# I.e. adding "ass" would block that word but would also block "assassin" and "assistant," while " ass" and "ass "
+#   to block the word itself.
+# Some suggested words to block are annoying words, swear words, racial slurs, and words that might make a city seem falsely official
 cityNameFilter:
 - "minecraft"
 - "official"

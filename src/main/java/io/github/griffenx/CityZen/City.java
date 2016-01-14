@@ -999,4 +999,43 @@ public class City implements Reputable {
 		while (modifier > 0 && !idChanged);
 		return id;
 	}
+
+	@Override
+	public long getMaxReputation() {
+		long maxRep = properties.getLong("maxReputation");
+		if (maxRep < 0) {
+			maxRep = 0;
+		}
+		return maxRep;
+	}
+	
+	public void setMaxReputation(long amount) {
+		if (amount < 0) amount = 0;
+		setProperty("maxReputation", amount);
+	}
+	
+	@Override
+	public void sendReward(Reward r) {
+		if (r.getIsBroadcast()) {
+			CityZen.getPlugin().getServer().broadcastMessage(r.getFormattedString(r.getMessage(), this));
+		}
+		for (Citizen c : getCitizens()) {
+			if (c.getPassport().isOnline()) {
+				CityZen.getPlugin().getServer().dispatchCommand(CityZen.getPlugin().getServer().getConsoleSender(),
+						r.getFormattedString(r.getCommand(),c));
+				c.sendMessage(r.getFormattedString(r.getMessage(),this));
+			} else c.queueReward(r);
+		}
+	}
+
+	@Override
+	public List<Reward> getRewards() {
+		List<Reward> rewards = new Vector<Reward>();
+        for (Reward r : getRewards()) {
+            if (r.getType().equals("c")) {
+                if (getMaxReputation() == r.getInitialRep() || 
+                    (getMaxReputation() - r.getInitialRep()) % r.getIntervalRep() == 0) rewards.add(r);
+            }
+        } return rewards;
+	}
 }

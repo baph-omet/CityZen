@@ -693,7 +693,7 @@ public class CityCommand {
 		if (sender instanceof Player) {
 			City city = null;
 			if (args.length == 1) {
-				if (sender.hasPermission("cityzen.city.distance")) {
+				if (sender.hasPermission("cityzen.city.visitors")) {
 					Citizen citizen = Citizen.getCitizen(sender);
 					if (citizen != null) {
 						city = citizen.getAffiliation();
@@ -706,18 +706,18 @@ public class CityCommand {
 						return;
 					}
 				} else {
-					sender.sendMessage(Messaging.noPerms("cityzen.city.distance"));
+					sender.sendMessage(Messaging.noPerms("cityzen.city.visitors"));
 					return;
 				}
 			} else {
-				if (sender.hasPermission("cityzen.city.distance.others")) {
+				if (sender.hasPermission("cityzen.city.visitors.others")) {
 					city = City.getCity(args[2]);
 					if (city == null) {
 						sender.sendMessage(Messaging.cityNotFound(args[1]));
 						return;
 					}
 				} else {
-					sender.sendMessage(Messaging.noPerms("cityzen.city.distance.others"));
+					sender.sendMessage(Messaging.noPerms("cityzen.city.visitors.others"));
 				}
 			}
 			if (city != null) {

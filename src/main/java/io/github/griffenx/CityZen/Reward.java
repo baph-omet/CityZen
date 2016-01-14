@@ -1,8 +1,11 @@
 package io.github.griffenx.CityZen;
 
+import java.util.List;
+import java.util.Vector;
+
+import org.bukkit.configuration.file.FileConfiguration;
+
 public class Reward {
-    
-    private Config config = CityZen.rewardConfig.getConfig();
     
     private int id;
     private String type;
@@ -12,16 +15,16 @@ public class Reward {
     private String command;
     private String message;
     
-    public Reward(int id) {
+    public Reward(int id) throws Exception {
         String[] properties = readReward(id);
         if (properties == null) {
-            return null;
+            throw new Exception("No reward exists with specified ID");
         } else {
             this.id = id;
             type = properties[1];
-            initialRep = Long.parseInt(properties[2]);
-            intervalRep = Long.parseInt(properties[3]);
-            isBroadcast = Boolean.parse(properties[4]);
+            initialRep = Long.parseLong(properties[2]);
+            intervalRep = Long.parseLong(properties[3]);
+            isBroadcast = Boolean.valueOf(properties[4]);
             command = properties[5];
             message = properties[6];
         }
@@ -30,10 +33,14 @@ public class Reward {
     public static Reward createReward(String type, long initialRep, long intervalRep, boolean isBroadcast, String command, String message) {
         int newID = getNextID();
         if (newID >= 0) {
-            Config config = CityZen.rewardConfig.getConfig();
-            String properties = newID + ";" + type + ";" + initialRep + ";" + intervalRep + ";" + isBroadcast.toString() + ";" + command + ";" + message;
+            FileConfiguration config = CityZen.rewardConfig.getConfig();
+            String properties = newID + ";" + type + ";" + initialRep + ";" + intervalRep + ";" + isBroadcast + ";" + command + ";" + message;
             config.set("rewards",config.getStringList("rewards").add(properties));
-            return new Reward(newID);
+            try {
+            	return new Reward(newID);
+            } catch (Exception e) {
+            	return null;
+            }
         } return null;
     }
     
@@ -41,34 +48,28 @@ public class Reward {
         List<Reward> rewards = new Vector<Reward>();
         for (String r : CityZen.rewardConfig.getConfig().getStringList("rewards")) {
             try {
-                rewards.add(Integer.parseInt(r.split(";")[0]));
-            } catch (NumberFormatException e) {
+                rewards.add(new Reward(Integer.parseInt(r.split(";")[0])));
+            } catch (Exception e) {
                 continue;
             }
         } return rewards;
     }
     
-    public static List<Reward> getRewards(Reputable target) {
-        String targetType = "p";
-        if (target instanceof City) targetType = "c"
-        List<Reward> rewards = new Vector<Reward>();
-        for (String r : getRewards()) {
-            if (r.getType().equals(targetType)) {
-                if (citizen.getMaxReputation() == r.getInitialRep() || 
-                    (citizen.getMaxReputation() - r.getInitialRep()) % r.getIntervalRep() == 0) rewards.add(r);
-            }
-        } return rewards;
-    }
-    
-    public void deleteReward(int id) {
+    public static void deleteReward(int id) throws Exception {
+    	Reward target;
+    	try {
+    		target = new Reward(id);
+    	} catch (Exception e) {
+    		throw e;
+    	}
         List<String> rewards = CityZen.rewardConfig.getConfig().getStringList("rewards");
         int i = 0;
         while (i<rewards.size()) {
             try {
                 if (Integer.parseInt(rewards.get(i).split(";")[0]) == id) {
-                    for (Citizen c : getCitizens()) {
+                    for (Citizen c : Citizen.getCitizens()) {
                         for (Reward r : c.getRewards()) {
-                            if (equals(r)) {
+                            if (target.equals(r)) {
                                 c.cancelReward(r);
                             }
                         }
@@ -107,7 +108,7 @@ public class Reward {
     }
     
     public long getIntervalRep() {
-        return intervalRep();
+        return intervalRep;
     }
     
     public void setIntervalRep(long rep) {
@@ -117,7 +118,7 @@ public class Reward {
     }
     
     public boolean getIsBroadcast() {
-        return isBoolean();
+        return isBroadcast;
     }
     
     public void setIsBroadcast(boolean isBroadcast) {
@@ -130,9 +131,13 @@ public class Reward {
     }
     
     public String getFormattedString(String input, Citizen target) {
-        return input.replace("%p",target.getName()).replace("%r",target.getReputation())
+        return input.replace("%p",target.getName()).replace("%r",target.getReputation() + "")
             .replace("%c",(target.getAffiliation() != null ? target.getAffiliation().getName() : "(None)"))
             .replace("%i",(target.getAffiliation() != null ? target.getAffiliation().getIdentifier() : "(None)"));
+    }
+    public String getFormattedString(String input, City target) {
+        return input.replace("%r",target.getReputation() + "").replace("%c",target.getName())
+            .replace("%i",target.getName());
     }
     
     public void setCommand(String command) {
@@ -150,17 +155,18 @@ public class Reward {
     }
     
     public String toString() {
-        return id + ";" + type + ";" + initialRep + ";" + intervalRep + ";" + isBroadcast.toString() + ";" + command + ";" + message;
+        return id + ";" + type + ";" + initialRep + ";" + intervalRep + ";" + isBroadcast + ";" + command + ";" + message;
     }
     
     public boolean equals(Object obj) {
         if (obj == null) return false;
         if (obj == this) return true;
-        if (obj.getClass().equals("Reward") && obj.getID() == this.getID()) return true;
+        if (obj.getClass().equals("Reward") && ((Reward)obj).getID() == this.getID()) return true;
+        return false;
     }
     
-    private int getNextID() {
-        Config config = CityZen.rewardConfig.getConfig();
+    private static  int getNextID() {
+        FileConfiguration config = CityZen.rewardConfig.getConfig();
         boolean numberFound = false;
         for (int i=0; i < config.getStringList("rewards").size();i++) {
             numberFound = false;
@@ -182,7 +188,7 @@ public class Reward {
     private String[] readReward(int id) {
         for (String r : CityZen.rewardConfig.getConfig().getStringList("rewards")) {
             try {
-                String reward = r.split(";");
+                String[] reward = r.split(";");
                 if (id == Integer.parseInt(reward[0])) return reward;
             } catch (NumberFormatException e) {
                 return null;
@@ -191,7 +197,8 @@ public class Reward {
     }
     
     private void saveReward() {
-        String properties = id + ";" + type + ";" + initialRep + ";" + intervalRep + ";" + isBroadcast.toString() + ";" + command + ";" + message;
-        CityZen.rewardConfig.getConfig().set("rewards",CityZen.rewardConfig.getConfig().getStringList("rewards").add(id,properties));
+    	List<String> rewards = CityZen.rewardConfig.getConfig().getStringList("rewards");
+    	rewards.add(id,toString());
+        CityZen.rewardConfig.getConfig().set("rewards",rewards);
     }
 }
