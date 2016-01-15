@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.Metadatable;
 
 import io.github.griffenx.CityZen.Citizen;
 import io.github.griffenx.CityZen.City;
@@ -14,6 +15,7 @@ import io.github.griffenx.CityZen.CityZen;
 import io.github.griffenx.CityZen.Messaging;
 import io.github.griffenx.CityZen.Plot;
 import io.github.griffenx.CityZen.ProtectionLevel;
+import io.github.griffenx.CityZen.Tasks.ClearMetadataTask;
 
 public class PlotCommand {
 	public static boolean delegate(CommandSender sender, String[] args) {
@@ -43,9 +45,37 @@ public class PlotCommand {
 			case "abandon":
 				abandon(sender);
 				break;
-			case "kick":
+			case "sel":
+			case "select":
+				select(sender, args);
+				break;
+			case "p1":
+			case "pos1":
+			case "p2":
+			case "pos2":
+				selectCorner(sender);
+				break;
+			case "invite":
+				invite(sender, args);
+				break;
+			case "add":
+			case "addowner":
 			case "remove":
-				remove(sender,args);
+			case "removeowner":
+				modifyowners(sender, args);
+				break;
+			case "i":
+			case "info":
+				info(sender);
+				break;
+			case "prot":
+			case "protection":
+			case "setprotection":
+				setprotection(sender, args);
+				break;
+			case "accept":
+			case "deny":
+				inviteReply(sender, args);
 				break;
 			default:
 				return false;
@@ -394,15 +424,25 @@ public class PlotCommand {
 								if (args.length > 1) {
 									Citizen target = Citizen.getCitizen(args[1]);
 									if (target != null) {
-										if (target.getPassport().isOnline()) {
-											if (target.getPlots().size() < target.getMaxPlots()) {
-												//TODO: Send target an invitation
-												// After 2 minutes, the invitation should expire
-											} else sender.sendMessage(ChatColor.RED + target.getName() + " cannot own any more plots.");
-										} else {
-											target.sendMessage(citizen.getName() + " wanted to invite you to a plot, but you were offline.");
-											sender.sendMessage(ChatColor.BLUE + target.getName() + " was offline, but they were notified that you want to add them to your plot. Try again when they're online.");
-										}
+										if (citizen.getAffiliation().equals(target.getAffiliation())) {
+											if (!plot.getOwners().contains(target)) {
+												if (target.getPlots().size() < target.getMaxPlots()) {
+													if (target.getPassport().isOnline()) {
+														if (!target.getPassport().hasMetadata("plotInvite")) {
+															target.getPassport().setMetadata("plotInvite", new FixedMetadataValue(CityZen.getPlugin(), citizen.getName() + ";" + plot.getIdentifier()));
+															new ClearMetadataTask((Metadatable) target.getPassport(),"plotInvite").runTaskLater(CityZen.getPlugin(), 20 * 120);
+															sender.sendMessage(ChatColor.BLUE + "Invite sent to " + target.getPassport().getDisplayName() + ChatColor.BLUE + ". You will be notified if they accept.");
+															target.sendMessage(ChatColor.BLUE + "You have a new plot invite from " + citizen.getPassport().getDisplayName() + "!\n"
+																	+ "Type \"" + ChatColor.GOLD + "/plot accept" + ChatColor.BLUE + "\" or \"" + ChatColor.WHITE + "/plot deny" + ChatColor.BLUE + "\"\n"
+																	+ "This invite will expire in 2 minutes.");
+														} else sender.sendMessage(ChatColor.RED + target.getPassport().getDisplayName() + ChatColor.RED + " already has a pending invite. Please try again later.");
+													} else {
+														target.sendMessage(citizen.getName() + " wanted to invite you to a plot, but you were offline.");
+														sender.sendMessage(ChatColor.BLUE + target.getName() + " was offline, but they were notified that you want to add them to your plot. Try again when they're online.");
+													}
+												} else sender.sendMessage(ChatColor.RED + target.getName() + " cannot own any more plots.");
+											} else sender.sendMessage(ChatColor.RED + target.getName() + " is already an owner of this plot.");
+										} else sender.sendMessage(ChatColor.RED + "The invited player must be a Citizen of the same City as you.");
 									} else sender.sendMessage(Messaging.citizenNotFound(args[1]));
 								} else sender.sendMessage(Messaging.notEnoughArguments("/plot invite <Citizen>"));
 							} else sender.sendMessage(Messaging.notPlotOwner());
@@ -410,6 +450,47 @@ public class PlotCommand {
 					} else sender.sendMessage(Messaging.noAffiliation());
 				} else sender.sendMessage(Messaging.missingCitizenRecord());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.invite"));
+		} else sender.sendMessage(Messaging.playersOnly());
+	}
+	
+	private static void inviteReply(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			if ((args[0].substring(0, 1).equalsIgnoreCase("a") && sender.hasPermission("cityzen.plot.accept")) || 
+					(args[0].substring(0, 1).equalsIgnoreCase("d") && sender.hasPermission("cityzen.plot.deny"))) {
+				Citizen citizen = Citizen.getCitizen(sender);
+				if (citizen != null) {
+					City city = citizen.getAffiliation();
+					if (city != null) {
+						if (citizen.getPlots().size() < citizen.getMaxPlots()) {
+							if (citizen.getPassport().hasMetadata("plotInvite")) {
+								String[] invite = citizen.getPassport().getMetadata("plotInvite").get(0).asString().split(";");
+								Citizen host = Citizen.getCitizen(invite[0]);
+								if (host != null) {
+									citizen.getPassport().removeMetadata("plotInvite", CityZen.getPlugin());
+									if (args[0].substring(0, 1).equalsIgnoreCase("a")) {
+										if (city.equals(host.getAffiliation())) {
+											Plot plot = Plot.getPlot(city, Integer.parseInt(invite[1]));
+											if (plot != null) {
+												if (plot.getOwners().contains(host)) {
+													if (!plot.getOwners().contains(citizen)) {
+														plot.addOwner(citizen);
+														citizen.sendMessage(ChatColor.BLUE + "You have sucessfully become an owner of this Plot!");
+														host.sendMessage(ChatColor.BLUE + citizen.getPassport().getDisplayName() + ChatColor.BLUE + " accepted your Plot invitation."
+																+ " They are now an owner of your Plot!");
+													} else sender.sendMessage(ChatColor.RED + "You are already an owner of this Plot");
+												} else sender.sendMessage(ChatColor.RED + host.getName() + " no longer owns this Plot.");
+											} else sender.sendMessage(Messaging.noPlotFound());
+										} else sender.sendMessage(ChatColor.RED + "You must be a Citizen of " + host.getAffiliation().getName() + " to join this Plot.");
+									} else if (args[0].substring(0, 1).equalsIgnoreCase("d")) {
+										sender.sendMessage(ChatColor.BLUE + "Invitation denied.");
+										host.sendMessage(ChatColor.RED + citizen.getName() + " denied your Plot invitation.");
+									}
+								} else sender.sendMessage(ChatColor.RED + "Could not respond to your invitation. The Citizen record of " + invite[0] + " couldn't be found.");
+							} else sender.sendMessage(ChatColor.RED + "You have not been invited to any Plots.");
+						} else sender.sendMessage(Messaging.tooManyPlots());
+					} else sender.sendMessage(Messaging.noAffiliation());
+				} else sender.sendMessage(Messaging.missingCitizenRecord());
+			} else sender.sendMessage(Messaging.noPerms((args[0].substring(0, 1).equalsIgnoreCase("a") ? "cityzen.plot.accept" : "cityzen.plot.deny")));
 		} else sender.sendMessage(Messaging.playersOnly());
 	}
 	

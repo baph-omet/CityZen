@@ -96,7 +96,7 @@ public class CityZenCommand {
 				"passport - passport - Show all your Citizen data",
 				"passport.others - passport (Citizen) - Show all the Citizen data for the specified Citizen",
 				 "- alert - Show all your pending alerts and dismisses them"
-			}
+			};
 			String[] city = {
 				"city.list - city list - List all cities that exist on this server",
 				"city.info - city info (city) - Show detailed information on the specified City",
@@ -206,7 +206,7 @@ public class CityZenCommand {
 				"rewards.remove - cityzen rewards remove <index> - Remove a specified reward"
 			};
 			
-			String[] catarray;
+			String[] catarray = null;
 			switch (category.toLowerCase()) {
 				case "basic": catarray = basic; break;
 				case "city": catarray = city; break;
@@ -215,18 +215,18 @@ public class CityZenCommand {
 				case "city exclusion": catarray = cityexclusion; break;
 				case "citizen": catarray = citizen; break;
 				case "plot": catarray = plot; break;
-				case "plot management": catarray = plotmanamgent; break;
+				case "plot management": catarray = plotmanagement; break;
 				case "rewards": catarray = rewards; break;
 				default:
 					sender.sendMessage(ChatColor.RED + "Category not found. Type \"/cityzen help\" for a list of help categories.");
-					break;
+					return;
 			}
 			
 			int numberOfUseableCommands = 0;
 			message.append(ChatColor.RED + "===CityZen Help: " + category.toUpperCase() + "===");
 			for (String s : catarray) {
 				String[] command = s.split(" - ");
-				if (command[0].length == 0 || sender.hasPermission("cityzen."command[0])) {
+				if (command[0].length() == 0 || sender.hasPermission("cityzen." + command[0])) {
 					message.append("\n" + ChatColor.GRAY + "| " + ChatColor.RED + "/" + command[1] + ChatColor.GRAY + " - " + command[2]);
 					numberOfUseableCommands++;
 				}
