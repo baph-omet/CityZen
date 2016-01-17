@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -45,15 +46,15 @@ public class PlotCommand {
 			case "abandon":
 				abandon(sender);
 				break;
+			case "1":
+			case "p1":
+			case "pos1":
+			case "2":
+			case "p2":
+			case "pos2":
 			case "sel":
 			case "select":
 				select(sender, args);
-				break;
-			case "p1":
-			case "pos1":
-			case "p2":
-			case "pos2":
-				selectCorner(sender);
 				break;
 			case "invite":
 				invite(sender, args);
@@ -88,6 +89,7 @@ public class PlotCommand {
 			if (sender.hasPermission("cityzen.plot.select")) {
 				Citizen citizen = Citizen.getCitizen(sender);
 				if (citizen != null) {
+					Player user = (Player)sender;
 					City city = citizen.getAffiliation();
 					if (city != null) {
 						if (city.isOpenPlotting() || citizen.isCityOfficial()) {
@@ -101,7 +103,8 @@ public class PlotCommand {
 									case "select":
 										if (citizen.getPassport().hasMetadata("plotSelectEnabled")) {
 											citizen.getPassport().removeMetadata("plotSelectEnabled", CityZen.getPlugin());
-											citizen.getPassport().removeMetadata("plotSelectCorners", CityZen.getPlugin());
+											citizen.getPassport().removeMetadata("pos1", CityZen.getPlugin());
+											citizen.getPassport().removeMetadata("pos2", CityZen.getPlugin());
 											sender.sendMessage(ChatColor.BLUE + "Plot selection disabled.");
 										} else {
 											citizen.getPassport().setMetadata("plotSelectEnabled", new FixedMetadataValue(CityZen.getPlugin(), true));
@@ -110,25 +113,44 @@ public class PlotCommand {
 										}
 										break;
 									case "1":
+									case "p1":
 									case "pos1":
-										// Format: world,x1,y1,z1;world,x2,y2,z2
-										Location pos = ((Player) sender).getLocation();
+										// Format: world;x;y;z
+										Location pos = user.getLocation();
 										for (City c : City.getCities()) for (Plot p : c.getPlots()) if (p.isInPlot(pos)) {
 											sender.sendMessage(ChatColor.RED + "This location is inside an existing plot. Try a different location.");
 											return;
 										}
-										String[] positions;
-										if (citizen.getPassport().hasMetadata("plotSelectCorners")) {
-											positions = citizen.getPassport().getMetadata("plotSelectCorners").get(0).asString().split(";");
-											Location pos2 = new Location(CityZen.getPlugin().getServer().getWorld(positions[1].split(",")[0]),
-													Double.parseDouble(positions[1].split(",")[1]),Double.parseDouble(positions[1].split(",")[2]),
-													Double.parseDouble(positions[1].split(",")[3]));
-											
-											positions[0] = pos.getWorld().getName() + "," + pos.getBlockX() + "," + pos.getBlockZ();
-											citizen.getPassport().setMetadata("plotSelectCorners", new FixedMetadataValue(CityZen.getPlugin(), String.join(";", positions)));
-										} else {
-											
+										if (citizen.getPassport().hasMetadata("pos2")) {
+											World w = CityZen.getPlugin().getServer().getWorld(citizen.getPassport().getMetadata("pos2").get(0).asString().split(";")[0]);
+											if (!w.equals(user.getWorld())) {
+												citizen.getPassport().removeMetadata("pos2", CityZen.getPlugin());
+											}
 										}
+										String newPos = String.join(";",user.getWorld().getName(),Integer.toString(pos.getBlockX()),
+												Integer.toString(pos.getBlockY()),Integer.toString(pos.getBlockZ()));
+										citizen.getPassport().setMetadata("pos1", new FixedMetadataValue(CityZen.getPlugin(), newPos));
+										sender.sendMessage(ChatColor.BLUE + "Position 1 set (" + newPos + ")");
+										break;
+									case "2":
+									case "p2":
+									case "pos2":
+										// Format: world;x;y;z
+										Location pos2 = user.getLocation();
+										for (City c : City.getCities()) for (Plot p : c.getPlots()) if (p.isInPlot(pos2)) {
+											sender.sendMessage(ChatColor.RED + "This location is inside an existing plot. Try a different location.");
+											return;
+										}
+										if (citizen.getPassport().hasMetadata("pos1")) {
+											World w = CityZen.getPlugin().getServer().getWorld(citizen.getPassport().getMetadata("pos1").get(0).asString().split(";")[0]);
+											if (!w.equals(user.getWorld())) {
+												citizen.getPassport().removeMetadata("pos1", CityZen.getPlugin());
+											}
+										}
+										String newPos2 = String.join(";",user.getWorld().getName(),Integer.toString(pos2.getBlockX()),
+												Integer.toString(pos2.getBlockY()),Integer.toString(pos2.getBlockZ()));
+										citizen.getPassport().setMetadata("pos2", new FixedMetadataValue(CityZen.getPlugin(), newPos2));
+										sender.sendMessage(ChatColor.BLUE + "Position 2 set (" + newPos2 + ")");
 										break;
 								}
 							} else sender.sendMessage(ChatColor.RED + "You cannot select plots. You have too many plots already.");
@@ -137,17 +159,6 @@ public class PlotCommand {
 				} else sender.sendMessage(Messaging.missingCitizenRecord());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.select"));
 		} else sender.sendMessage(Messaging.playersOnly());
-	}
-	
-	private static void selectCorner(CommandSender sender) {
-		if (sender instanceof Player) {
-			if (sender.hasPermission("cityzen.plot.select")) {
-				Citizen citizen = Citizen.getCitizen(sender);
-				if (citizen != null) {
-					
-				}
-			}
-		}
 	}
 	
 	private static void list(CommandSender sender, String[] args) {
