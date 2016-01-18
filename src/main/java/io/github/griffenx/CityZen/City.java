@@ -326,6 +326,14 @@ public class City implements Reputable {
 		setProperty("openPlotting",state);
 	}
 	
+	public boolean isWipePlots() {
+		return Boolean.valueOf(getProperty("wipePlots"));
+	}
+	
+	public void setWipePlots(boolean state) {
+		setProperty("wipePlots",state);
+	}
+	
 	/**
 	 * Gets whether or not this City is set to wipe plots to natural terrain from seed. Defaults to false (wipes to flatlands).
 	 * Defaults if property is not set correctly.
@@ -758,6 +766,13 @@ public class City implements Reputable {
 	public Plot getPlot(CommandSender sender) {
 		if (sender instanceof Player) {
 			return getPlot((Player)sender);
+		} return null;
+	}
+	public Plot getPlot(int id) {
+		for (Plot p : getPlots()) {
+			if (p.getIdentifier() == id) {
+				return p;
+			}
 		} return null;
 	}
 	

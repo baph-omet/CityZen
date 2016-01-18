@@ -140,6 +140,8 @@ public class CityZenCommand {
 				"city.set.others - city set freeJoin <true | false> <City> - Set whether or not any player can join the selected City",
 				"city.set - city set openPlotting <true | false> - Set whether or not any Citizen of your City can create Plots (M)",
 				"city.set.others - city set openPlotting <true | false> <City> - Set whether or not any Citizen of the specified City can create Plots",
+				"city.set - city set wipePlots <true | false> - Toggle automatically wiping Plots in this City",
+				"city.set.others - city set wipePlots <true | false> <City> - Toggle automatically wiping Plots in the specified City",
 				"city.set - city set mayor <Citizen> - Change the Mayor of your City to a new Citizen (M)",
 				"city.set.others - city set mayor <Citizen> <City> - Change the Mayor of the specified City to a new Citizen",
 				"city.set - city set protection <level> - Sets protection level of Plot buffers in your City (M)",

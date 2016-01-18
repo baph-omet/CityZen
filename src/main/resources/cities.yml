@@ -77,6 +77,11 @@ cities:
         # If false, only the mayor or a deputy may place plots
         openPlotting: false
         
+        # If true, plots get wiped automatically when created and abandoned
+        # If false, plots will always keep their contents
+        # Recommended setting this to true to reduce clutter and prevent people claiming others' builds
+        wipePlots: true
+        
         # If true, wiped plots will reset to the natural terrain from seed
         # If false, wiped plots will generate flatlands at their height
         # CURRENTLY UNUSED! Possibility for future update.

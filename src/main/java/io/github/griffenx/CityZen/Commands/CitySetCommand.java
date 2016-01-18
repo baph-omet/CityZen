@@ -86,6 +86,10 @@ public class CitySetCommand {
 						city.setOpenPlotting(openPlotting);
 						sender.sendMessage(ChatColor.BLUE + "FreeJoin for " + city.getChatName() + ChatColor.BLUE + " is now set to " + openPlotting);
 						break;
+					case "wipePlots":
+						boolean wipePlots = Boolean.parseBoolean(value);
+						city.setWipePlots(wipePlots);
+						sender.sendMessage(ChatColor.BLUE + "WipePlots for " + city.getChatName() + ChatColor.BLUE + " is now set to " + wipePlots);
 					case "mayor":
 						Citizen mayor = Citizen.getCitizen(value);
 						if (mayor != null) {
