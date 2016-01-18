@@ -929,7 +929,12 @@ public class City implements Reputable {
 	 * The protection level to set for this plot
 	 */
 	public void setProtectionLevel(int level) {
-		if (level >=0 && level < 3) setProperty("protection",level);
+		if (level >=0 && level < 3) {
+			setProperty("protection",level);
+			for (Plot p : getPlots()) {
+				if (p.isMega()) p.setProtectionLevel(level);
+			}
+		}
 		else setProperty("protection",2);
 	}
 	

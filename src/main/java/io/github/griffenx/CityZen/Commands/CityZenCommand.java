@@ -57,7 +57,6 @@ public class CityZenCommand {
 	}
 	
 	private static void help(CommandSender sender, String[] args) {
-		//TODO: show help of the specified category
 		String category = "none";
 		if (args.length > 1) {
 			StringBuilder cat = new StringBuilder(args[1]);

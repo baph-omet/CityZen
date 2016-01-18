@@ -57,6 +57,19 @@ public class Plot {
 		return newPlot;
 	}
 	
+	/**
+	 * Creates a new plot, but does not add the creator as an owner
+	 * @param city
+	 * The City in which to create this Plot
+	 * @param corner1
+	 * The first corner of this Plot
+	 * @param corner2
+	 * The second corner of this Plot
+	 * @param creator
+	 * The Citizen who created this Plot
+	 * @return
+	 * A new Plot with no owners
+	 */
 	public static Plot createEmptyPlot(City city, Location corner1, Location corner2, Citizen creator) {
 		if (city.isOpenPlotting()) return null;
 		Plot newPlot = null;
@@ -410,6 +423,10 @@ public class Plot {
 		}
 		return false;
 	}
+	public boolean isInPlot(Position p) {
+		return isInPlot((double)p.x,(double)p.z);
+	}
+	
 	
 	public boolean isInBuffer(double x, double z) {
 		if (isInPlot(x,z)) return false;
@@ -422,6 +439,18 @@ public class Plot {
 		if ((x < bufferX[0] && x > bufferX[1]) || (x > bufferX[0] && x < bufferX[1])) {
 			if ((z < bufferZ[0] && z > bufferZ[1]) || (z > bufferZ[0] && z < bufferZ[1])) {
 				return true;
+			}
+		}
+		return false;
+	}
+	public boolean isInBuffer(Selection s) {
+		int xDirection = 1;
+		int zDirection = 1;
+		if (s.pos1.x > s.pos2.x) xDirection = -1;
+		if (s.pos1.z > s.pos2.z) zDirection = -1;
+		for (int x = (int) s.pos1.x; x < ((int) s.pos2.x * xDirection); x = x + (1 * xDirection)) {
+			for (int z = (int) s.pos1.z; x < ((int) s.pos2.z * zDirection); x = x + (1 * zDirection)) {
+				if (isInBuffer(x, z)) return true;
 			}
 		}
 		return false;
@@ -460,6 +489,10 @@ public class Plot {
 		}
 		return false;
 	}
+	public boolean overlaps(Selection s) {
+		return overlaps(s.pos1.asLocation(),s.pos2.asLocation());
+	}
+	
 	
 	/**
 	 * Wipes this plot based on the wipe settings for the City. Ignores plots that have at least 1 owner
