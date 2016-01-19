@@ -3,14 +3,18 @@ package io.github.griffenx.CityZen;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import io.github.griffenx.CityZen.Commands.CitizenCommand;
 import io.github.griffenx.CityZen.Commands.CityCommand;
 import io.github.griffenx.CityZen.Commands.CityDeputyCommand;
 import io.github.griffenx.CityZen.Commands.CityExclusionCommand;
 import io.github.griffenx.CityZen.Commands.CitySetCommand;
+import io.github.griffenx.CityZen.Commands.CityZenCommand;
+import io.github.griffenx.CityZen.Commands.CityZenRewardCommand;
 import io.github.griffenx.CityZen.Commands.InfoCommand;
 import io.github.griffenx.CityZen.Commands.PlotCommand;
+import io.github.griffenx.CityZen.Tasks.AlertNotifyTask;
 
 public class Commander implements CommandExecutor {
 	
@@ -18,6 +22,10 @@ public class Commander implements CommandExecutor {
 			String label, String[] args) {
 		
 		String cmdName = command.getName().toLowerCase();
+		if (sender instanceof Player) {
+			Citizen citizen = Citizen.getCitizen(sender);
+			if (citizen != null) if (citizen.getAlerts().size() > 0) new AlertNotifyTask(citizen).runTaskLater(CityZen.getPlugin(), 20 * 3);
+		}
 		
 		switch (cmdName) {
 			case "psp":
@@ -59,6 +67,10 @@ public class Commander implements CommandExecutor {
 			case "plt":
 			case "plot":
 				return PlotCommand.delegate(sender, args);
+			case "cityzen":
+				if (args.length > 0 && args[0].contains("reward")) return CityZenRewardCommand.delegate(sender, args);
+				else CityZenCommand.delegate(sender, args);
+				return true;
 		}
 		return false;
 	}

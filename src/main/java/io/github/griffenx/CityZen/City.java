@@ -116,6 +116,10 @@ public class City implements Reputable {
 		return getCity(citizen.getPassport());
 	}
 	
+	public static City getCity(Location location) {
+		for (City c : getCities()) if (c.isInCity(location)) return c;
+		return null;
+	}
 	/**
 	 * Deletes this city from config
 	 */

@@ -36,10 +36,29 @@ public final class CityZen extends JavaPlugin {
 	        }
 		} else log.info("Economy disabled in config. Set \"useEconomy\" to true in config.yml to use Economy features.");
 		
-		//TODO: Register command handlers
-		//TODO: Register event handlers
+		Commander commander = new Commander();
+		String[] commands = {
+				"psp",
+				"passport",
+				"rep",
+				"reputation",
+				"alert",
+				"alerts",
+				"ctz",
+				"citizen",
+				"cty",
+				"city",
+				"plt",
+				"plot",
+				"cityzen"
+		};
+		for (String cmd : commands) getCommand(cmd).setExecutor(commander);
+		getServer().getPluginManager().registerEvents(new CityZenEventListener(), plugin);
 		int saveInterval = getConfig().getInt("saveInterval");
-		if (saveInterval > 0) new SaveConfigTask().runTaskTimer(plugin, 20 * 60 * saveInterval, 20 * 60 * saveInterval);
+		if (saveInterval > 0) {
+			new SaveConfigTask().runTaskTimer(plugin, 20 * 60 * saveInterval, 20 * 60 * saveInterval);
+			log.info("CityZen AutoSave started. Plugin will automatically save data every " + saveInterval + " minutes.");
+		} else log.warning("Autosaving is disabled. This is not recommended. To enable AutoSave, set \"saveInterval\" in config.yml to a value greater than 0.");
 	}
 	
 	public void onDisable() {

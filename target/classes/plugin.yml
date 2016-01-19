@@ -1,3 +1,340 @@
 name: CityZen
 main: io.github.griffenx.CityZen.CityZen
-version: 1.0.0
+version: 0.1.0
+
+commands:
+    cityzen:
+        description: Base command. Type "/cityzen help" for full commands
+        useage: /cityzen
+    alert:
+        description: Show your alerts and dismiss them.
+        useage: /alert
+    alerts:
+        description: Show your alerts and dismiss them.
+        useage: /alerts
+    psp:
+        description: Show your Passport
+        useage: /psp
+    passport:
+        description: Show your Passport
+        useage: /passport
+    rep:
+        description: Show your Reputation
+        useage: /rep
+    reputation:
+        description: Show your Reputation
+        useage: /reputation
+    city:
+        description: City management and interaction commands. Type "/cityzen help" for full commands
+    cty:
+        description: City management and interaction commands. Type "/cityzen help" for full commands
+    ctz:
+        description: Citizen management and interaction commands. Type "/cityzen help" for full commands
+    citizen:
+        description: Citizen management and interaction commands. Type "/cityzen help" for full commands
+    plt:
+        description: Plot management and interaction commands. Type "/cityzen help" for full commands
+    plot:
+        description: Plot management and interaction commands. Type "/cityzen help" for full commands
+        
+permissions:
+    cityzen.admin:
+        description: Gives access to all Admin commands and editing
+        children:
+            cityzen.user: true
+            cityzen.reputation.others: true
+            cityzen.passport.others: true
+            cityzen.city.visitors.others: true
+            cityzen.city.deputy.list.others: true
+            cityzen.city.dissolve.others: true
+            cityzen.city.ban.others: true
+            cityzen.city.pardon.others: true
+            cityzen.city.banlist.others: true
+            cityzen.city.deputy.add.others: true
+            cityzen.city.deputy.remove.others: true
+            cityzen.city.deputy.list.others: true
+            cityzen.city.set.others: true
+            cityzen.city.exclusion.mode.others: true
+            cityzen.city.exclusion.add.others: true
+            cityzen.city.exclusion.remove.others: true
+            cityzen.city.exclusion.list.others: true
+            cityzen.citizen.list.others: true
+            cityzen.plot.list.others: true
+            cityzen.plot.available.others: true
+            cityzen.plot.delete.others: true
+            cityzen.plot.price.set.others: true
+            cityzen.plot.modifyowners.others: true
+            cityzen.plot.setprotection.others: true
+            cityzen.rewards.list.others: true
+            cityzen.rewards.list: true
+            cityzen.rewards.add: true
+            cityzen.rewards.message: true
+            cityzen.rewards.remove: true
+            cityzen.reload: true
+            cityzen.save: true
+            cityzen.citizen.changerep: true
+        default: op
+    cityzen.user:
+        description: Gives access to all basic commands and editing (subject to Citizen status)
+        children:
+            cityzen.reputation: true
+            cityzen.passport: true
+            cityzen.city.list: true
+            cityzen.city.info: true
+            cityzen.city.top: true
+            cityzen.city.visitors: true
+            cityzen.city.create: true
+            cityzen.city.join: true
+            cityzen.city.leave: true
+            cityzen.city.deputy.list: true
+            cityzen.city.evict: true
+            cityzen.city.dissolve: true
+            cityzen.city.accept: true
+            cityzen.city.deny: true
+            cityzen.city.ban: true
+            cityzen.city.pardon: true
+            cityzen.city.banlist: true
+            cityzen.city.deputy.add: true
+            cityzen.city.deputy.remove: true
+            cityzen.city.deputy.list: true
+            cityzen.city.set: true
+            cityzen.city.exclusion.mode: true
+            cityzen.city.exclusion.add: true
+            cityzen.city.exclusion.remove: true
+            cityzen.city.exclusion.list: true
+            cityzen.citizen.top: true
+            cityzen.citizen.list: true
+            cityzen.citizen.remove: true
+            cityzen.citizen.addplots: true
+            cityzen.citizen.setplots: true
+            cityzen.plot.info: true
+            cityzen.plot.select: true
+            cityzen.plot.select: true
+            cityzen.plot.select: true
+            cityzen.plot.create: true
+            cityzen.plot.move: true
+            cityzen.plot.list: true
+            cityzen.plot.available: true
+            cityzen.plot.abandon: true
+            cityzen.plot.delete: true
+            cityzen.plot.invite: true
+            cityzen.plot.accept: true
+            cityzen.plot.deny: true
+            cityzen.plot.claim: true
+            cityzen.plot.buy: true
+            cityzen.plot.price: true
+            cityzen.plot.price.set: true
+            cityzen.plot.modifyowners: true
+            cityzen.plot.setprotection: true
+            cityzen.plot.wipe: true
+        default: true
+    cityzen.reload:
+        description: Reload config files from disk
+    cityzen.save:
+        description: Save changes to config files
+    cityzen.reputation:
+        description: Show your reputation
+    cityzen.reputation.others:
+        description: Show the reputation of the specified Citizen
+        children:
+            cityzen.reputation: true
+    cityzen.passport:
+        description: Show all your Citizen data
+    cityzen.passport.others:
+        description: Show all the Citizen data for the specified Citizen
+        children:
+            cityzen.passport: true
+    cityzen.city.list:
+        description: List all cities that exist on this server
+    cityzen.city.info:
+        description: Show detailed information on the specified City
+    cityzen.city.top:
+        description: Show top Cities with the specified criteria
+    cityzen.city.visitors:
+        description: Show which players are currently located in your City
+    cityzen.city.visitors.others:
+        description: Show which players are currently located inside the specified City
+        children:
+            cityzen.city.visitors: true
+    cityzen.city.create:
+        description: Found a new City
+    cityzen.city.join:
+        description: Join the specified City
+    cityzen.city.leave:
+        description: Leave your current City
+    cityzen.city.deputy.list:
+        description: Lists all Deputies of your City
+    cityzen.city.deputy.list.others:
+        description: Lists all deputies of the specified City
+        children:
+            cityzen.city.deputy.list: true
+    cityzen.city.evict:
+        description: Forcibly remove the specified Citizen from your City
+    cityzen.city.dissolve:
+        description: Permanently deletes your City
+    cityzen.city.dissolve.others:
+        description: Permanently delete the specified City
+        children:
+            cityzen.city.dissolve: true
+    cityzen.city.accept:
+        description: Accept the request to join your city of the specified Citizen
+    cityzen.city.deny:
+        description: Deny the request to join your city of the specified Citizen
+    cityzen.city.ban:
+        description: Block the specified Citizen from joining your City or sending join requests
+    cityzen.city.ban.others:
+        description: Block the specified Citizen from joining the specified City or sending join requests
+        children:
+            cityzen.city.ban: true
+    cityzen.city.pardon:
+        description: Remove the specified Citizen from your City's banlist
+    cityzen.city.pardon.others:
+        description: Remove the specified Citizen from the banlist of the specified City
+        children:
+            cityzen.city.pardon: true
+    cityzen.city.banlist:
+        description: Show Citizens banned from joining your City
+    cityzen.city.banlist.others:
+        description: Show Citizens banned from joining the specified City
+        children:
+            cityzen.city.banlist: true
+    cityzen.city.deputy.add:
+        description: Promotes a Citizen of your City to a Deputy
+    cityzen.city.deputy.add.others:
+        description: Promotes a Citizen of the specified City to a Deputy
+        children:
+            cityzen.city.deputy.add: true
+    cityzen.city.deputy.remove:
+        description: Demotes the specified Deputy of your City
+    cityzen.city.deputy.remove.others:
+        description: Demotes the specified Deputy of the specified City
+        children:
+            cityzen.city.deputy.remove: true
+    cityzen.city.deputy.list:
+        description: Lists the Deputies of your City
+    cityzen.city.deputy.list.others:
+        description: Lists the Deputies of any City
+        children:
+            cityzen.city.deputy.list: true
+    cityzen.city.set:
+        description: Set a new name for your City
+    cityzen.city.set.others:
+        description: Set a new name for the specified City
+        children:
+            cityzen.city.set: true
+    cityzen.city.exclusion.mode:
+        description: Set the block exclusion mode of your City
+    cityzen.city.exclusion.mode.others:
+        description: Set the block exclusion mode of the specified City
+        children:
+            cityzen.city.exclusion.mode: true
+    cityzen.city.exclusion.add:
+        description: Add a material to the exclusion list for your City
+    cityzen.city.exclusion.add.others:
+        description: Add a material to the exclusion list for the specified City
+        children:
+            cityzen.city.exclusion.add: true
+    cityzen.city.exclusion.remove:
+        description: Remove a material from the exclusion list for your City
+    cityzen.city.exclusion.remove.others:
+        description: Remove a material from the exclusion list for your City
+        children:
+            cityzen.city.exclusion.remove: true
+    cityzen.city.exclusion.list:
+        description: List all excluded materials for your City
+    cityzen.city.exclusion.list.others:
+        description: List all excluded materials for the specified City
+        children:
+            cityzen.city.exclusion.list: true
+    cityzen.citizen.top:
+        description: List top Citizens with the specified criteria
+    cityzen.citizen.list:
+        description: Show a list of Citizens of your City
+    cityzen.citizen.list.others:
+        description: Show a list of Citizens of the specified City
+        children:
+            cityzen.citizen.list: true
+    cityzen.citizen.changerep:
+        description: Change the reputation of the specified Citizen
+    cityzen.citizen.remove:
+        description: Delete the record of the specified Citizen
+    cityzen.citizen.addplots:
+        description: Increase the number of plots this Citizen can own
+    cityzen.citizen.setplots:
+        description: Set the number of plots this Citizen can own
+    cityzen.plot.info:
+        description: Show information about the Plot in which you're standing
+    cityzen.plot.select:
+        description: Allows Plot selection mode
+    cityzen.plot.create:
+        description: Create a new Plot from your selection
+        children:
+            cityzen.plot.select: true
+    cityzen.plot.move:
+        description: Move an existing Plot to your selection
+        children:
+            cityzen.plot.select: true
+    cityzen.plot.list:
+        description: List all Plots you own
+    cityzen.plot.list.others:
+        description: List all Plots owned by the specified Citizen
+        children:
+            cityzen.plot.list: true
+    cityzen.plot.available:
+        description: List all open Plots in your City
+    cityzen.plot.available.others:
+        description: List all open Plots in the specified City
+        children:
+            cityzen.plot.available: true
+    cityzen.plot.abandon:
+        description: Remove yourself from ownership of the Plot in which you're standing
+    cityzen.plot.delete:
+        description: Delete the Plot in which you're standing
+    cityzen.plot.delete.others:
+        description: Delete any Plot in which you're standing
+        children:
+            cityzen.plot.delete: true
+    cityzen.plot.invite:
+        description: Invite the specified Citizen to be an owner of this Plot
+    cityzen.plot.accept:
+        description: Accepts a Plot invitation
+    cityzen.plot.deny:
+        description: Denies Plot invitation
+    cityzen.plot.claim:
+        description: Claim the Plot in which you're standing if it's available
+    cityzen.plot.buy:
+        description: Buy the Plot in which you're standing if it's for sale
+    cityzen.plot.price:
+        description: Check the price of the Plot in which you're standing
+    cityzen.plot.price.set:
+        description: Set the price of a Plot you own
+    cityzen.plot.price.set.others:
+        description: Set the price of any Plot
+        children:
+            cityzen.plot.price.set: true
+    cityzen.plot.modifyowners:
+        description: Set owner of a Plot you own
+    cityzen.plot.modifyowners.others:
+        description: Set owner of any Plot
+        children:
+            cityzen.plot.modifyowners: true
+    cityzen.plot.setprotection:
+        description: Set the protection level of a Plot you own
+    cityzen.plot.setprotection.others:
+        description: Set the protection level of any Plot
+        children:
+            cityzen.plot.setprotection: true
+    cityzen.plot.wipe:
+        description: Wipe the plot in which you're standing
+    cityzen.rewards.list:
+        description: List all registered rewards
+    cityzen.rewards.list.others:
+        description: Show all rewards earned by a certain Citizen or City
+        children:
+            cityzen.rewards.list: true
+    cityzen.rewards.add:
+        description: Add a new reward.
+    cityzen.rewards.message:
+        description: Set a message to be broadcast when a reward is disbursed.
+    cityzen.rewards.remove:
+        description: Remove a specified reward

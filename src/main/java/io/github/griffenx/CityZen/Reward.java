@@ -3,6 +3,7 @@ package io.github.griffenx.CityZen;
 import java.util.List;
 import java.util.Vector;
 
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class Reward {
@@ -81,6 +82,15 @@ public class Reward {
                 rewards.remove(i);
             }
         }
+    }
+    
+    public static List<World> getAllowedWorlds() {
+    	List<World> worlds = new Vector<World>();
+    	for (String w : CityZen.rewardConfig.getConfig().getStringList("enabledWorlds")) {
+    		World world = CityZen.getPlugin().getServer().getWorld(w);
+    		if (world !=null) worlds.add(world);
+    	}
+    	return worlds;
     }
     
     public int getID() {
@@ -165,7 +175,7 @@ public class Reward {
         return false;
     }
     
-    private static  int getNextID() {
+    private static int getNextID() {
         FileConfiguration config = CityZen.rewardConfig.getConfig();
         boolean numberFound = false;
         for (int i=0; i < config.getStringList("rewards").size();i++) {

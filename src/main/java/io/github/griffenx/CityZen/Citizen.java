@@ -464,7 +464,7 @@ public class Citizen implements Reputable {
 	}
 	
 	public void sendReward(Reward r) {
-		if (getPassport().isOnline()) {
+		if (getPassport().isOnline() && Reward.getAllowedWorlds().contains(getPassport().getWorld())) {
 			CityZen.getPlugin().getServer().dispatchCommand(plugin.getServer().getConsoleSender(), r.getFormattedString(r.getCommand(),this));
 			if (r.getIsBroadcast()) {
 				CityZen.getPlugin().getServer().broadcastMessage(r.getFormattedString(r.getMessage(), this));

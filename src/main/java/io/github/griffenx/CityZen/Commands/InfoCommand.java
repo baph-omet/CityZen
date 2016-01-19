@@ -35,8 +35,7 @@ public class InfoCommand {
 			return;
 		} else {
 			if (sender.hasPermission("cityzen.reputation.others")) {
-				@SuppressWarnings("deprecation")
-				Citizen target = Citizen.getCitizen(plugin.getServer().getOfflinePlayer(args[0]));
+				Citizen target = Citizen.getCitizen(args[0]);
 				if (target != null) {
 					sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " has a Reputation of:");
 					sender.sendMessage(ChatColor.GOLD + "" + target.getReputation());

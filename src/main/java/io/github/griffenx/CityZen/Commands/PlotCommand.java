@@ -104,7 +104,6 @@ public class PlotCommand {
 	
 	private static void select(CommandSender sender, String[] args) {
 		if (sender instanceof Player) {
-			//TODO: handle permissions
 			if (sender.hasPermission("cityzen.plot.select")) {
 				Citizen citizen = Citizen.getCitizen(sender);
 				if (citizen != null) {
