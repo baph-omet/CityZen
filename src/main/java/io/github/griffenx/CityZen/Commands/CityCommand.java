@@ -18,6 +18,7 @@ import io.github.griffenx.CityZen.Citizen;
 import io.github.griffenx.CityZen.City;
 import io.github.griffenx.CityZen.CityZen;
 import io.github.griffenx.CityZen.Messaging;
+import io.github.griffenx.CityZen.Util;
 import io.github.griffenx.CityZen.Tasks.ClearMetadataTask;
 
 public class CityCommand {
@@ -74,6 +75,9 @@ public class CityCommand {
 			case "visitors":
 				visitors(sender, args);
 				break;
+			case "alert":
+				alert(sender, args);
+				break;
 			default:
 				return false;
 		}
@@ -84,10 +88,7 @@ public class CityCommand {
 		if (sender instanceof Player) {
 			if (sender.hasPermission("cityzen.city.join")) {
 				
-				String cityName = "";
-				for (int i = 1; i < args.length; i++){
-					cityName += args[i];
-				}
+				String cityName = Util.findCityName(args);
 				City city = City.getCity(cityName);
 				if (city != null) {
 					
@@ -125,7 +126,7 @@ public class CityCommand {
 						sender.sendMessage(Messaging.missingCitizenRecord());
 					}
 				} else {
-					sender.sendMessage(Messaging.cityNotFound(cityName));
+					sender.sendMessage(Messaging.cityNotFound());
 				}
 			} else {
 				sender.sendMessage(Messaging.noPerms("cityzen.city.join"));
@@ -394,7 +395,7 @@ public class CityCommand {
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.dissolve"));
 		} else {
 			if (sender.hasPermission("cityzen.city.dissolve.others")) {
-				City city = City.getCity(args[1]);
+				City city = City.getCity(Util.findCityName(args));
 				if (city != null) {
 					List<Citizen> refugees = city.getCitizens();
 					sender.sendMessage(ChatColor.BLUE + "You deleted the City " + city.getChatName());
@@ -405,7 +406,7 @@ public class CityCommand {
 						else r.addAlert("Your city has been deleted."
 							+ " You have not lost any reputation from this and are free to join another city.");
 					}
-				} else sender.sendMessage(Messaging.cityNotFound(args[1]));
+				} else sender.sendMessage(Messaging.cityNotFound());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.dissolve.others"));
 		}
 	}
@@ -435,10 +436,9 @@ public class CityCommand {
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.ban"));
 		} else {
 			if (sender.hasPermission("cityzen.city.ban.others")) {
-				city = City.getCity(args[2]);
-				
+				city = City.getCity(Util.findCityName(args));
 				if (city == null) {
-					sender.sendMessage(Messaging.cityNotFound(args[2]));
+					sender.sendMessage(Messaging.cityNotFound());
 					return;
 				}
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.ban.others"));
@@ -479,10 +479,10 @@ public class CityCommand {
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.pardon"));
 		} else {
 			if (sender.hasPermission("cityzen.city.pardon.others")) {
-				city = City.getCity(args[2]);
+				city = City.getCity(Util.findCityName(args));
 				
 				if (city == null) {
-					sender.sendMessage(Messaging.cityNotFound(args[2]));
+					sender.sendMessage(Messaging.cityNotFound());
 					return;
 				}
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.pardon.others"));
@@ -587,9 +587,9 @@ public class CityCommand {
 			}
 		} else {
 			if (sender.hasPermission("cityzen.city.banlist.others")) {
-				city = City.getCity(args[2]);
+				city = City.getCity(Util.findCityName(args));
 				if (city == null) {
-					sender.sendMessage(Messaging.cityNotFound(args[2]));
+					sender.sendMessage(Messaging.cityNotFound());
 					return;
 				}
 			} else {
@@ -655,9 +655,9 @@ public class CityCommand {
 				}
 			} else {
 				if (sender.hasPermission("cityzen.city.distance.others")) {
-					city = City.getCity(args[2]);
+					city = City.getCity(Util.findCityName(args));
 					if (city == null) {
-						sender.sendMessage(Messaging.cityNotFound(args[1]));
+						sender.sendMessage(Messaging.cityNotFound());
 						return;
 					}
 				} else {
@@ -711,9 +711,9 @@ public class CityCommand {
 				}
 			} else {
 				if (sender.hasPermission("cityzen.city.visitors.others")) {
-					city = City.getCity(args[2]);
+					city = City.getCity(Util.findCityName(args));
 					if (city == null) {
-						sender.sendMessage(Messaging.cityNotFound(args[1]));
+						sender.sendMessage(Messaging.cityNotFound());
 						return;
 					}
 				} else {
@@ -774,6 +774,53 @@ public class CityCommand {
 		} else {
 			sender.sendMessage(Messaging.playersOnly());
 			return;
+		}
+	}
+	
+	private static void alert(CommandSender sender, String[] args) {
+		City city = null;
+		String cityName = Util.findCityName(args);
+		boolean admin = false;
+		if (cityName != null && sender.hasPermission("cityzen.city.alert.others")) {
+			city = City.getCity(Util.findCityName(args));
+			
+			if (city == null) {
+				sender.sendMessage(Messaging.cityNotFound());
+				return;
+			}
+			admin = true;
+		}
+		else if (sender.hasPermission("cityzen.city.alert")) {
+			if (sender instanceof Player) {
+				Citizen citizen = Citizen.getCitizen(sender);
+				if (citizen != null) {
+					city = citizen.getAffiliation();
+					if (city == null) {
+						sender.sendMessage(Messaging.noAffiliation());
+						return;
+					}
+					if (!(citizen.isMayor() || citizen.isDeputy())) {
+						sender.sendMessage(Messaging.notCityOfficial());
+						return;
+					}
+				}
+			} else {
+				sender.sendMessage(ChatColor.RED + "You have to specify a city to use this command"
+						+ " from console or a command block. Useage:\"/city alert <message...> (city)");
+				return;
+			}
+		} else sender.sendMessage(Messaging.noPerms("cityzen.city.alert"));
+		if (city != null) {
+			String alert = "";
+			if (admin) {
+				alert = Util.collapseArgsWithoutCityName(args, 1, city.getName());
+			} else {
+				alert = Util.collapseArguments(args, 1);
+			}
+			for (Citizen c : city.getCitizens()) {
+				c.addAlert(sender.getName() + ": " + alert);
+			}
+			sender.sendMessage(ChatColor.BLUE + "Alert sent: " + alert);
 		}
 	}
 }

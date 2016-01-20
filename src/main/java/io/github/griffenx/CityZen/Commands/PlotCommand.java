@@ -19,6 +19,7 @@ import io.github.griffenx.CityZen.Plot;
 import io.github.griffenx.CityZen.Position;
 import io.github.griffenx.CityZen.ProtectionLevel;
 import io.github.griffenx.CityZen.Selection;
+import io.github.griffenx.CityZen.Util;
 import io.github.griffenx.CityZen.Tasks.ClearMetadataTask;
 
 public class PlotCommand {
@@ -489,9 +490,9 @@ public class PlotCommand {
 				} else sender.sendMessage(Messaging.playersOnly());
 			} else {
 				if (sender.hasPermission("cityzen.plot.available.others")) {
-					city = City.getCity(args[1]);
+					city = City.getCity(Util.findCityName(args));
 					if (city == null) {
-						sender.sendMessage(Messaging.cityNotFound(args[1]));
+						sender.sendMessage(Messaging.cityNotFound());
 						return;
 					}
 				} else sender.sendMessage(Messaging.noPerms("cityzen.plot.available.others"));

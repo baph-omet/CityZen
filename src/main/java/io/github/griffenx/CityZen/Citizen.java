@@ -388,7 +388,7 @@ public class Citizen implements Reputable {
 	public void addAlert(String alertText) {
 		List<String> alerts = getAlerts();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd",Locale.US);
-		alerts.add(sdf.format(new Date()) + alertText);
+		alerts.add("[" + sdf.format(new Date()) + "] " + alertText);
 		setProperty("alerts",alerts);
 	}
 	

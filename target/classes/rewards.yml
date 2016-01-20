@@ -2,13 +2,12 @@
 #     Welcome to the reward config          #
 #             for CityZen                   #
 # # # # # # # # # # # # # # # # # # # # # # #
-
+#   
+# == enabledWorlds ==
 # A list of worlds in which rewards are enabled.
 # If this list is empty, rewards are enabled in all worlds.
-enabledWorlds:
-- world
-- world_nether
-
+#   
+# == rewards ==
 # Rewards to be issued to players for their individual maximum reputations
 # Syntax: "id;type;initialRep;intervalRep;isBroadcast;command...;message..."
 #   id: unique integer used to index this reward. Starts with 0. Don't change this.
@@ -31,6 +30,11 @@ enabledWorlds:
 #   message: The chat-formatted message to show when this reward is disbursed.
 #     chat codes are allowed, as well as the above variables.
 #     leave this blank to make this reward silent
+# 
+# -- Variables start below --
+enabledWorlds:
+- world
+- world_nether
 rewards:
 - "0;p;100;-1;true;give %p diamond 1;&e%p received &c1 Diamond&e for reaching &c%r reputation"
 - "1;p;200;50;false;tell %p this is a sample reward;"

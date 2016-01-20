@@ -16,6 +16,7 @@ import io.github.griffenx.CityZen.Citizen;
 import io.github.griffenx.CityZen.City;
 import io.github.griffenx.CityZen.CityZen;
 import io.github.griffenx.CityZen.Messaging;
+import io.github.griffenx.CityZen.Util;
 import io.github.griffenx.CityZen.Tasks.ClearMetadataTask;
 
 public class CitizenCommand {
@@ -127,8 +128,8 @@ public class CitizenCommand {
 			} else sender.sendMessage(Messaging.playersOnly());
 		} else {
 			if (sender.hasPermission("cityzen.citizen.list.others")) {
-				city = City.getCity(args[1]);
-				if (city == null) sender.sendMessage(Messaging.cityNotFound(args[1]));
+				city = City.getCity(Util.findCityName(args));
+				if (city == null) sender.sendMessage(Messaging.cityNotFound());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.citizen.list.others"));
 		}
 		if (city != null) {

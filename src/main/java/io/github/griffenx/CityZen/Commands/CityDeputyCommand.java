@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import io.github.griffenx.CityZen.Citizen;
 import io.github.griffenx.CityZen.City;
 import io.github.griffenx.CityZen.Messaging;
+import io.github.griffenx.CityZen.Util;
 
 public class CityDeputyCommand {
 	
@@ -57,9 +58,9 @@ public class CityDeputyCommand {
 			}
 		} else {
 			if (sender.hasPermission("cityzen.city.deputy.list.others")) {
-				city = City.getCity(args[2]);
+				city = City.getCity(Util.findCityName(args));
 				if (city == null) {
-					sender.sendMessage(Messaging.cityNotFound(args[2]));
+					sender.sendMessage(Messaging.cityNotFound());
 					return;
 				}
 			}
@@ -101,9 +102,9 @@ public class CityDeputyCommand {
 			}
 		} else {
 			if (sender.hasPermission("cityzen.city.deputy.add.others")) {
-				city = City.getCity(args[3]);
+				city = City.getCity(Util.findCityName(args));
 				if (city == null) {
-					sender.sendMessage(Messaging.cityNotFound(args[3]));
+					sender.sendMessage(Messaging.cityNotFound());
 					return;
 				}
 			} else {
@@ -154,9 +155,9 @@ public class CityDeputyCommand {
 			}
 		} else {
 			if (sender.hasPermission("cityzen.city.deputy.remove.others")) {
-				city = City.getCity(args[3]);
+				city = City.getCity(Util.findCityName(args));
 				if (city == null) {
-					sender.sendMessage(Messaging.cityNotFound(args[3]));
+					sender.sendMessage(Messaging.cityNotFound());
 					return;
 				}
 			} else {

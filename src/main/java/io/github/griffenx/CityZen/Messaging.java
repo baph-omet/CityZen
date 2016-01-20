@@ -15,9 +15,9 @@ public class Messaging {
 		return ChatColor.RED + "You either do not have an affiliation or you are not in a City in which you can run this command.";
 	}
 	
-	public static String cityNotFound(String cityName) {
+	/*public static String cityNotFound(String cityName) {
 		return ChatColor.RED + "Could not find a city by the name of \"" + cityName + ".\" Try \"/city list\" for a list of cities. ";
-	}
+	}*/
 	
 	public static String noAffiliation(Citizen citizen) {
 		return ChatColor.RED + citizen.getName() + " is not a Citizen of any City.";

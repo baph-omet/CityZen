@@ -5,13 +5,16 @@ import org.bukkit.command.CommandSender;
 
 import io.github.griffenx.CityZen.Citizen;
 import io.github.griffenx.CityZen.City;
+import io.github.griffenx.CityZen.CityZen;
 import io.github.griffenx.CityZen.Messaging;
 import io.github.griffenx.CityZen.ProtectionLevel;
+import io.github.griffenx.CityZen.Util;
 
 public class CitySetCommand {
 	public static boolean delegate(CommandSender sender, String[] args) {
 		if (args.length >= 3) {
 			City city = null;
+			boolean admin = false;
 			if (args.length == 3) {
 				if (sender.hasPermission("cityzen.city.set")) {
 					Citizen citizen = Citizen.getCitizen(sender);
@@ -23,25 +26,41 @@ public class CitySetCommand {
 				}
 			} else {
 				if (sender.hasPermission("cityzen.city.set.others")) {
-					if (args[1].equalsIgnoreCase("slogan")) city = City.getCity(args[args.length - 1]);
-					else city = City.getCity(args[3]);
-					if (city == null) sender.sendMessage(Messaging.cityNotFound(args[3]));
+					city = City.getCity(Util.findCityName(args));
+					admin = true;
+					if (city == null) sender.sendMessage(Messaging.cityNotFound());
 				}
 			} if (city != null) {
 				String value = args[2];
 				switch (args[1].toLowerCase()) {
 					case "name":
-						city.setName(value);
-						sender.sendMessage(ChatColor.BLUE + "This City is now known as " + city.getChatName());
+						String cityName;
+						if (admin) cityName = Util.collapseArgsWithoutCityName(args, 2, city.getName());
+						else cityName = Util.collapseArguments(args, 2);
+						StringBuilder namingConflicts = new StringBuilder();
+						for (String s : CityZen.getPlugin().getConfig().getStringList("cityNameFilter")) {
+							if (cityName.toString().contains(s)) namingConflicts.append(ChatColor.RED + "- \"" + s.trim() + "\"\n");
+						}
+						if (namingConflicts.length() == 0) {
+							city.setName(cityName.toString());
+							sender.sendMessage(ChatColor.BLUE + "This City is now known as " + city.getChatName());
+						} else sender.sendMessage(ChatColor.RED + "Unable to rename city. \"" + cityName.toString() + "\" contains the following blocked word(s):\n" + namingConflicts.toString() 
+							+ "Please try again with these words omitted.");
 						break;
 					case "slogan":
-						String slogan = "";
-						for (int i = 2; i < args.length - 1; i++) {
-							slogan += args[i];
+						String slogan;
+						if (admin) slogan = Util.collapseArgsWithoutCityName(args, 2, city.getName());
+						else slogan = Util.collapseArguments(args, 2);
+						StringBuilder sloganConflicts = new StringBuilder();
+						for (String s : CityZen.getPlugin().getConfig().getStringList("cityNameFilter")) {
+							if (slogan.contains(s)) sloganConflicts.append(ChatColor.RED + "- \"" + s.trim() + "\"\n");
 						}
-						city.setSlogan(slogan);
-						sender.sendMessage(ChatColor.BLUE + "The slogan for " + city.getChatName() + ChatColor.BLUE + " is now " 
-								+ ChatColor.WHITE + slogan);
+						if (sloganConflicts.length() == 0) {
+							city.setSlogan(slogan.toString());
+							sender.sendMessage(ChatColor.BLUE + "The slogan for " + city.getChatName() + ChatColor.BLUE + " is now " 
+									+ ChatColor.WHITE + slogan);
+						} else sender.sendMessage(ChatColor.RED + "Unable to set slogan. \"" + slogan + "\" contains the following blocked word(s):\n" + sloganConflicts.toString() 
+							+ "Please try again with these words omitted.");
 						break;
 					case "color":
 						ChatColor color = ChatColor.getByChar(value);

@@ -13,9 +13,9 @@ public final class CityZen extends JavaPlugin {
 	private static final Logger log = Logger.getLogger("Minecraft");
 	private static Plugin plugin;
 	
-	public static Config citizenConfig = new Config("citizens.yml");
-	public static Config cityConfig = new Config("cities.yml");
-	public static Config rewardConfig = new Config("rewards.yml");
+	public static Config citizenConfig;
+	public static Config cityConfig;
+	public static Config rewardConfig;
 	
 	public static Economy econ = null;
 	
@@ -24,9 +24,15 @@ public final class CityZen extends JavaPlugin {
 		plugin = this;
 		this.saveDefaultConfig();
 		getConfig();
+		citizenConfig = new Config("citizens.yml");
+		cityConfig = new Config("cities.yml");
+		rewardConfig = new Config("rewards.yml");
 		citizenConfig.save();
-		citizenConfig.getConfig();
+		citizenConfig.reload();
 		cityConfig.save();
+		cityConfig.reload();
+		rewardConfig.save();
+		rewardConfig.reload();
 		
 		if (getConfig().getBoolean("useEconomy")) {
 			if (!setupEconomy() ) {
@@ -66,6 +72,7 @@ public final class CityZen extends JavaPlugin {
 		saveConfig();
 		citizenConfig.save();
 		cityConfig.save();
+		rewardConfig.save();
 	}
 	
 	public static Plugin getPlugin(){

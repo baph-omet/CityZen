@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import io.github.griffenx.CityZen.Citizen;
 import io.github.griffenx.CityZen.City;
 import io.github.griffenx.CityZen.Messaging;
+import io.github.griffenx.CityZen.Util;
 
 public class CityExclusionCommand {
 	public static boolean delegate(CommandSender sender, String[] args) {
@@ -45,8 +46,8 @@ public class CityExclusionCommand {
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.mode"));
 		} else {
 			if (sender.hasPermission("cityzen.city.exclusion.mode.others")) {
-				city = City.getCity(args[3]);
-				if (city == null) sender.sendMessage(Messaging.cityNotFound(args[3]));
+				city = City.getCity(Util.findCityName(args));
+				if (city == null) sender.sendMessage(Messaging.cityNotFound());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.mode.others"));
 		}
 		if (city == null) return;
@@ -104,8 +105,8 @@ public class CityExclusionCommand {
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.add"));
 		} else {
 			if (sender.hasPermission("cityzen.city.exclusion.add.others")) {
-				city = City.getCity(args[3]);
-				if (city == null) sender.sendMessage(Messaging.cityNotFound(args[3]));
+				city = City.getCity(Util.findCityName(args));
+				if (city == null) sender.sendMessage(Messaging.cityNotFound());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.add.others"));
 		}
 		if (city == null) return;
@@ -134,8 +135,8 @@ public class CityExclusionCommand {
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.remove"));
 		} else {
 			if (sender.hasPermission("cityzen.city.exclusion.remove.others")) {
-				city = City.getCity(args[3]);
-				if (city == null) sender.sendMessage(Messaging.cityNotFound(args[3]));
+				city = City.getCity(Util.findCityName(args));
+				if (city == null) sender.sendMessage(Messaging.cityNotFound());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.remove.others"));
 		}
 		if (city == null) return;
@@ -177,9 +178,9 @@ public class CityExclusionCommand {
 			}
 		} else {
 			if (sender.hasPermission("cityzen.city.exclusion.list.others")) {
-				city = City.getCity(args[2]);
+				city = City.getCity(Util.findCityName(args));
 				if (city == null) {
-					sender.sendMessage(Messaging.cityNotFound(args[2]));
+					sender.sendMessage(Messaging.cityNotFound());
 					return;
 				}
 			}

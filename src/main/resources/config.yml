@@ -1,61 +1,81 @@
 # # # # # # # # # # # # # # # # # # # # # # #
 #     Welcome to the config for CityZen     #
-#       (add some stuff here)               #
+#     Change the values at the bottom       #
+#     to customize the plugin.              #
 # # # # # # # # # # # # # # # # # # # # # # #
-
+# See https://github.com/griffenx/CityZen/wiki for more details
+#   
+# == useEconomy ==
 # Whether or not to use economy features of this plugin.
 # If set to true, you MUST have Vault and some Economy plugin enabled, or this plugin will not run.
 # Set to false to ignore all economy features (buying/selling plots, etc.)
-useEconomy: true
-
+#   
+# == minCitySeparation ==
 # Distance (in blocks) minimum between city centers
-minCitySeparation: 1000
-
+#   
+# == saveInterval ==
 # The interval (in minutes) in which to auto-save configs
 # Set to -1 to disable autosave
-saveInterval: 10
-
+#   
+# == plotBuffer ==
 # Number of blocks around each plot that are protected as part of the city
 # Also serves as the maximum spacing between new plots
-plotBuffer: 16
-
+#   
+# == maxPlotSize ==
 # Server-wide maximum size for normal plots
 # Plot may not contain more than this many blocks squared on the X/Z plane
 # Does not apply to MegaPlots
 # Used as the city-wide default for new cities
-maxPlotSize: 16
-
+#   
+# == minPlotSize ==
 # Server-wide minimum size for all plots
 # Plot must not contain fewer than this many blocks squared on the X/Z plane
 # Used as the city-wide default for new cities
-minPlotSize: 4
-
+#   
+# == maxMegaPlotSize ==
 # Server-wide maximum size for MegaPlots
 # Plot may not contain more than this many blocks squared on the X/Z plane
-maxMegaPlotSize: 128
-
+#   
+# == minPlotWidth ==
 # Minimum width of any of a plot's sides. This prevents players from making really long plots.
 # Recommended: set equal to the minPlotSize
-minPlotWidth: 4
-
+#   
+# == plotDensity ==
 # Defines how many plots a City is allowed per Citizen of the City
 # Must be greater than 0
 # maxPlots = Math.round(plotDensity * numberOfCitizens)
-plotDensity: 2.0
-
+#   
+# == cityNameFilter ==
 # The following strings cannot be included in a city name (case insensitive)
 # It's best to play it cautiously with this filter, as any city name containing one of these strings will be blocked.
 # I.e. adding "ass" would block that word but would also block "assassin" and "assistant," while " ass" and "ass "
 #   to block the word itself.
 # Some suggested words to block are annoying words, swear words, racial slurs, and words that might make a city seem falsely official
+#   
+# == cityDefaults ==
+# Default city config values
+# If these values are absent from a city's config, they will be drawn from here
+# Additionally, all new cities will get these values, however they may be overwritten
+#   
+# == reputation ==
+# Sources of internal changes to reputation
+# Reputation may also be modified externally via commands
+#   
+#   
+# -- Variables start below --
+useEconomy: true
+minCitySeparation: 1000
+saveInterval: 10
+plotBuffer: 16
+maxPlotSize: 16
+minPlotSize: 4
+maxMegaPlotSize: 128
+minPlotWidth: 4
+plotDensity: 2.0
 cityNameFilter:
 - "minecraft"
 - "official"
 - "admin"
-
-# Default city config values
-# If these values are absent from a city's config, they will be drawn from here
-# Additionally, all new cities will get these values, however they may be overwritten
 cityDefaults:
     color: "&f"
     slogan: "The newest city on the server!"
@@ -64,9 +84,6 @@ cityDefaults:
     blockBlacklist: false
     useBlacklistAsWhitelist: false
     naturalWipe: false
-    
-# Sources of internal changes to reputation
-# Reputation may also be modified externally via commands
 reputation:
     default: 0
     maximum: 1000000000000000

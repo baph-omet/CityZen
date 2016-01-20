@@ -2,145 +2,144 @@
 #  This is the data file for all defined cities     #
 #  Do not modify unless you know what you're doing  #
 # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-# All cities are listed under here.
-cities:
-
-    # Each city has an identifier that's basically its name with spaces removed.
-    # If this identifier is taken, it will add a number to the end.
-    testcity:
-    
-        # Publicly visible name
-        name: "Test City"
-        
-        # Color code used for this city's name. Must be a valid Bukkit code.
-        color: "&c"
-        
-        # Publicly visible slogan. Must be less than 100 characters or it will be truncated.
-        slogan: "Hello world!"
-        
-        # The Citizen who founded this city
-        founder: "778310a6219c43599d19271573d98b7c"
-        
-        # Date that this City was founded
-        # Uses yyyyMMdd format
-        foundingDate: "20151001"
-        
-        # Name of the world in which this City resides. All plots must be in the same world
-        world: "world"
-        
-        # UUID of player that is this city's mayor
-        mayor: "778310a6219c43599d19271573d98b7c"
-        
-        # List of UUID's of players who are this city's deputies
-        deputies:
-        - "878310a6219c43599d19271573d98b7c"
-        - "978310a6219c43599d19271573d98b7c"
-        
-        # List of UUID's of players who are citizens of this city
-        citizens:
-        - "778310a6219c43599d19271573d98b7c"
-        - "878310a6219c43599d19271573d98b7c"
-        - "978310a6219c43599d19271573d98b7c"
-        - "078310a6219c43599d19271573d98b7c"
-        - "178310a6219c43599d19271573d98b7c"
-        
-        # List of UUID's of players who are not allowed to join this city
-        # Also blocks join request for closed cities
-        banlist:
-        - "578310a6219c43599d19271573d98b7c"
-        - "678310a6219c43599d19271573d98b7c"
-        
-        # The highest reputation this City has ever attained.
-        # Used for rewards purposes.
-        maxReputation: 100000
-        
-        # Max width of a square plot in this city 
-        # (plots may be any rectangle with an area no more than this number of blocks squared)
-        # Set to -1 to ignore this value and just use the server default
-        maxPlotSize: 16
-        
-        # Minimum plot size, same as above, but minimum
-        minPlotSize: 8
-        
-        # Protection level for this plot
-        # 2 - protected - Only owners can build (default)
-        # 1 - communal - Only citizens of the city can build
-        # 0 - public - Anyone can build, even non-citizens (not recommended)
-        protection: 2
-        
-        # If true, any player may join this city
-        # If false, all new citizens must be invited by the mayor or a deputy
-        freeJoin: false
-        
-        # If true, citizens may place their own plots
-        # If false, only the mayor or a deputy may place plots
-        openPlotting: false
-        
-        # If true, plots get wiped automatically when created and abandoned
-        # If false, plots will always keep their contents
-        # Recommended setting this to true to reduce clutter and prevent people claiming others' builds
-        wipePlots: true
-        
-        # If true, wiped plots will reset to the natural terrain from seed
-        # If false, wiped plots will generate flatlands at their height
-        # CURRENTLY UNUSED! Possibility for future update.
-        naturalWipe: false
-        
-        # If true, item restricting will be enabled
-        # If false, any block types may be used
-        blockBlacklist: false
-        
-        # If true, the blacklist is inverted and players may only build with the blocks listed below
-        # Only checked if blockBlacklist is true
-        useBlacklistAsWhitelist: false
-        
-        # A list of blocks that are restricted in this city
-        # Only checked if blockBlacklist is true
-        # If this list is empty, the plugin treats this as if blockBlacklist is false
-        blacklistedBlocks:
-        - "netherbrick"
-        - "tnt"
-        
-        # A list of Citizens who have requested to join this City
-        # A City official can approve or deny each request
-        waitlist:
-        - "278310a6219c43599d19271573d98b7c"
-        - "378310a6219c43599d19271573d98b7c"
-        
-        # A list of all plots in this city
-        plots:
-            
-            # A unique ID assigned to each plot. Need not be sequential.
-            0:
-                
-                # Location of the plot's two corners, assumes same world as city
-                # Values must be comma-separated X,Z pairs! i.e. "150,-201"
-                corner1: "150,-150"
-                corner2: "166,-134"
-                
-                # The base height of plot
-                # When a plot is wiped, it is reset to flatlands at this height
-                height: 70
-                
-                # The selling price for this plot.
-                # This is ignored if this is a MegaPlot or if this plot has no owners
-                price: 0
-                
-                # Whether or not this plot is a MegaPlot
-                mega: false
-                
-                # Protection level for this plot
-                # 2 - protected - Only owners can build (default)
-                # 1 - communal - Only citizens of the city can build
-                # 0 - public - Anyone can build, even non-citizens (not recommended)
-                protection: 2
-                
-                # UUID of this plot's creator
-                creator: "778310a6219c43599d19271573d98b7c"
-                
-                # List of UUID's of this plot's owners
-                # The plot's creator need not be an owner
-                owners:
-                - "778310a6219c43599d19271573d98b7c"
-                - "878310a6219c43599d19271573d98b7c"
+# See https://github.com/griffenx/CityZen/wiki for more details
+# == Example City Listing ==
+# cities:
+#    # Each city has an identifier that's basically its name with spaces removed.
+#    # If this identifier is taken, it will add a number to the end.
+#    testcity:
+#        # Publicly visible name
+#        name: "Test City"
+#        
+#        # Color code used for this city's name. Must be a valid Bukkit code.
+#        color: "&c"
+#        
+#        # Publicly visible slogan. Must be less than 100 characters or it will be truncated.
+#        slogan: "Hello world!"
+#        
+#        # The Citizen who founded this city
+#        founder: "778310a6219c43599d19271573d98b7c"
+#        
+#        # Date that this City was founded
+#        # Uses yyyyMMdd format
+#        foundingDate: "20151001"
+#        
+#        # Name of the world in which this City resides. All plots must be in the same world
+#        world: "world"
+#        
+#        # UUID of player that is this city's mayor
+#        mayor: "778310a6219c43599d19271573d98b7c"
+#        
+#        # List of UUID's of players who are this city's deputies
+#        deputies:
+#        - "878310a6219c43599d19271573d98b7c"
+#        - "978310a6219c43599d19271573d98b7c"
+#        
+#        # List of UUID's of players who are citizens of this city
+#        citizens:
+#        - "778310a6219c43599d19271573d98b7c"
+#        - "878310a6219c43599d19271573d98b7c"
+#        - "978310a6219c43599d19271573d98b7c"
+#        - "078310a6219c43599d19271573d98b7c"
+#        - "178310a6219c43599d19271573d98b7c"
+#        
+#        # List of UUID's of players who are not allowed to join this city
+#        # Also blocks join request for closed cities
+#        banlist:
+#        - "578310a6219c43599d19271573d98b7c"
+#        - "678310a6219c43599d19271573d98b7c"
+#        
+#        # The highest reputation this City has ever attained.
+#        # Used for rewards purposes.
+#        maxReputation: 100000
+#        
+#        # Max width of a square plot in this city 
+#        # (plots may be any rectangle with an area no more than this number of blocks squared)
+#        # Set to -1 to ignore this value and just use the server default
+#        maxPlotSize: 16
+#        
+#        # Minimum plot size, same as above, but minimum
+#        minPlotSize: 8
+#        
+#        # Protection level for this plot
+#        # 2 - protected - Only owners can build (default)
+#        # 1 - communal - Only citizens of the city can build
+#        # 0 - public - Anyone can build, even non-citizens (not recommended)
+#        protection: 2
+#        
+#        # If true, any player may join this city
+#        # If false, all new citizens must be invited by the mayor or a deputy
+#        freeJoin: false
+#        
+#        # If true, citizens may place their own plots
+#        # If false, only the mayor or a deputy may place plots
+#        openPlotting: false
+#        
+#        # If true, plots get wiped automatically when created and abandoned
+#        # If false, plots will always keep their contents
+#        # Recommended setting this to true to reduce clutter and prevent people claiming others' builds
+#        wipePlots: true
+#        
+#        # If true, wiped plots will reset to the natural terrain from seed
+#        # If false, wiped plots will generate flatlands at their height
+#        # CURRENTLY UNUSED! Possibility for future update.
+#        naturalWipe: false
+#        
+#        # If true, item restricting will be enabled
+#        # If false, any block types may be used
+#        blockBlacklist: false
+#        
+#        # If true, the blacklist is inverted and players may only build with the blocks listed below
+#        # Only checked if blockBlacklist is true
+#        useBlacklistAsWhitelist: false
+#        
+#        # A list of blocks that are restricted in this city
+#        # Only checked if blockBlacklist is true
+#        # If this list is empty, the plugin treats this as if blockBlacklist is false
+#        blacklistedBlocks:
+#        - "netherbrick"
+#        - "tnt"
+#        
+#        # A list of Citizens who have requested to join this City
+#        # A City official can approve or deny each request
+#        waitlist:
+#        - "278310a6219c43599d19271573d98b7c"
+#        - "378310a6219c43599d19271573d98b7c"
+#        
+#        # A list of all plots in this city
+#        plots:
+#            # A unique ID assigned to each plot. Need not be sequential.
+#            0:
+#                # Location of the plot's two corners, assumes same world as city
+#                # Values must be comma-separated X,Z pairs! i.e. "150,-201"
+#                corner1: "150,-150"
+#                corner2: "166,-134"
+#                
+#                # The base height of plot
+#                # When a plot is wiped, it is reset to flatlands at this height
+#                height: 70
+#                
+#                # The selling price for this plot.
+#                # This is ignored if this is a MegaPlot or if this plot has no owners
+#                price: 0
+#                
+#                # Whether or not this plot is a MegaPlot
+#                mega: false
+#                
+#                # Protection level for this plot
+#                # 2 - protected - Only owners can build (default)
+#                # 1 - communal - Only citizens of the city can build
+#                # 0 - public - Anyone can build, even non-citizens (not recommended)
+#                protection: 2
+#                
+#                # UUID of this plot's creator
+#                creator: "778310a6219c43599d19271573d98b7c"
+#                
+#                # List of UUID's of this plot's owners
+#                # The plot's creator need not be an owner
+#                owners:
+#                - "778310a6219c43599d19271573d98b7c"
+#                - "878310a6219c43599d19271573d98b7c"
+#   
+# -- Live data starts below --
+cities: {}

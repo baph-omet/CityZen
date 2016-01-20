@@ -73,6 +73,7 @@ permissions:
             cityzen.reload: true
             cityzen.save: true
             cityzen.citizen.changerep: true
+            cityzen.city.alert.others: true
         default: op
     cityzen.user:
         description: Gives access to all basic commands and editing (subject to Citizen status)
@@ -127,6 +128,7 @@ permissions:
             cityzen.plot.modifyowners: true
             cityzen.plot.setprotection: true
             cityzen.plot.wipe: true
+            cityzen.city.alert: true
         default: true
     cityzen.reload:
         description: Reload config files from disk
@@ -168,6 +170,12 @@ permissions:
         description: Lists all deputies of the specified City
         children:
             cityzen.city.deputy.list: true
+    cityzen.city.alert:
+        description: Sends an alert to all members of your City
+    cityzen.city.alert.others:
+        description: Sends an alert to all members of the specified City
+        children:
+            cityzen.city.alert: true
     cityzen.city.evict:
         description: Forcibly remove the specified Citizen from your City
     cityzen.city.dissolve:
