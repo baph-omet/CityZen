@@ -2,6 +2,7 @@ package io.github.griffenx.CityZen;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -27,7 +28,7 @@ public class Citizen implements Reputable {
 	 * The UUID to use to identify this Citizen
 	 */
 	private Citizen(UUID uuid) {
-		this((Player) CityZen.getPlugin().getServer().getOfflinePlayer(uuid));
+		this(CityZen.getPlugin().getServer().getOfflinePlayer(uuid).getPlayer());
 	}
 	/**
 	 * Initializes a new Citizen object based on the corresponding player
@@ -35,7 +36,21 @@ public class Citizen implements Reputable {
 	 * The player whose Citizen record to initialize
 	 */
 	private Citizen(Player player) {
-		properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString());
+		if (CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString()) != null) {
+			properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString());
+		} else {
+			CityZen.citizenConfig.getConfig().createSection("citizens." + player.getUniqueId().toString());
+			properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString());
+			properties.set("name", player.getName());
+			properties.set("reputation", CityZen.getPlugin().getConfig().getLong("reputation.default"));
+			properties.set("maxReputation", CityZen.getPlugin().getConfig().getLong("reputation.default"));
+			properties.set("maxPlots", 1);
+			properties.set("issueDate", new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date()));
+			List<String> alerts = new ArrayList<String>();
+			alerts.add("Welcome to CityZen!");
+			properties.set("alerts", alerts);
+			CityZen.citizenConfig.save();
+		}
 	}
 	
 	/**
@@ -49,12 +64,7 @@ public class Citizen implements Reputable {
 		for (Citizen c : getCitizens()) {
 			if (player.getUniqueId().equals(c.getPassport().getUniqueId())) return ctz;
 		}
-		CityZen.citizenConfig.getConfig().createSection("citizens." + player.getUniqueId().toString());
 		ctz = new Citizen(player);
-		long defaultRep = CityZen.getPlugin().getConfig().getLong("reputation.default");
-		ctz.setReputation(defaultRep);
-		ctz.setMaxReputation(defaultRep);
-		ctz.setIssueDate(new Date());
 		return ctz;
 	}
 	
@@ -114,10 +124,8 @@ public class Citizen implements Reputable {
 	 * A Citizen that corresponds to this Player if one exists, else {@literal null}.
 	 */
 	public static Citizen getCitizen(Player player) {
-		for (Citizen c : getCitizens()) {
-			if (c.getPassport().equals(player)) return c;
-		}
-		return null;
+		if (CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString()) != null) return new Citizen(player);
+		else return null;
 	}
 	/**
 	 * Gets a Citizen from the config based on a CommandSender reference
@@ -183,7 +191,7 @@ public class Citizen implements Reputable {
 	public long getReputation() {
 		long rep;
 		try {
-			rep = Long.valueOf(getProperty("reputation"));
+			rep = properties.getLong("reputation");
 		} catch (NumberFormatException e) {
 			rep = -1;
 		}
@@ -218,8 +226,8 @@ public class Citizen implements Reputable {
 		long rep;
 		if (amount < 0 && (Math.abs(amount) > (globalMax - getReputation()))) rep = globalMax;
 		else rep = getReputation() - amount;
-		fixRep();
 		setProperty("reputation",rep);
+		fixRep();
 		if (rep > getMaxReputation()) setMaxReputation(rep);
 	}
 	
@@ -244,7 +252,7 @@ public class Citizen implements Reputable {
 	public long getMaxReputation() {
 		long rep;
 		try {
-			rep = Long.valueOf(getProperty("maxReputation"));
+			rep = properties.getLong("maxReputation");
 		} catch (NumberFormatException e) {
 			rep = -1;
 		}
@@ -336,7 +344,7 @@ public class Citizen implements Reputable {
 			}
 		}
 		if (foundUUID != null) {
-			passport = (Player) CityZen.getPlugin().getServer().getOfflinePlayer(UUID.fromString(foundUUID));
+			passport = CityZen.getPlugin().getServer().getOfflinePlayer(UUID.fromString(foundUUID)).getPlayer();
 		}
 		return passport;
 	}
@@ -366,18 +374,13 @@ public class Citizen implements Reputable {
 		return sdf.format(getIssueDate());
 	}
 	
-	private void setIssueDate(Date date) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd",Locale.US);
-		setProperty("issueDate",sdf.format(date));		
-	}
-	
 	/**
 	 * Gets a list of alerts for this Citizen
 	 * @return
 	 * A List of alert messages
 	 */
 	public List<String> getAlerts() {
-		return CityZen.citizenConfig.getConfig().getStringList("citizens." + getPassport().getUniqueId().toString() + ".alerts");
+		return CityZen.citizenConfig.getConfig().getStringList(properties.getCurrentPath() + ".alerts");
 	}
 	
 	/**
@@ -396,7 +399,7 @@ public class Citizen implements Reputable {
 	 * Removes all alerts from this Citizen.
 	 */
 	public void clearAlerts() {
-		setProperty("alerts", null);
+		setProperty("alerts", new Vector<String>());
 	}
 	
 	/**
@@ -463,6 +466,18 @@ public class Citizen implements Reputable {
 		} return null;
 	}
 	
+	@Override
+	public List<Reward> getRewards() {
+		List<Reward> rewards = new Vector<Reward>();
+        for (Reward r : Reward.getRewards()) {
+            if (r.getType().equals("p")) {
+            	if (r.getIntervalRep() > 0 && getMaxReputation() > r.getInitialRep() && 
+            			(getMaxReputation() - r.getInitialRep()) % r.getIntervalRep() == 0) rewards.add(r);
+            	else if (getMaxReputation() == r.getInitialRep()) rewards.add(r);
+            }
+        } return rewards;
+	}
+	
 	public void sendReward(Reward r) {
 		if (getPassport().isOnline() && Reward.getAllowedWorlds().contains(getPassport().getWorld())) {
 			CityZen.getPlugin().getServer().dispatchCommand(plugin.getServer().getConsoleSender(), r.getFormattedString(r.getCommand(),this));
@@ -492,7 +507,7 @@ public class Citizen implements Reputable {
 			}
 		} return rewards;
 	}
-	
+
 	/**
 	 * Determines if two Citizen objects are the same by their UUID
 	 * @param citizen
@@ -513,31 +528,15 @@ public class Citizen implements Reputable {
 	}
 	
 	private String getProperty(String property) {
-		for (String prop : properties.getKeys(false)) {
-			if (prop.equalsIgnoreCase(property)) {
-				return CityZen.citizenConfig.getConfig().getString(properties.getString(property));
-				// No need to set defaults, as there are no defaults for citizens
-			}
-		}
-		return "";
+		return properties.getString(property);
 	}
 	
 	private void setProperty(String property, Object value) {
 		for (String prop : properties.getKeys(false)) {
 			if (prop.equalsIgnoreCase(property)) {
-				CityZen.citizenConfig.getConfig().set("citizens." + getPassport().getUniqueId().toString() + property,value);
+				CityZen.citizenConfig.getConfig().set(properties.getCurrentPath() + "." + property,value);
 				citizenConfig = CityZen.citizenConfig.getConfig();
 			}
 		}
-	}
-	@Override
-	public List<Reward> getRewards() {
-		List<Reward> rewards = new Vector<Reward>();
-        for (Reward r : getRewards()) {
-            if (r.getType().equals("p")) {
-                if (getMaxReputation() == r.getInitialRep() || 
-                    (getMaxReputation() - r.getInitialRep()) % r.getIntervalRep() == 0) rewards.add(r);
-            }
-        } return rewards;
 	}
 }

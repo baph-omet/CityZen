@@ -47,9 +47,9 @@ public class CityZenCommand {
 	private static void info(CommandSender sender) {
 		if (sender.hasPermission("cityzen.info")) {
 			Plugin plugin = CityZen.getPlugin();
-			StringBuilder message = new StringBuilder(ChatColor.BLUE + "" + ChatColor.BOLD + "=== CityZen: The Premier City Management Plugin ===\n");
-			message.append(ChatColor.RESET + "" + ChatColor.BLUE + "| Version: " + plugin.getDescription().getVersion() + " Author: iamvishnu (iamvishnu.tumblr.com)\n");
-			message.append("| Download, get help, and learn about the plugin on BukkitDev: ");
+			StringBuilder message = new StringBuilder(ChatColor.GOLD+ "" + ChatColor.BOLD + "=== CityZen: The Premier City Management Plugin ===\n");
+			message.append(ChatColor.RESET + "" + ChatColor.BLUE + "| Version: " + plugin.getDescription().getVersion() + " Author: iamvishnu ( iamvishnu.tumblr.com )\n");
+			message.append("| Download, get help, and learn about the plugin on GitHub:\ngithub.com/griffenx/CityZen/wiki\n");
 			message.append("| For a list of commands, try \"" + ChatColor.WHITE + "/cityzen help" + ChatColor.BLUE + "\"");
 			//TODO: Add BukkitDev link
 			sender.sendMessage(message.toString());
@@ -79,10 +79,10 @@ public class CityZenCommand {
 		StringBuilder message = new StringBuilder();
 		if (category.equals("none")) {
 			message.append(ChatColor.RED + "===CityZen Help: Categories===\n" + ChatColor.GRAY 
-				+ "| To get help with CityZen commands, type \"" + ChatColor.RED + "/cityzen help <category>\n" 
-				+ ChatColor.GRAY + "where <category> is one of the following:");
-			for (String s : categories) message.append(ChatColor.GRAY + "| " + s.substring(0,1).toUpperCase() + s.substring(1));
-			message.append(ChatColor.GRAY + "Command Syntax: label <requiredArgument> (optionalArgument) (chooseThis | orThat) <argumentSupportsSpaces...>\n");
+				+ "| To get help with CityZen commands, type\n\"" + ChatColor.RED + "/cityzen help <category>\n" 
+				+ ChatColor.GRAY + "\" where <category> is one of the following:\n");
+			for (String s : categories) message.append(ChatColor.GRAY + "| " + s.substring(0,1).toUpperCase() + s.substring(1) + "\n");
+			message.append(ChatColor.GRAY + "Command Syntax: label <requiredArgument> (optionalArgument)\n(chooseThis | orThat) <argumentSupportsSpaces...>\n");
 			message.append(ChatColor.GRAY + "Key: (C) Citizens of Cities only, (P) Plot owners only, (O) City officials only, (M) Mayors only");
 		} else {
 			String[] basic = {

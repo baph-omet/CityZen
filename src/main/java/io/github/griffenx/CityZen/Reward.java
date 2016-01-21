@@ -16,10 +16,10 @@ public class Reward {
     private String command;
     private String message;
     
-    public Reward(int id) throws Exception {
+    public Reward(int id) throws IllegalArgumentException {
         String[] properties = readReward(id);
         if (properties == null) {
-            throw new Exception("No reward exists with specified ID");
+            throw new IllegalArgumentException("No reward exists with specified ID");
         } else {
             this.id = id;
             type = properties[1];

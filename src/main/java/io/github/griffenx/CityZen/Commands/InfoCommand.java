@@ -100,9 +100,9 @@ public class InfoCommand {
 				if (alerts.size() > 0) {
 					StringBuilder alertText = new StringBuilder(ChatColor.BLUE + "Alerts for " + citizen.getName() + ":\n");
 					for (String a : alerts) {
-						alertText.append(ChatColor.BLUE + "| " + a);
+						alertText.append(ChatColor.BLUE + "| " + ChatColor.GOLD + a);
 					}
-					alertText.append(ChatColor.BLUE + "All alerts delivered. Have a nice day!");
+					alertText.append(ChatColor.BLUE + "\nAll alerts delivered. Have a nice day!");
 					sender.sendMessage(alertText.toString());
 					citizen.clearAlerts();
 				} else sender.sendMessage(ChatColor.BLUE + "No pending alerts to display.");

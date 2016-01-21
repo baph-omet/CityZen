@@ -5,7 +5,6 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -23,29 +22,16 @@ import io.github.griffenx.CityZen.Tasks.AlertNotifyTask;
 public class CityZenEventListener implements Listener {
 	@EventHandler (priority = EventPriority.MONITOR)
 	public void onLogin(PlayerLoginEvent event) {
-		if (event.getResult().equals(Result.ALLOW)) {
-			Player player = event.getPlayer();
-			Citizen citizen = Citizen.getCitizen(player);
-			if (citizen == null) {
-				Citizen.createCitizen(player);
-			} else {
-				if (!player.getName().equals(citizen.getName())) citizen.setName(player.getName());
-			}
+		Player player = event.getPlayer();
+		Citizen citizen = Citizen.getCitizen(player);
+		if (citizen == null) {
+			citizen = Citizen.createCitizen(player);
+		} else {
+			if (!player.getName().equals(citizen.getName())) citizen.setName(player.getName());
 			if (citizen.getAlerts().size() > 0) new AlertNotifyTask(citizen).runTaskLater(CityZen.getPlugin(), 20 * 3);
 			if (citizen.getRewards().size() > 0) {
 				for (Reward reward : citizen.getRewards()) {
 					citizen.sendReward(reward);
-				}
-			}
-			for (Reward r : Reward.getRewards()) {
-				if (citizen.getReputation() >= r.getInitialRep()) {
-					if (r.getIntervalRep() > 0) {
-						if ((citizen.getReputation() - r.getInitialRep()) % r.getIntervalRep() == 0) {
-							citizen.sendReward(r);
-						}
-					} else if (citizen.getReputation() == r.getInitialRep()) {
-						citizen.sendReward(r);
-					}
 				}
 			}
 		}
