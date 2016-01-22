@@ -29,9 +29,50 @@ public class City implements Reputable {
 	 * @param id
 	 * The ID of the City to load
 	 */
-	private City(String id) {
-		properties = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + id);
+	private City(String name, Citizen founder) {
+		for (City c : City.getCities()) {
+			if (c.getName().equalsIgnoreCase(name)) return;
+		}
+		
+		String id = generateID(name);
 		identifier = id;
+		CityZen.cityConfig.getConfig().createSection("cities." + id);
+		properties = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + id);
+		FileConfiguration cnfg = CityZen.getPlugin().getConfig();
+		ConfigurationSection defaults = cnfg.getConfigurationSection("cityDefaults");
+		
+		properties.set("name", name);
+		properties.set("color", defaults.getString("color").charAt(1));
+		properties.set("slogan", defaults.getString("slogan"));
+		properties.set("freeJoin",defaults.getBoolean("freeJoin"));
+		properties.set("openPlotting",defaults.getBoolean("openPlotting"));
+		properties.set("wipePlots", defaults.getBoolean("wipePlots"));
+		properties.set("naturalWipe",defaults.getBoolean("naturalWipe"));
+		properties.set("blockBlacklist",defaults.getBoolean("blockBlacklist"));
+		properties.set("useBlacklistAsWhitelist",defaults.getBoolean("useBlacklistAsWhitelist"));
+		properties.set("maxPlotSize",cnfg.getInt("maxPlotSize"));
+		properties.set("minPlotSize",cnfg.getInt("minPlotSize"));
+		properties.set("founder", founder.getUUID().toString());
+		properties.set("foundingDate", new SimpleDateFormat("yyyyMMdd").format(new Date()));
+		properties.set("world", founder.getPassport().getWorld().getName());
+		properties.set("mayor", founder.getUUID().toString());
+		properties.set("deputies", new Vector<String>());
+		Vector<String> citizens = new Vector<String>();
+		citizens.add(founder.getUUID().toString());
+		properties.set("citizens", citizens);
+		properties.set("banlist", new Vector<String>());
+		properties.set("maxReputation", founder.getReputation());
+		properties.set("protection", 2);
+		properties.set("blacklistedBlocks", new Vector<String>());
+		properties.set("waitlist", new Vector<String>());
+		
+		properties.createSection("plots");
+		CityZen.cityConfig.save();
+	}
+	private City(String id) throws IllegalArgumentException {
+		identifier = id;
+		properties = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + id);
+		if (properties == null) throw new IllegalArgumentException("Attempted to get a City that doesn't exist");
 	}
 	
 	/**
@@ -41,43 +82,9 @@ public class City implements Reputable {
 	 * @return
 	 * A brand new City, or {@literal null} if the City already exists
 	 */
-	public static City createCity(String name) {
-		City newCity = null;
-		if (Character.isAlphabetic(name.charAt(0))) {
-			for (City c : City.getCities()) {
-				if (c.getName().equalsIgnoreCase(name)) return newCity;
-			}
-			
-			String id = generateID(name);
-			
-			FileConfiguration cityConfig = CityZen.cityConfig.getConfig();
-			if (!cityConfig.contains("cities." + id)) {
-				cityConfig.createSection("cities." + id);
-				cityConfig.createSection("cities." + id + ".plots");
-			}
-			
-			newCity = new City(id);
-			FileConfiguration cnfg = CityZen.getPlugin().getConfig();
-			ConfigurationSection defaults = cnfg.getConfigurationSection("cityDefaults");
-			newCity.setName(name);
-			newCity.setColor(defaults.getString("color").charAt(1));
-			newCity.setSlogan(defaults.getString("slogan"));
-			newCity.setFreeJoin(defaults.getBoolean("freeJoin"));
-			newCity.setOpenPlotting(defaults.getBoolean("openPlotting"));
-			newCity.setNaturalWipe(defaults.getBoolean("naturalWipe"));
-			newCity.setBlockExclusion(defaults.getBoolean("blockBlacklist"));
-			newCity.setWhitelisted(defaults.getBoolean("useBlacklistAsWhitelist"));
-			newCity.setMaxPlotSize(cnfg.getInt("maxPlotSize"));
-			newCity.setMinPlotSize(cnfg.getInt("minPlotSize"));
-			newCity.setFoundingDate(new Date());
-		}
-		return newCity;
-	}
 	public static City createCity(String name, Citizen founder) {
-		City newCity = City.createCity(name);
-		newCity.setFounder(founder);
-		newCity.setMayor(founder);
-		newCity.addCitizen(founder);
+		if (getCity(name) != null) return null;
+		City newCity = new City(name, founder);
 		return newCity;
 	}
 	
@@ -175,9 +182,9 @@ public class City implements Reputable {
 		return Citizen.getCitizen(UUID.fromString(getProperty("founder")));
 	}
 	
-	private void setFounder(Citizen founder) {
+	/* private void setFounder(Citizen founder) {
 		setProperty("founder",founder.getUUID().toString());
-	}
+	} */
 	
 	/**
 	 * Gets the date that this City's record was created as a Date
@@ -204,10 +211,10 @@ public class City implements Reputable {
 		return sdf.format(getFoundingDate());
 	}
 	
-	private void setFoundingDate(Date date) {
+	/* private void setFoundingDate(Date date) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd",Locale.US);
 		setProperty("foundingDate",sdf.format(date));		
-	}
+	} */
 	
 	/**
 	 * Sets the mayor of this city to a new citizen. Overwrites the old mayor.
@@ -875,8 +882,8 @@ public class City implements Reputable {
 	 * @return
 	 * A Location that signifies the center of this city
 	 */
-	public Location getCenter() {
-		Location center = null;
+	public Position getCenter() {
+		Position center = null;
 		if (getPlots().size() > 0) {
 			double maxX = 0,
 					minX = 0,
@@ -893,7 +900,7 @@ public class City implements Reputable {
 				if (p.getCorner2().getZ() > maxZ) maxZ = p.getCorner2().getZ();
 				if (p.getCorner2().getZ() < minZ) minZ = p.getCorner2().getZ();
 			}
-			center = new Location(getPlots().get(0).getCorner1().getWorld(),(maxX + minX) / 2, 0, (maxZ + minZ) / 2);
+			center = new Position(getPlots().get(0).getCorner1().getWorld(),(maxX + minX) / 2, 0, (maxZ + minZ) / 2);
 		}
 		return center;
 	}
@@ -1012,7 +1019,7 @@ public class City implements Reputable {
 		int modifier = 0;
 		Set<String> keys = CityZen.cityConfig.getConfig().getConfigurationSection("cities").getKeys(false);
 		do {
-			if (keys.contains(id + (modifier != 0 ? modifier : "")) && !(new City(id + (modifier != 0 ? modifier : "")).getName().equalsIgnoreCase(name))) {
+			if (keys.contains(id + (modifier != 0 ? modifier : "")) && !(getCity(id + (modifier != 0 ? modifier : "")).getName().equalsIgnoreCase(name))) {
 				modifier++;
 			}
 			else {

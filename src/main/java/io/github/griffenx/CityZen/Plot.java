@@ -21,8 +21,27 @@ public class Plot {
 	 * @param id
 	 * The ID number of this Plot
 	 */
-	private Plot(City city, int id) {
-		identifier = id;
+	private Plot(City city, Location corner1, Location corner2, Citizen creator) {
+		identifier = generateID(city);
+		ConfigurationSection properties = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + city.getIdentifier() + ".plots")
+				.createSection(Integer.toString(identifier));
+		properties.set("corner1", corner1.getBlockX() + "," + corner1.getBlockZ());
+		properties.set("corner2", corner2.getBlockX() + "," + corner2.getBlockZ());
+		properties.set("creator", creator.getUUID().toString());
+		properties.set("height", (int)((corner1.getBlockY() + corner2.getBlockY())/2));
+		properties.set("price", 0);
+		properties.set("mega", false);
+		properties.set("protection", 2);
+		properties.set("owners", new Vector<String>());
+		CityZen.cityConfig.save();
+	}
+	
+	private Plot(City city, int id) throws IllegalArgumentException {
+		if (CityZen.cityConfig.getConfig().getConfigurationSection("cities." + city.getIdentifier() + ".plots." + id)
+				== null) throw new IllegalArgumentException("Attempted to get a Plot that doesn't exist");
+		else {
+			identifier = id;
+		}
 	}
 	
 	/**
@@ -39,21 +58,8 @@ public class Plot {
 	 * The freshly-squeezed new Plot. If this plot already exists, or would overlap an existing plot, this returns {@literal null}.
 	 */
 	public static Plot createPlot(City city, Location corner1, Location corner2, Citizen creator) {
-		Plot newPlot = null;
-		for (Plot p : city.getPlots()) {
-			if (p.overlaps(corner1,corner2) || p.getCorner1().equals(corner1) || p.getCorner2().equals(corner2)) {
-				return null;
-			}
-		}
-		int id = generateID(city);
-		newPlot = new Plot(city,id);
-		newPlot.setCorner1(corner1);
-		newPlot.setCorner2(corner2);
-		newPlot.setCreator(creator);
-		newPlot.setMega(false);
-		newPlot.setProtectionLevel(2);
-		newPlot.addOwner(creator);
-		newPlot.setBaseHeight((int) (corner1.getY() + corner2.getY()) / 2);
+		for (Plot p : city.getPlots()) if (p.overlaps(corner1, corner2)) return null;
+		Plot newPlot = new Plot(city, corner1, corner2, creator);
 		return newPlot;
 	}
 	
@@ -71,21 +77,8 @@ public class Plot {
 	 * A new Plot with no owners
 	 */
 	public static Plot createEmptyPlot(City city, Location corner1, Location corner2, Citizen creator) {
-		if (city.isOpenPlotting()) return null;
-		Plot newPlot = null;
-		for (Plot p : city.getPlots()) {
-			if (p.overlaps(corner1,corner2) || p.getCorner1().equals(corner1) || p.getCorner2().equals(corner2)) {
-				return null;
-			}
-		}
-		int id = generateID(city);
-		newPlot = new Plot(city,id);
-		newPlot.setCorner1(corner1);
-		newPlot.setCorner2(corner2);
-		newPlot.setCreator(creator);
-		newPlot.setMega(false);
-		newPlot.setProtectionLevel(2);
-		newPlot.setBaseHeight((int) (corner1.getY() + corner2.getY()) / 2);
+		Plot newPlot = createPlot(city, corner1, corner2, creator);
+		newPlot.addOwner(creator);
 		return newPlot;
 	}
 	
@@ -448,8 +441,8 @@ public class Plot {
 		int zDirection = 1;
 		if (s.pos1.x > s.pos2.x) xDirection = -1;
 		if (s.pos1.z > s.pos2.z) zDirection = -1;
-		for (int x = (int) s.pos1.x; x < ((int) s.pos2.x * xDirection); x = x + (1 * xDirection)) {
-			for (int z = (int) s.pos1.z; x < ((int) s.pos2.z * zDirection); x = x + (1 * zDirection)) {
+		for (int x = (int) s.pos1.x; x < ((int) s.pos2.x * xDirection) + (1 * xDirection); x = x + (1 * xDirection)) {
+			for (int z = (int) s.pos1.z; z < ((int) s.pos2.z * zDirection) + (1 * zDirection); z = z + (1 * zDirection)) {
 				if (isInBuffer(x, z)) return true;
 			}
 		}
@@ -482,7 +475,7 @@ public class Plot {
 			if (corner1.getX() > corner2.getX()) xDirection = -1;
 			if (corner1.getZ() > corner2.getZ()) zDirection = -1;
 			for (int x = (int) corner1.getX(); x < ((int) corner2.getX() * xDirection); x = x + (1 * xDirection)) {
-				for (int z = (int) corner1.getZ(); x < ((int) corner2.getZ() * zDirection); x = x + (1 * zDirection)) {
+				for (int z = (int) corner1.getZ(); z < ((int) corner2.getZ() * zDirection); z = z + (1 * zDirection)) {
 					if (isInPlot(x, z)) return true;
 				}
 			}
@@ -492,7 +485,6 @@ public class Plot {
 	public boolean overlaps(Selection s) {
 		return overlaps(s.pos1.asLocation(),s.pos2.asLocation());
 	}
-	
 	
 	/**
 	 * Wipes this plot based on the wipe settings for the City. Ignores plots that have at least 1 owner
@@ -505,8 +497,8 @@ public class Plot {
 			if (getCorner1().getX() > getCorner2().getX()) xDirection = -1;
 			if (getCorner1().getZ() > getCorner2().getZ()) zDirection = -1;
 			for (int y = 1; y <= getBaseHeight(); y++) {
-				for (int x = (int) getCorner1().getX(); x < ((int) getCorner2().getX() * xDirection); x = x + (1 * xDirection)) {
-					for (int z = (int) getCorner1().getZ(); x < ((int) getCorner2().getZ() * zDirection); x = x + (1 * zDirection)) {
+				for (int x = (int) getCorner1().getX(); x < ((int) getCorner2().getX() * xDirection)+ (1 * xDirection); x = x + (1 * xDirection)) {
+					for (int z = (int) getCorner1().getZ(); z < ((int) getCorner2().getZ() * zDirection)+ (1 * zDirection); z = z + (1 * zDirection)) {
 						Environment dimension = world.getEnvironment();
 						/*if (getAffiliation().isNaturalWipe()) {
 						} else {*/

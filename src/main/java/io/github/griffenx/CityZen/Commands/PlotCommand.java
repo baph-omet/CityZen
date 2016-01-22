@@ -26,7 +26,7 @@ public class PlotCommand {
 	private static FileConfiguration config = CityZen.getPlugin().getConfig();
 	
 	public static boolean delegate(CommandSender sender, String[] args) {
-		switch (args[1].toLowerCase()) {
+		switch (args[0].toLowerCase()) {
 			case "list":
 				list(sender, args);
 				break;
@@ -98,6 +98,7 @@ public class PlotCommand {
 				wipe(sender);
 				break;
 			default:
+				sender.sendMessage(Messaging.noSuchSubcommand(args[0]));
 				return false;
 		}
 		return true;
@@ -222,65 +223,86 @@ public class PlotCommand {
 						Position position1 = new Position(citizen.getPassport().getMetadata("pos1").get(0).asString());
 						Position position2 = new Position(citizen.getPassport().getMetadata("pos2").get(0).asString());
 						Selection sel = new Selection(position1,position2);
-						if (position1.world.equals(position2.world)) {
-							if (position1.world.equals(city.getWorld())) {
-								boolean isMega = false;
-								if (!(sel.getArea() <= Math.pow((double)city.getMaxPlotSize(), 2) 
-										&& sel.getArea() <= Math.pow(config.getDouble("maxPlotSize"),2))) {
-									if (!citizen.isCityOfficial()) {
-										sender.sendMessage(ChatColor.RED + "You cannot create a Plot this big. Max Plot Size: " + city.getMaxPlotSize() 
-											+ " (City), " + config.getDouble("maxPlotSize") + " (Server)\n"
-													+ "(Plot size factor is based on the width of a square Plot)");
-										return;
-									} else {
-										if (sel.getArea() <= Math.pow(config.getDouble("maxMegaPlotSize"), 2)) {
-											isMega = true;
-											sender.sendMessage(ChatColor.BLUE + "This Plot is too large for a standard Plot and will be created as a MegaPlot.");
-										} else {
-											sender.sendMessage(ChatColor.RED + "This Plot is too large for both a standard and Mega Plot. Please select a smaller area.");
+						if (!sel.worldGuardConflicts(citizen)) {
+							if (position1.world.equals(position2.world)) {
+								if (position1.world.equals(city.getWorld())) {
+									boolean isMega = false;
+									if (!(sel.getArea() <= Math.pow((double)city.getMaxPlotSize(), 2) 
+											&& sel.getArea() <= Math.pow(config.getDouble("maxPlotSize"),2))) {
+										if (!citizen.isCityOfficial()) {
+											sender.sendMessage(ChatColor.RED + "You cannot create a Plot this big. Max Plot Size: " + city.getMaxPlotSize() 
+												+ " (City), " + config.getDouble("maxPlotSize") + " (Server)\n"
+														+ "(Plot size factor is based on the width of a square Plot)");
 											return;
-										}
-									}
-								}
-								if (sel.getArea() >= Math.pow((double)city.getMinPlotSize(), 2) 
-										&& sel.getArea() >= Math.pow(config.getDouble("minPlotSize"), 2)) {
-									int minWidth = config.getInt("minPlotWidth");
-									if (sel.getSideX() >= minWidth && sel.getSideZ() >= minWidth) {
-										boolean inPlotBuffer = false;
-										for (City c : City.getCities()) {
-											for (Plot p : c.getPlots()) {
-												if (p.overlaps(sel)) {
-													sender.sendMessage(ChatColor.RED + "You cannot create a new Plot here. It overlaps another Plot.");
-													return;
-												} else if (p.isInBuffer(sel.getBuffer(1))){
-													if (c.equals(city)) {
-														inPlotBuffer = true;
-													} else {
-														sender.sendMessage(ChatColor.RED + "You cannot create a new Plot here. It overlaps " + c.getName());
-														return;
-													}
-												}
+										} else {
+											if (sel.getArea() <= Math.pow(config.getDouble("maxMegaPlotSize"), 2)) {
+												isMega = true;
+												sender.sendMessage(ChatColor.BLUE + "This Plot is too large for a standard Plot and will be created as a MegaPlot.");
+											} else {
+												sender.sendMessage(ChatColor.RED + "This Plot is too large for both a standard and Mega Plot. Please select a smaller area.");
+												return;
 											}
 										}
-										if (inPlotBuffer) {
-											Plot newPlot = Plot.createEmptyPlot(city, position1.asLocation(), position2.asLocation(), citizen);
-											if (isMega) {
-												newPlot.setMega(true);
-												newPlot.setProtectionLevel(city.getProtectionLevel());
-											} else if (city.isOpenPlotting()) newPlot.addOwner(citizen);
-											if (city.isWipePlots() && !(args.length >= 2 && args[1].equalsIgnoreCase("preserve"))) newPlot.wipe();
-											sender.sendMessage(ChatColor.BLUE + "A new Plot was sucessfully created for " + city.getChatName()
-													+ ChatColor.BLUE + " at the selected location.\n"
-													+ "This area is now protected from interference by non-owners. Type \""
-													+ ChatColor.GOLD + "/cityzen help plot management"
-													+ ChatColor.BLUE + "\" for ways to customize your new Plot.");
-										} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot here. Plots must be no more than " + config.getInt("plotBuffer") + " blocks away from another Plot in the same City.");
-									} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot of this size. Both the length and the width of all Plots must be at least " + config.getInt("minPlotWidth") + " blocks each.");
-								} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot this small. Min Plot Size: " + city.getMinPlotSize()
-									+ " (City), " + config.getDouble("minPlotSize") + " (Server)\n"
-									+ "(Plot size factor is based on the width of a square Plot)");
-							} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot in a different world than the rest of the City.");
-						} else sender.sendMessage(ChatColor.RED + "You must select two points in the same world to create a Plot.");
+									}
+									if (sel.getArea() >= Math.pow((double)city.getMinPlotSize(), 2) 
+											&& sel.getArea() >= Math.pow(config.getDouble("minPlotSize"), 2)) {
+										int minWidth = config.getInt("minPlotWidth");
+										if (sel.getSideX() >= minWidth && sel.getSideZ() >= minWidth) {
+											if (city.getPlots().size() == 0) {
+												boolean inPlotBuffer = false;
+												for (City c : City.getCities()) {
+													for (Plot p : c.getPlots()) {
+														if (p.overlaps(sel)) {
+															sender.sendMessage(ChatColor.RED + "You cannot create a new Plot here. It overlaps another Plot.");
+															return;
+														} else if (p.isInBuffer(sel.getBuffer(1))){
+															if (c.equals(city)) {
+																inPlotBuffer = true;
+															} else {
+																sender.sendMessage(ChatColor.RED + "You cannot create a new Plot here. It overlaps " + c.getName());
+																return;
+															}
+														}
+													}
+												}
+												if (inPlotBuffer) {
+													Plot newPlot = Plot.createEmptyPlot(city, position1.asLocation(), position2.asLocation(), citizen);
+													if (isMega) {
+														newPlot.setMega(true);
+														newPlot.setProtectionLevel(city.getProtectionLevel());
+													} else if (city.isOpenPlotting()) newPlot.addOwner(citizen);
+													if (city.isWipePlots() && !(args.length >= 2 && args[1].equalsIgnoreCase("preserve"))) newPlot.wipe();
+													sender.sendMessage(ChatColor.BLUE + "A new Plot was sucessfully created for " + city.getChatName()
+															+ ChatColor.BLUE + " at the selected location.\n"
+															+ "This area is now protected from interference by non-owners. Type \""
+															+ ChatColor.GOLD + "/cityzen help plot management"
+															+ ChatColor.BLUE + "\" for ways to customize your new Plot.");
+												} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot here. Plots must be no more than " + config.getInt("plotBuffer") + " blocks away from another Plot in the same City.");
+											} else {
+												if (citizen.isCityOfficial()) {
+													if (sel.isSpaced(city)) {
+														Plot newPlot = Plot.createEmptyPlot(city, position1.asLocation(), position2.asLocation(), citizen);
+														if (isMega) {
+															newPlot.setMega(true);
+															newPlot.setProtectionLevel(city.getProtectionLevel());
+														} else if (city.isOpenPlotting()) newPlot.addOwner(citizen);
+														if (city.isWipePlots() && !(args.length >= 2 && args[1].equalsIgnoreCase("preserve"))) newPlot.wipe();
+														sender.sendMessage(ChatColor.BLUE + "A new Plot was sucessfully created for " + city.getChatName()
+																+ ChatColor.BLUE + " at the selected location.\n"
+																+ "This area is now protected from interference by non-owners. Type \""
+																+ ChatColor.GOLD + "/cityzen help plot management"
+																+ ChatColor.BLUE + "\" for ways to customize your new Plot.");
+													} else sender.sendMessage(ChatColor.RED + "This City is not far away enough from another City. Cities must be " 
+														+ CityZen.getPlugin().getConfig().getInt("minCitySeparation") + " blocks away from one another.");
+												} else sender.sendMessage(ChatColor.RED + "This City has no plots yet. Let a City official set the first plot.");
+											}
+										} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot of this size. Both the length and the width of all Plots must be at least " + config.getInt("minPlotWidth") + " blocks each.");
+									} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot this small. Min Plot Size: " + city.getMinPlotSize()
+										+ " (City), " + config.getDouble("minPlotSize") + " (Server)\n"
+										+ "(Plot size factor is based on the width of a square Plot)");
+								} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot in a different world than the rest of the City.");
+							} else sender.sendMessage(ChatColor.RED + "You must select two points in the same world to create a Plot.");
+						} else sender.sendMessage(Messaging.worldGuardConflicts());
 					} else sender.sendMessage(ChatColor.RED + "You must select two corners with \"/plot pos1\" and \"/plot pos2\".");
 				} else sender.sendMessage(ChatColor.RED + city.getName() + " cannot have any more Plots.");
 			} else sender.sendMessage(ChatColor.RED + "You cannot have any more Plots.");
@@ -295,58 +317,60 @@ public class PlotCommand {
 						Position position1 = new Position(citizen.getPassport().getMetadata("pos1").get(0).asString());
 						Position position2 = new Position(citizen.getPassport().getMetadata("pos2").get(0).asString());
 						Selection sel = new Selection(position1,position2);
-						if (position1.world.equals(position2.world)) {
-							if (position1.world.equals(city.getWorld())) {
-								if (sel.getArea() <= Math.pow((double)city.getMaxPlotSize(), 2) 
-										&& sel.getArea() <= Math.pow(config.getDouble("maxPlotSize"),2)) {
-									if (plot.isMega() && citizen.isCityOfficial()) {
-										if (sel.getArea() > Math.pow(config.getDouble("maxMegaPlotSize"), 2)) {
-											sender.sendMessage(ChatColor.RED + "This selection is too big for even a MegaPlot.");
+						if (!sel.worldGuardConflicts(citizen)) {
+							if (position1.world.equals(position2.world)) {
+								if (position1.world.equals(city.getWorld())) {
+									if (sel.getArea() <= Math.pow((double)city.getMaxPlotSize(), 2) 
+											&& sel.getArea() <= Math.pow(config.getDouble("maxPlotSize"),2)) {
+										if (plot.isMega() && citizen.isCityOfficial()) {
+											if (sel.getArea() > Math.pow(config.getDouble("maxMegaPlotSize"), 2)) {
+												sender.sendMessage(ChatColor.RED + "This selection is too big for even a MegaPlot.");
+												return;
+											}
+										} else {
+											sender.sendMessage(ChatColor.RED + "The area you have selected is too large. Only city officials can move MegaPlots to large areas.");
 											return;
 										}
-									} else {
-										sender.sendMessage(ChatColor.RED + "The area you have selected is too large. Only city officials can move MegaPlots to large areas.");
-										return;
 									}
-								}
-								if (sel.getArea() >= Math.pow((double)city.getMinPlotSize(), 2) 
-										&& sel.getArea() >= Math.pow(config.getDouble("minPlotSize"), 2)) {
-									int minWidth = config.getInt("minPlotWidth");
-									if (sel.getSideX() >= minWidth && sel.getSideZ() >= minWidth) {
-										boolean inPlotBuffer = false;
-										for (City c : City.getCities()) {
-											for (Plot p : c.getPlots()) {
-												if (p.overlaps(sel)) {
-													sender.sendMessage(ChatColor.RED + "You cannot create a new Plot here. It overlaps another Plot.");
-													return;
-												} else if (p.isInBuffer(sel.getBuffer(1))){
-													if (c.equals(city)) {
-														inPlotBuffer = true;
-													} else {
-														sender.sendMessage(ChatColor.RED + "You cannot create a new Plot here. It overlaps " + c.getName());
+									if (sel.getArea() >= Math.pow((double)city.getMinPlotSize(), 2) 
+											&& sel.getArea() >= Math.pow(config.getDouble("minPlotSize"), 2)) {
+										int minWidth = config.getInt("minPlotWidth");
+										if (sel.getSideX() >= minWidth && sel.getSideZ() >= minWidth) {
+											boolean inPlotBuffer = false;
+											for (City c : City.getCities()) {
+												for (Plot p : c.getPlots()) {
+													if (p.overlaps(sel)) {
+														sender.sendMessage(ChatColor.RED + "You cannot create a new Plot here. It overlaps another Plot.");
 														return;
+													} else if (p.isInBuffer(sel.getBuffer(1))){
+														if (c.equals(city)) {
+															inPlotBuffer = true;
+														} else {
+															sender.sendMessage(ChatColor.RED + "You cannot create a new Plot here. It overlaps " + c.getName());
+															return;
+														}
 													}
 												}
 											}
-										}
-										if (inPlotBuffer) {
-											if (city.isWipePlots() && !(args.length >= 2 && args[1].equalsIgnoreCase("preserve"))) plot.wipe();
-											
-											plot.setCorner1(position1.asLocation());
-											plot.setCorner2(position2.asLocation());
-											
-											if (city.isWipePlots() && !(args.length >= 2 && args[1].equalsIgnoreCase("preserve"))) plot.wipe();
-											sender.sendMessage(ChatColor.BLUE + "The plot was successfully moved to the selected location.\n"
-													+ "This area is now protected from interference by non-owners. Type \""
-													+ ChatColor.GOLD + "/cityzen help plot management"
-													+ ChatColor.BLUE + "\" for ways to customize your new Plot.");
-										} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot here. Plots must be no more than " + config.getInt("plotBuffer") + " blocks away from another Plot in the same City.");
-									} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot of this size. Both the length and the width of all Plots must be at least " + config.getInt("minPlotWidth") + " blocks each.");
-								} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot this small. Min Plot Size: " + city.getMinPlotSize()
-									+ " (City), " + config.getDouble("minPlotSize") + " (Server)\n"
-									+ "(Plot size factor is based on the width of a square Plot)");
-							} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot in a different world than the rest of the City.");
-						} else sender.sendMessage(ChatColor.RED + "You must select two points in the same world to create a Plot.");
+											if (inPlotBuffer) {
+												if (city.isWipePlots() && !(args.length >= 2 && args[1].equalsIgnoreCase("preserve"))) plot.wipe();
+												
+												plot.setCorner1(position1.asLocation());
+												plot.setCorner2(position2.asLocation());
+												
+												if (city.isWipePlots() && !(args.length >= 2 && args[1].equalsIgnoreCase("preserve"))) plot.wipe();
+												sender.sendMessage(ChatColor.BLUE + "The plot was successfully moved to the selected location.\n"
+														+ "This area is now protected from interference by non-owners. Type \""
+														+ ChatColor.GOLD + "/cityzen help plot management"
+														+ ChatColor.BLUE + "\" for ways to customize your new Plot.");
+											} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot here. Plots must be no more than " + config.getInt("plotBuffer") + " blocks away from another Plot in the same City.");
+										} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot of this size. Both the length and the width of all Plots must be at least " + config.getInt("minPlotWidth") + " blocks each.");
+									} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot this small. Min Plot Size: " + city.getMinPlotSize()
+										+ " (City), " + config.getDouble("minPlotSize") + " (Server)\n"
+										+ "(Plot size factor is based on the width of a square Plot)");
+								} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot in a different world than the rest of the City.");
+							} else sender.sendMessage(ChatColor.RED + "You must select two points in the same world to create a Plot.");
+						} else sender.sendMessage(Messaging.worldGuardConflicts());
 					} else sender.sendMessage(ChatColor.RED + "You must select two corners with \"/plot pos1\" and \"/plot pos2\".");
 				} else sender.sendMessage(ChatColor.RED + city.getName() + " cannot have any more Plots.");
 			} else sender.sendMessage(ChatColor.RED + "You cannot have any more Plots.");

@@ -45,6 +45,7 @@ public class CitizenCommand {
 				setplots(sender, args);
 				break;
 			default:
+				sender.sendMessage(Messaging.noSuchSubcommand(args[0]));
 				return false;
 		}
 		return true;

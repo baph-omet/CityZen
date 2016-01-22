@@ -41,4 +41,8 @@ public class Util {
 			else return mostComplexName.getName();
 		}
 	}
+	
+	public static double getDistace(Position pos1, Position pos2) {
+		return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.z - pos2.z, 2));
+	}
 }

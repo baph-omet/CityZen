@@ -6,6 +6,8 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+
 import io.github.griffenx.CityZen.Tasks.SaveConfigTask;
 import net.milkbowl.vault.economy.Economy;
 
@@ -18,6 +20,7 @@ public final class CityZen extends JavaPlugin {
 	public static Config rewardConfig;
 	
 	public static Economy econ = null;
+	public static WorldGuardPlugin WorldGuard = null;
 	
 	@Override
 	public void onEnable() {
@@ -41,6 +44,10 @@ public final class CityZen extends JavaPlugin {
 	            return;
 	        }
 		} else log.info("Economy disabled in config. Set \"useEconomy\" to true in config.yml to use Economy features.");
+		
+		WorldGuard = getWorldGuard();
+		if (WorldGuard != null) log.info("WorldGuard successfully hooked! Regions will be protected from CityZen activity.");
+		else log.info("WorldGuard not found. WorldGuard-dependent functions will be ignored.");
 		
 		Commander commander = new Commander();
 		String[] commands = {
@@ -89,5 +96,16 @@ public final class CityZen extends JavaPlugin {
 	        }
 	        econ = rsp.getProvider();
 	        return econ != null;
+	}
+	
+	private WorldGuardPlugin getWorldGuard() {
+	    Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
+	 
+	    // WorldGuard may not be loaded
+	    if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
+	        return null; // Maybe you want throw an exception instead
+	    }
+	 
+	    return (WorldGuardPlugin) plugin;
 	}
 }

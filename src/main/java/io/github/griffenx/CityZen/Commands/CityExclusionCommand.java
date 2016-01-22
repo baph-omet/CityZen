@@ -13,7 +13,7 @@ import io.github.griffenx.CityZen.Util;
 public class CityExclusionCommand {
 	public static boolean delegate(CommandSender sender, String[] args) {
 		if (args.length > 1) {
-			switch (args[2].toLowerCase()) {
+			switch (args[1].toLowerCase()) {
 				case "mode":
 					mode(sender,args);
 					break;
@@ -27,6 +27,7 @@ public class CityExclusionCommand {
 					list(sender,args);
 					break;
 				default:
+					sender.sendMessage(Messaging.noSuchSubcommand(args[1]));
 					return false;
 			}
 			return true;

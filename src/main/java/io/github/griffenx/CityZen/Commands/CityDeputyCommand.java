@@ -24,6 +24,7 @@ public class CityDeputyCommand {
 					remove(sender,args);
 					break;
 				default:
+					sender.sendMessage(Messaging.noSuchSubcommand(args[1]));
 					return false;
 			}
 			return true;

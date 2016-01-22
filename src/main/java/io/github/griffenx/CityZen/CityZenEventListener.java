@@ -19,6 +19,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import io.github.griffenx.CityZen.Tasks.AlertNotifyTask;
 
+
+
 public class CityZenEventListener implements Listener {
 	@EventHandler (priority = EventPriority.MONITOR)
 	public void onLogin(PlayerLoginEvent event) {

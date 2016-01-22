@@ -70,4 +70,12 @@ public class Messaging {
 	public static String notPlotOwner() {
 		return ChatColor.RED + "You must be the owner of this Plot to run this command.";
 	}
+	
+	public static String worldGuardConflicts() {
+		return ChatColor.RED + "You cannot put a plot in this location. There are protected regions here.";
+	}
+	
+	public static String noSuchSubcommand(String subcommand) {
+		return ChatColor.RED + "No such subcommand \"" + subcommand + "\". Type \"/cityzen help\" for a list of commands.";
+	}
 }

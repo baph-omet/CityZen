@@ -32,4 +32,37 @@ public class Selection {
 	public Selection getBuffer() {
 		return getBuffer(0);
 	}
+	
+	public boolean isSpaced(City affiliation) {
+		int xDirection = 1;
+		int zDirection = 1;
+		if (pos1.x > pos2.x) xDirection = -1;
+		if (pos1.z > pos2.z) zDirection = -1;
+		for (int x = (int) pos1.x; x < ((int) pos2.x * xDirection) + (1 * xDirection); x = x + (1 * xDirection)) {
+			for (int z = (int) pos1.z; z < ((int) pos2.z * zDirection) + (1 * zDirection); z = z + (1 * zDirection)) {
+				for (City c : City.getCities()) {
+					if (!c.equals(affiliation) && c.getWorld().equals(pos1.world) 
+							&& Util.getDistace(new Position(pos1.world, x, 0, z), c.getCenter()) < CityZen.getPlugin().getConfig().getInt("minCitySeparation")) return false;
+				}
+			}
+		} return true;
+	}
+	
+	public boolean worldGuardConflicts(Citizen citizen) {
+		if (CityZen.WorldGuard != null) {
+			int xDirection = 1;
+			int zDirection = 1;
+			if (pos1.x > pos2.x) xDirection = -1;
+			if (pos1.z > pos2.z) zDirection = -1;
+			for (int x = (int) pos1.x; x < ((int) pos2.x * xDirection) + (1 * xDirection); x = x + (1 * xDirection)) {
+				for (int z = (int) pos1.z; z < ((int) pos2.z * zDirection) + (1 * zDirection); z = z + (1 * zDirection)) {
+					for (int y = 0; y < pos1.world.getMaxHeight(); y++) {
+						if (!CityZen.WorldGuard.canBuild(citizen.getPassport(), new Position(pos1.world,x,y,z).asLocation())) {
+							return true;
+						}
+					}
+				}
+			}
+		} return false;
+	}
 }

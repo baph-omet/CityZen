@@ -1,6 +1,7 @@
 name: CityZen
 main: io.github.griffenx.CityZen.CityZen
 version: 0.1.0
+softdepend: [WorldGuard]
 
 commands:
     cityzen:

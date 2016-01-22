@@ -84,6 +84,8 @@ cityDefaults:
     blockBlacklist: false
     useBlacklistAsWhitelist: false
     naturalWipe: false
+    wipePlots: true
+    
 reputation:
     default: 0
     maximum: 1000000000000000
