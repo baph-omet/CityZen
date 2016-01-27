@@ -35,6 +35,7 @@ public class CityZenCommand {
 			CityZen.cityConfig.save();
 			CityZen.citizenConfig.save();
 			CityZen.rewardConfig.save();
+			sender.sendMessage(ChatColor.BLUE + "CityZen configs saved!");
 		} else sender.sendMessage(Messaging.noPerms("cityzen.save"));
 	}
 	
@@ -44,6 +45,7 @@ public class CityZenCommand {
 			CityZen.cityConfig.reload();
 			CityZen.citizenConfig.reload();
 			CityZen.rewardConfig.reload();
+			sender.sendMessage(ChatColor.BLUE + "CityZen configs reloaded!");
 		} else sender.sendMessage(Messaging.noPerms("cityzen.reload"));
 	}
 	

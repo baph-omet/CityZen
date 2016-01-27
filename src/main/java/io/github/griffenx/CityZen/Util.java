@@ -17,15 +17,32 @@ public class Util {
 	
 	public static String collapseArgsWithoutCityName(String[] args, int start, String cityName) {
 		int adjustment = cityName.split(" ").length;
-		StringBuilder joinedArgs = new StringBuilder(args[1]);
-		for (int i = start; i < args.length - adjustment; i++) {
+		StringBuilder joinedArgs = new StringBuilder(args[start]);
+		for (int i = start + 1; i < args.length - adjustment; i++) {
 			joinedArgs.append(" " + args[i]);
 		} return joinedArgs.toString();
 	}
 	
+	/**
+	 * Works backwards from the end of the list of arguments of a command by building a list of City names matched, then picks the one with the largest number of words.
+	 * @param args
+	 * The command arguments to parse
+	 * @return
+	 * Returns the name of a City found in the arguments with the longest name. If no City name is found, returns null.
+	 */
 	public static String findCityName(String[] args) {
+		return findCityName(args, 0);
+	}
+	/**
+	 * Works backwards from the end of the list of arguments of a command to the specified stop index by building a list of City names matched, then picks the one with the largest number of words.
+	 * @param args
+	 * The command arguments to parse
+	 * @return
+	 * Returns the name of a City found in the arguments with the longest name. If no City name is found, returns null.
+	 */
+	public static String findCityName(String[] args, int stop) {
 		List<City> citiesMatched = new Vector<>();
-		for (int i = args.length - 1; i >= 0; i--) {
+		for (int i = args.length - 1; i >= stop; i--) {
 			String name = collapseArguments(args, i, args.length);
 			City city = City.getCity(name);
 			if (city != null) citiesMatched.add(city);

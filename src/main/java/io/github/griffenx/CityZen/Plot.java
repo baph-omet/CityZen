@@ -528,8 +528,7 @@ public class Plot {
 	 * @returns True if the plots have the same corners
 	 */
 	public Boolean equals(Plot plot) {
-		return getCorner1().getX() == plot.getCorner1().getX() && getCorner1().getZ() == plot.getCorner1().getZ()
-			&& getCorner2().getX() == plot.getCorner2().getX() && getCorner2().getZ() == plot.getCorner2().getZ();
+		return identifier == plot.getIdentifier();
 	}
 	
 	private String getProperty(String property) {

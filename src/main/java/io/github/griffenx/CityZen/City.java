@@ -104,7 +104,7 @@ public class City implements Reputable {
 	
 	public static City getCity(String name) {
 		for (City c : getCities()) {
-			if (c.getName() == name) return c;
+			if (c.getName().equalsIgnoreCase(name)) return c;
 		}
 		return null;
 	}
@@ -170,7 +170,10 @@ public class City implements Reputable {
 	 * Citizen who is the Mayor of this city
 	 */
 	public Citizen getMayor() {
-		return Citizen.getCitizen(UUID.fromString(getProperty("mayor")));
+		String mayor = getProperty("mayor");
+		//CityZen.getPlugin().getLogger().info("The UUID from file is: " + mayor);
+		if (mayor != null && mayor.length() > 0) return Citizen.getCitizen(UUID.fromString(mayor));
+		else return null;
 	}
 	
 	/**
@@ -281,11 +284,16 @@ public class City implements Reputable {
 	 */
 	public ChatColor getColor() {
 		ChatColor color;
-		try {
-			color = ChatColor.getByChar(getProperty("color").charAt(1));
-		} catch(Exception e) {
-			color = ChatColor.WHITE;
-		}
+		String colorProperty = getProperty("color");
+		if (colorProperty.length() > 0) {
+			try {
+				if (colorProperty.length() <= 2) color = ChatColor.getByChar(colorProperty.charAt(colorProperty.length() - 1));
+				else color = ChatColor.valueOf(colorProperty);
+				color = ChatColor.getByChar(getProperty("color").charAt(1));
+			} catch(Exception e) {
+				color = ChatColor.WHITE;
+			}
+		} else color = ChatColor.WHITE;
 		return color;
 	}
 	
@@ -973,64 +981,6 @@ public class City implements Reputable {
 		setProtectionLevel(ProtectionLevel.getIndex(level));
 	}
 	
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (this.getClass() != obj.getClass()) return false;
-		City city = (City)obj;
-		return identifier.equalsIgnoreCase(city.getIdentifier());
-	}
-
-	private String getProperty(String property) {
-		// Get the property from the city's config
-		for (String prop : properties.getKeys(false)) {
-			if (prop.equalsIgnoreCase(property)) {
-				String val = CityZen.cityConfig.getConfig().getString(properties.getString(property));
-				// If the value is not set for some reason
-				if (val.length() == 0) {
-					val = CityZen.getPlugin().getConfig().getString("cityDefaults." + property);
-					CityZen.cityConfig.getConfig().set("cities." + identifier + "." + property, val);
-				} return val;
-			}
-		}
-		FileConfiguration defaultConfig = CityZen.getPlugin().getConfig();
-		for (String prop : defaultConfig.getConfigurationSection("cityDefaults").getKeys(false)) {
-			if (prop.equalsIgnoreCase(property)) {
-				String val = defaultConfig.getString("cityDefaults." + property);
-				CityZen.cityConfig.getConfig().set("cities." + identifier + "." + property, val);
-				//NOTE: This assumes that the default config is intact. Should probably do some sort of error handling on loading configs to make sure that each value is valid.
-				return val;
-			}
-		}
-		return "";
-	}
-	
-	private void setProperty(String property, Object value) {
-		CityZen.cityConfig.getConfig().set("cities." + identifier + "." + property, value);
-	}
-	
-	private static String generateID(String name) {
-		String id = "";
-		for (int i = 0; i < name.length(); i++) {
-			if (Character.isAlphabetic(name.charAt(i))) id += name.charAt(i);
-		}
-		
-		Boolean idChanged = false;
-		int modifier = 0;
-		Set<String> keys = CityZen.cityConfig.getConfig().getConfigurationSection("cities").getKeys(false);
-		do {
-			if (keys.contains(id + (modifier != 0 ? modifier : "")) && !(getCity(id + (modifier != 0 ? modifier : "")).getName().equalsIgnoreCase(name))) {
-				modifier++;
-			}
-			else {
-				if (modifier > 0) id += modifier;
-				idChanged = true;
-			}
-		}
-		while (modifier > 0 && !idChanged);
-		return id;
-	}
-
 	@Override
 	public long getMaxReputation() {
 		long maxRep = properties.getLong("maxReputation");
@@ -1069,4 +1019,47 @@ public class City implements Reputable {
             }
         } return rewards;
 	}
+
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (this.getClass() != obj.getClass()) return false;
+		City city = (City)obj;
+		return identifier.equalsIgnoreCase(city.getIdentifier());
+	}
+
+	private String getProperty(String property) {
+		// Get the property from the city's config
+		String val = properties.getString(property);
+		if (val == null) val = CityZen.getPlugin().getConfig().getString("cityDefaults." + property);
+		//CityZen.getPlugin().getLogger().info("Properties for the selected City: " + properties.toString() + "\nSelected property: " + property + "\nFound Value: " + val);
+		return val;
+	}
+	
+	private void setProperty(String property, Object value) {
+		CityZen.cityConfig.getConfig().set("cities." + identifier + "." + property, value);
+	}
+	
+	private static String generateID(String name) {
+		String id = "";
+		for (int i = 0; i < name.length(); i++) {
+			if (Character.isAlphabetic(name.charAt(i))) id += name.charAt(i);
+		}
+		
+		Boolean idChanged = false;
+		int modifier = 0;
+		Set<String> keys = CityZen.cityConfig.getConfig().getConfigurationSection("cities").getKeys(false);
+		do {
+			if (keys.contains(id + (modifier != 0 ? modifier : "")) && !(getCity(id + (modifier != 0 ? modifier : "")).getName().equalsIgnoreCase(name))) {
+				modifier++;
+			}
+			else {
+				if (modifier > 0) id += modifier;
+				idChanged = true;
+			}
+		}
+		while (modifier > 0 && !idChanged);
+		return id;
+	}
+
 }

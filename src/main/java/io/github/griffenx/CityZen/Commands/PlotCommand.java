@@ -248,7 +248,7 @@ public class PlotCommand {
 											&& sel.getArea() >= Math.pow(config.getDouble("minPlotSize"), 2)) {
 										int minWidth = config.getInt("minPlotWidth");
 										if (sel.getSideX() >= minWidth && sel.getSideZ() >= minWidth) {
-											if (city.getPlots().size() == 0) {
+											if (city.getPlots().size() != 0) {
 												boolean inPlotBuffer = false;
 												for (City c : City.getCities()) {
 													for (Plot p : c.getPlots()) {

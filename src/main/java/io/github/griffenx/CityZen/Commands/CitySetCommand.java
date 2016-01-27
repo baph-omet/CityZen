@@ -63,11 +63,16 @@ public class CitySetCommand {
 							+ "Please try again with these words omitted.");
 						break;
 					case "color":
-						ChatColor color = ChatColor.getByChar(value);
+						ChatColor color;
+						if (value.length() <= 2) {
+							color = ChatColor.getByChar(value.charAt(value.length() - 1));
+						} else {
+							color = ChatColor.valueOf(value.toUpperCase());
+						}
 						if (color != null) {
 							city.setColor(color.getChar());
 							sender.sendMessage(ChatColor.BLUE + "The color for " + city.getChatName() + ChatColor.BLUE + " is now "
-									+ color.toString());
+									+ color.name());
 							break;
 						} else {
 							sender.sendMessage(ChatColor.RED + "Could not interpret " + value + " as a color.");

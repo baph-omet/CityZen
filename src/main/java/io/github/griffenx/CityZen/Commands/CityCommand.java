@@ -143,14 +143,16 @@ public class CityCommand {
 			List<City> cities = City.getCities();
 			if (cities.size() > 0) {
 				int pageNumber;
-				try {
-					pageNumber = Integer.parseInt(args[1]);
-				} catch (NumberFormatException e) {
-					pageNumber = 1;
+				if (args.length == 1) pageNumber = 1;
+				else {
+					try {
+						pageNumber = Integer.parseInt(args[1]);
+					} catch (NumberFormatException e) {
+						pageNumber = 1;
+					}
 				}
-				
 				// Puts together the page of cities to display
-				int numberOfPages = (int) Math.ceil(cities.size() / 5);
+				int numberOfPages = (int) Math.ceil(cities.size() / 5.0);
 				if (pageNumber < 1) pageNumber = 1;
 				else if (pageNumber > numberOfPages) pageNumber = numberOfPages;
 				
@@ -159,15 +161,15 @@ public class CityCommand {
 					for (int c = 0; c < 5; c++) {
 						try {
 							City city = cities.get((page * 5) + c);
-							listCities[page][c] = city.getChatName() + ChatColor.BLUE + city.getSlogan();
+							if (city != null) listCities[page][c] = ChatColor.BLUE + "| " + city.getChatName() + ChatColor.BLUE + " - \"" + city.getSlogan() + "\"";
 						} catch (IndexOutOfBoundsException e) {
 							listCities[page][c] = null;
 						}
 					}
 				}
 				sender.sendMessage(ChatColor.RED + "Cities on " + ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() 
-						+ ChatColor.RESET + "" + ChatColor.RED + "(" + pageNumber + "/" + numberOfPages);
-				sender.sendMessage(listCities[pageNumber - 1]);
+						+ ChatColor.RESET + "" + ChatColor.RED + " (" + pageNumber + "/" + numberOfPages + ")");
+				for (String m : listCities[pageNumber - 1]) if (m != null) sender.sendMessage(m);
 				if (numberOfPages > 1 && pageNumber < numberOfPages) sender.sendMessage(ChatColor.BLUE + "Type \"/cities list " + (pageNumber + 1) + "\" to view the next page.");
 				sender.sendMessage(ChatColor.BLUE + "See more info about a city with \"/city info <City Name...>\"");
 			} else {
@@ -245,10 +247,7 @@ public class CityCommand {
 					if (sender.hasPermission("cityzen.city.create")) {
 						if (Character.isAlphabetic(args[1].charAt(0))) {
 							City newCity;
-							String cityName = "";
-							for (int i = 1; i < args.length; i++) {
-								cityName += args[i];
-							}
+							String cityName = Util.collapseArguments(args, 1);
 							StringBuilder namingConflicts = new StringBuilder();
 							for (String s : CityZen.getPlugin().getConfig().getStringList("cityNameFilter")) {
 								if (cityName.contains(s)) namingConflicts.append(ChatColor.RED + "- \"" + s.trim() + "\"\n");
@@ -309,29 +308,30 @@ public class CityCommand {
 					return;
 				}
 			} else if (args.length > 1) {
-				city = City.getCity(args[1]);
+				city = City.getCity(Util.findCityName(args));
 			} else {
 				sender.sendMessage(ChatColor.RED + "You must specify a City in order to run this command from Console."
 					+ "Useage:\"/city info <City>\"");
 				return;
 			}
-			
-			int deps = city.getDeputies().size();
-			String[] messages = {
-				ChatColor.BLUE + "==============================",
-				ChatColor.GOLD + "     " + city.getChatName(),
-				ChatColor.BLUE + "| Slogan: " + ChatColor.WHITE + "\"" + city.getSlogan() + "\"",
-				ChatColor.BLUE + "| Date Founded: " + ChatColor.WHITE + city.getFoundingDate("dd MMM yyyy"),
-				ChatColor.BLUE + "| Population: " + ChatColor.WHITE + city.getCitizens().size(),
-				ChatColor.BLUE + "| Reputation: " + ChatColor.GOLD + city.getReputation(),
-				ChatColor.BLUE + "| Mayor: " + ChatColor.GOLD + city.getMayor().getName() 
-					+ (deps > 0 ? "(" + deps + " Deput" + (deps > 1 ? "ies" : "y") + ")" : ""),
-				ChatColor.BLUE + "| Plots: " + ChatColor.WHITE + city.getPlots().size(),
-				ChatColor.BLUE + "| FreeJoin: " + city.isFreeJoin() + " OpenPlotting: " + city.isOpenPlotting() + " BlockExclusion: " 
-					+ (city.isBlockExclusion() ? (city.isWhitelisted() ? "Whitelist" : "Blacklist") : "None")
-			};
-			
-			sender.sendMessage(messages);
+			if (city != null) {
+				int deps = city.getDeputies().size();
+				String[] messages = {
+					ChatColor.BLUE + "==============================",
+					ChatColor.GOLD + "     " + city.getChatName(),
+					ChatColor.BLUE + "| Slogan: " + ChatColor.WHITE + "\"" + city.getSlogan() + "\"",
+					ChatColor.BLUE + "| Date Founded: " + ChatColor.WHITE + city.getFoundingDate("dd MMM yyyy"),
+					ChatColor.BLUE + "| Population: " + ChatColor.WHITE + city.getCitizens().size(),
+					ChatColor.BLUE + "| Reputation: " + ChatColor.GOLD + city.getReputation(),
+					ChatColor.BLUE + "| Mayor: " + ChatColor.GOLD + city.getMayor().getName() 
+						+ (deps > 0 ? "(" + deps + " Deput" + (deps > 1 ? "ies" : "y") + ")" : ""),
+					ChatColor.BLUE + "| Plots: " + ChatColor.WHITE + city.getPlots().size(),
+					ChatColor.BLUE + "| FreeJoin: " + city.isFreeJoin() + " OpenPlotting: " + city.isOpenPlotting() + " BlockExclusion: " 
+						+ (city.isBlockExclusion() ? (city.isWhitelisted() ? "Whitelist" : "Blacklist") : "None")
+				};
+				
+				sender.sendMessage(messages);
+			} else sender.sendMessage(Messaging.cityNotFound());
 		} else sender.sendMessage(Messaging.noPerms("cityzen.city.info"));
 	}
 	

@@ -75,11 +75,11 @@ public final class CityZen extends JavaPlugin {
 	}
 	
 	public void onDisable() {
-		plugin = null;
 		saveConfig();
 		citizenConfig.save();
 		cityConfig.save();
 		rewardConfig.save();
+		plugin = null;
 	}
 	
 	public static Plugin getPlugin(){
