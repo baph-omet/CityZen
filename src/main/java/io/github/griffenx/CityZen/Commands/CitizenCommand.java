@@ -1,5 +1,6 @@
 package io.github.griffenx.CityZen.Commands;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -219,11 +220,17 @@ public class CitizenCommand {
 			
 			sender.sendMessage(ChatColor.BLUE + "Top " + ChatColor.GOLD + amount + ChatColor.BLUE + " Citizens by " + category + ":");
 			for (int i = 0; i < amount; i++) {
-				for (Citizen c : citizens) {
-					if (values.get(i) != null && values.get(i) == c.getReputation()) {
-						sender.sendMessage(ChatColor.BLUE + "| " + i + ". " + ChatColor.RED + values.get(i)
-							+ ChatColor.BLUE + " - " + c.getName());
-						citizens.remove(c);
+				for (int j = 0; j < citizens.size(); j++) {
+					if (values.get(i) != null) {
+						long comparison = citizens.get(j).getReputation();
+						if (category.equals("age")) comparison = citizens.get(j).getIssueDate().getTime();
+						if (values.get(i) == comparison) {
+							sender.sendMessage(ChatColor.BLUE + "| " + i + ". " + ChatColor.RED 
+								+ (category.equalsIgnoreCase("age") ? new SimpleDateFormat("yyyy-MM-dd").format(new Date(values.get(i))) : values.get(i))
+								+ ChatColor.BLUE + " - " + citizens.get(j).getName());
+							citizens.remove(j);
+							j--;
+						}
 					}
 				}
 			}
@@ -267,7 +274,7 @@ public class CitizenCommand {
 					
 					if (amount >= 0) {
 						citizen.setMaxPlots(amount);
-						sender.sendMessage(ChatColor.BLUE + "Max Plots increased by " + amount + " for " + citizen.getName());
+						sender.sendMessage(ChatColor.BLUE + "Max Plots set to " + amount + " for " + citizen.getName());
 					} else sender.sendMessage(ChatColor.RED + "Amount must be at least 0");
 				} else sender.sendMessage(Messaging.citizenNotFound(args[1]));
 			} else sender.sendMessage(Messaging.notEnoughArguments("/citizen setplots <citizen> <amount>"));

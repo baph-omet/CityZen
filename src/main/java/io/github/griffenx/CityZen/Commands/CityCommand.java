@@ -1,5 +1,6 @@
 package io.github.griffenx.CityZen.Commands;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -161,14 +162,14 @@ public class CityCommand {
 					for (int c = 0; c < 5; c++) {
 						try {
 							City city = cities.get((page * 5) + c);
-							if (city != null) listCities[page][c] = ChatColor.BLUE + "| " + city.getChatName() + ChatColor.BLUE + " - \"" + city.getSlogan() + "\"";
+							if (city != null) listCities[page][c] = ChatColor.BLUE + "| " + ChatColor.WHITE + city.getChatName() + ChatColor.WHITE + " - \"" + city.getSlogan() + "\"";
 						} catch (IndexOutOfBoundsException e) {
 							listCities[page][c] = null;
 						}
 					}
 				}
-				sender.sendMessage(ChatColor.RED + "Cities on " + ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() 
-						+ ChatColor.RESET + "" + ChatColor.RED + " (" + pageNumber + "/" + numberOfPages + ")");
+				sender.sendMessage(ChatColor.AQUA + "Cities on " + ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() 
+						+ ChatColor.RESET + "" + ChatColor.AQUA + " (" + pageNumber + "/" + numberOfPages + ")");
 				for (String m : listCities[pageNumber - 1]) if (m != null) sender.sendMessage(m);
 				if (numberOfPages > 1 && pageNumber < numberOfPages) sender.sendMessage(ChatColor.BLUE + "Type \"/cities list " + (pageNumber + 1) + "\" to view the next page.");
 				sender.sendMessage(ChatColor.BLUE + "See more info about a city with \"/city info <City Name...>\"");
@@ -183,10 +184,12 @@ public class CityCommand {
 	private static boolean top(CommandSender sender, String[] args) {
 		if (sender.hasPermission("cityzen.city.top")) {
 			int numberOfResults = 10;
-			try {
-				numberOfResults = Integer.parseInt(args[1]);
-			} catch (NumberFormatException e) {
-				numberOfResults = 10;
+			if (args.length  > 1) {
+				try {
+	 				numberOfResults = Integer.parseInt(args[1]);
+				} catch (NumberFormatException e) {
+					numberOfResults = 10;
+				}
 			}
 			
 			if (numberOfResults < 1) numberOfResults = 1;
@@ -195,13 +198,16 @@ public class CityCommand {
 			if (cities.size() < numberOfResults) numberOfResults = cities.size();
 			
 			String sortType = "Reputation";
-			
-			if (args[2].length() == 0 || args[2].equalsIgnoreCase("reputation")) {
+			if (args.length > 2) {
+				if (args[2].length() == 0 || args[2].equalsIgnoreCase("reputation")) {
+					sortType = "Reputation";
+				} else if (args[2].equalsIgnoreCase("citizens") || args[2].equalsIgnoreCase("population")) {
+					sortType = "Population";
+				} else if (args[2].equalsIgnoreCase("date") || args[2].equalsIgnoreCase("age")) {
+					sortType = "Age";
+				}
+			} else {
 				sortType = "Reputation";
-			} else if (args[2].equalsIgnoreCase("citizens") || args[2].equalsIgnoreCase("population")) {
-				sortType = "Population";
-			} else if (args[2].equalsIgnoreCase("date") || args[2].equalsIgnoreCase("age")) {
-				sortType = "Age";
 			}
 			
 			List<Long> values = new ArrayList<Long>();
@@ -225,11 +231,18 @@ public class CityCommand {
 			
 			sender.sendMessage(ChatColor.BLUE + "Top " + ChatColor.GOLD + numberOfResults + ChatColor.BLUE + " Cities by " + sortType + ":");
 			for (int i = 0; i < numberOfResults; i++) {
-				for (City c : cities) {
-					if (values.get(i) != null && values.get(i) == c.getReputation()) {
-						sender.sendMessage(ChatColor.BLUE + "| " + i + ". " + ChatColor.RED + values.get(i)
-							+ ChatColor.BLUE + " - " + c.getChatName());
-						cities.remove(c);
+				for (int j = 0; j < cities.size(); j++) {
+					if (values.get(i) != null) {
+						long comparison = cities.get(j).getReputation();
+						if (sortType.equalsIgnoreCase("age")) comparison = cities.get(j).getFoundingDate().getTime();
+						else if (sortType.equalsIgnoreCase("population")) comparison = (long)cities.get(j).getCitizens().size();
+						if (values.get(i) == comparison) {
+							sender.sendMessage(ChatColor.BLUE + "| " + (i + 1) + ". " + ChatColor.RED
+								+ (sortType.equalsIgnoreCase("age") ? new SimpleDateFormat("yyyy-MM-dd").format(new Date(values.get(i))) : values.get(i))
+								+ ChatColor.BLUE + " - " + cities.get(j).getChatName());
+							cities.remove(j);
+							j--;
+						}
 					}
 				}
 			}
@@ -286,11 +299,13 @@ public class CityCommand {
 			if (sender.hasPermission("cityzen.city.leave")) {
 				City aff = citizen.getAffiliation();
 				if (aff != null) {
-					long rep = citizen.getReputation();
-					aff.removeCitizen(citizen);
-					sender.sendMessage(ChatColor.BLUE + "You have left " + ChatColor.GOLD + aff.getChatName() + ChatColor.BLUE + ". "
-						+ (CityZen.getPlugin().getConfig().getInt("lostOnLeaveCityPercent") > 0 ? " You lost " + ChatColor.GOLD + (rep - citizen.getReputation())
-						+ " Reputation" + ChatColor.BLUE + ". You now have " + ChatColor.GOLD + citizen.getReputation() + " Reputation" + ChatColor.BLUE + "." : ""));
+					if (!citizen.isMayor()) {
+						long rep = citizen.getReputation();
+						aff.removeCitizen(citizen);
+						sender.sendMessage(ChatColor.BLUE + "You have left " + ChatColor.GOLD + aff.getChatName() + ChatColor.BLUE + ". "
+							+ (CityZen.getPlugin().getConfig().getInt("lostOnLeaveCityPercent") > 0 ? " You lost " + ChatColor.GOLD + (rep - citizen.getReputation())
+							+ " Reputation" + ChatColor.BLUE + ". You now have " + ChatColor.GOLD + citizen.getReputation() + " Reputation" + ChatColor.BLUE + "." : ""));
+					} else sender.sendMessage(ChatColor.RED + "The Mayor of a City cannot leave. Either pass on your title or delete your City.");
 				} else sender.sendMessage(ChatColor.RED + "You have no city to leave.");
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.leave"));
 		} else sender.sendMessage(Messaging.playersOnly());
@@ -617,26 +632,28 @@ public class CityCommand {
 			
 			List<Citizen> banlist = city.getBanlist();
 			
-			int numberOfPages = (int) Math.ceil(banlist.size() / 5);
-			
-			String[][] pages = new String[numberOfPages][5];
-			
-			for (int page=0;page<numberOfPages;page++) {
-				for (int i=0; i < 5;i++) {
-					try {
-						Citizen banee = banlist.get(page * 5 + i);
-						pages[page][i] = banee.getName();
-					} catch (IndexOutOfBoundsException e) {
-						pages[page][i] = null;
+			if (banlist.size() > 0) {
+				int numberOfPages = (int) Math.ceil(banlist.size() / 5);
+				
+				String[][] pages = new String[numberOfPages][5];
+				
+				for (int page=0;page<numberOfPages;page++) {
+					for (int i=0; i < 5;i++) {
+						try {
+							Citizen banee = banlist.get(page * 5 + i);
+							pages[page][i] = banee.getName();
+						} catch (IndexOutOfBoundsException e) {
+							pages[page][i] = null;
+						}
 					}
 				}
-			}
-			
-			sender.sendMessage(ChatColor.RED + "Citizens banned from " + city.getChatName()
-					+ ChatColor.RED + "(" + pageNumber + "/" + numberOfPages);
-			sender.sendMessage(pages[pageNumber - 1]);
-			if (numberOfPages > 1 && pageNumber < numberOfPages) sender.sendMessage(ChatColor.BLUE + "Type \"/city banlist " 
-				+ (pageNumber + 1) + "\" to view the next page.");
+				
+				sender.sendMessage(ChatColor.RED + "Citizens banned from " + city.getChatName()
+						+ ChatColor.RED + "(" + pageNumber + "/" + numberOfPages);
+				sender.sendMessage(pages[pageNumber - 1]);
+				if (numberOfPages > 1 && pageNumber < numberOfPages) sender.sendMessage(ChatColor.BLUE + "Type \"/city banlist " 
+					+ (pageNumber + 1) + "\" to view the next page.");
+			} else sender.sendMessage(ChatColor.BLUE + "No Citizens are banned from " + city.getChatName());
 		}
 	}
 	
@@ -672,23 +689,25 @@ public class CityCommand {
 				}
 			}
 			if (city != null) {
-				Location position = ((Player) sender).getLocation();
-				Location cityLocation = city.getCenter().asLocation();
-				double x = position.getX();
-				double z = position.getZ();
-				double cityX = cityLocation.getX();
-				double cityZ = cityLocation.getZ();
-				double distance = Math.sqrt(Math.pow(x - cityX,2.0) + Math.pow(z - cityZ, 2.0));
-				String direction = "";
-				if (cityZ - z > 100) direction += "South";
-				else if (cityZ - z < -100) direction += "North";
-				else direction += "Due ";
-				if (cityX - x > 100) direction += "West";
-				else if (cityX - x < -100) direction += "East";
-				else direction += "ward";
-				
-				sender.sendMessage(ChatColor.BLUE + "Distance to the center of " + city.getChatName() + ChatColor.BLUE + String.format("(%.2d,%.2d):\n", cityX,cityZ)
-						+ String.format("| %.2d Blocks %s of your location",distance,direction));
+				if (city.getCenter() != null) {
+					Location position = ((Player) sender).getLocation();
+					Location cityLocation = city.getCenter().asLocation();
+					double x = position.getX();
+					double z = position.getZ();
+					double cityX = cityLocation.getX();
+					double cityZ = cityLocation.getZ();
+					double distance = Math.sqrt(Math.pow(x - cityX,2.0) + Math.pow(z - cityZ, 2.0));
+					String direction = "";
+					if (cityZ - z > 100.0) direction += "South";
+					else if (cityZ - z < -100.0) direction += "North";
+					else direction += "Due ";
+					if (cityX - x > 100.0) direction += "West";
+					else if (cityX - x < -100.0) direction += "East";
+					else direction += "ward";
+					
+					sender.sendMessage(ChatColor.BLUE + "Distance to the center of " + city.getChatName() + ChatColor.BLUE + String.format("(%1$.2f,%2$.2f):\n", cityX,cityZ)
+							+ String.format("| %1$.2f Blocks %2s of your location",distance,direction));
+				} else sender.sendMessage(ChatColor.RED + "Could not locate the center of " + city.getName() + ". This is probably because the City doesn't have any plots yet.");
 			}
 		} else {
 			sender.sendMessage(Messaging.playersOnly());
@@ -818,16 +837,18 @@ public class CityCommand {
 			}
 		} else sender.sendMessage(Messaging.noPerms("cityzen.city.alert"));
 		if (city != null) {
-			String alert = "";
-			if (admin) {
-				alert = Util.collapseArgsWithoutCityName(args, 1, city.getName());
-			} else {
-				alert = Util.collapseArguments(args, 1);
-			}
-			for (Citizen c : city.getCitizens()) {
-				c.addAlert(sender.getName() + ": " + alert);
-			}
-			sender.sendMessage(ChatColor.BLUE + "Alert sent: " + alert);
+			if (args.length > 1) {
+				String alert = "";
+				if (admin) {
+					alert = Util.collapseArgsWithoutCityName(args, 1, city.getName());
+				} else {
+					alert = Util.collapseArguments(args, 1);
+				}
+				for (Citizen c : city.getCitizens()) {
+					c.addAlert(sender.getName() + ": " + alert);
+				}
+				sender.sendMessage(ChatColor.BLUE + "Alert sent: " + alert);
+			} else sender.sendMessage(Messaging.notEnoughArguments("/city alert <Message>"));
 		}
 	}
 }

@@ -31,7 +31,10 @@ public class CityExclusionCommand {
 					return false;
 			}
 			return true;
-		} else return false;
+		} else {
+			sender.sendMessage(ChatColor.RED + "Not enough arguments. Type \"/cityzen help city exclusion\" for help with this command.");
+			return false;
+		}
 	}
 	
 	private static void mode(CommandSender sender, String[] args) {
@@ -62,7 +65,7 @@ public class CityExclusionCommand {
 					city.setBlockExclusion(true);
 					city.setWhitelisted(false);
 					sender.sendMessage(ChatColor.BLUE + "Block Exclusion for " + city.getChatName() 
-						+ ChatColor.BLUE + "has been set to " + ChatColor.GOLD + "BLACKLIST" 
+						+ ChatColor.BLUE + "has been set to " + ChatColor.GOLD + " BLACKLIST" 
 						+ ChatColor.BLUE + ". Use \"/city exclusion list\" to see which materials are not allowed in plots.");
 					break;
 				case "w":
@@ -73,7 +76,7 @@ public class CityExclusionCommand {
 					city.setBlockExclusion(true);
 					city.setWhitelisted(true);
 					sender.sendMessage(ChatColor.BLUE + "Block Exclusion for " + city.getChatName() 
-					+ ChatColor.BLUE + "has been set to " + ChatColor.GOLD + "WHITELIST" 
+					+ ChatColor.BLUE + "has been set to " + ChatColor.GOLD + " WHITELIST" 
 					+ ChatColor.BLUE + ". Use \"/city exclusion list\" to see which materials are allowed in plots.");
 					break;
 				case "":
@@ -86,7 +89,7 @@ public class CityExclusionCommand {
 					city.setBlockExclusion(false);
 					city.setWhitelisted(false);
 					sender.sendMessage(ChatColor.BLUE + "Block Exclusion for " + city.getChatName() 
-					+ ChatColor.BLUE + "has been set to " + ChatColor.GOLD + "OFF" 
+					+ ChatColor.BLUE + "has been set to " + ChatColor.GOLD + " NONE" 
 					+ ChatColor.BLUE + ". All materials are now allowed in plots.");
 					break;
 			}
@@ -112,7 +115,7 @@ public class CityExclusionCommand {
 		}
 		if (city == null) return;
 		else {
-			Material material = Material.getMaterial(args[2]);
+			Material material = Material.getMaterial(args[2].toUpperCase());
 			if (material != null) {
 				if (!city.getBlacklist().contains(material)) {
 					city.addBlock(material);
@@ -142,7 +145,7 @@ public class CityExclusionCommand {
 		}
 		if (city == null) return;
 		else {
-			Material material = Material.getMaterial(args[2]);
+			Material material = Material.getMaterial(args[2].toUpperCase());
 			if (material != null) {
 				if (city.getBlacklist().contains(material)) {
 					city.removeBlock(material);
@@ -188,7 +191,7 @@ public class CityExclusionCommand {
 		} if (city == null) return;
 		if (city.isBlockExclusion()) {
 			sender.sendMessage(ChatColor.GOLD + "Materials Excluded" + ChatColor.BLUE + " in " + city.getChatName() 
-				+ ChatColor.BLUE + "(Mode: " + (city.isWhitelisted() ? "Whitelist" : "Blacklist") + ")");
+				+ ChatColor.BLUE + " (Mode: " + (city.isWhitelisted() ? "Whitelist" : "Blacklist") + ")");
 			for (Material m : city.getBlacklist()) {
 				sender.sendMessage(ChatColor.GOLD + m.toString());
 			}

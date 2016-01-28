@@ -78,7 +78,7 @@ public class CitySetCommand {
 							sender.sendMessage(ChatColor.RED + "Could not interpret " + value + " as a color.");
 							break;
 						}
-					case "maxPlotSize":
+					case "maxplotsize":
 						int size;
 						try {
 							size = Integer.parseInt(value);
@@ -89,7 +89,7 @@ public class CitySetCommand {
 						city.setMaxPlotSize(size);
 						sender.sendMessage(ChatColor.BLUE + "The maximum plot size for " + city.getChatName() + ChatColor.BLUE + " is now " + value);
 						break;
-					case "minPlotSize":
+					case "minplotsize":
 						int minSize;
 						try {
 							minSize = Integer.parseInt(value);
@@ -100,17 +100,17 @@ public class CitySetCommand {
 						city.setMaxPlotSize(minSize);
 						sender.sendMessage(ChatColor.BLUE + "The minimum plot size for " + city.getChatName() + ChatColor.BLUE + " is now " + value);
 						break;
-					case "freeJoin":
+					case "freejoin":
 						boolean freejoin = Boolean.parseBoolean(value);
 						city.setFreeJoin(freejoin);
 						sender.sendMessage(ChatColor.BLUE + "FreeJoin for " + city.getChatName() + ChatColor.BLUE + " is now set to " + freejoin);
 						break;
-					case "openPlotting":
+					case "openplotting":
 						boolean openPlotting = Boolean.parseBoolean(value);
 						city.setOpenPlotting(openPlotting);
 						sender.sendMessage(ChatColor.BLUE + "FreeJoin for " + city.getChatName() + ChatColor.BLUE + " is now set to " + openPlotting);
 						break;
-					case "wipePlots":
+					case "wipeplots":
 						boolean wipePlots = Boolean.parseBoolean(value);
 						city.setWipePlots(wipePlots);
 						sender.sendMessage(ChatColor.BLUE + "WipePlots for " + city.getChatName() + ChatColor.BLUE + " is now set to " + wipePlots);
@@ -158,8 +158,9 @@ public class CitySetCommand {
 							default:
 								sender.sendMessage(ChatColor.RED + "\"" + args[2] + "\" is not a protection level.");
 						}
+						break;
 					default:
-						sender.sendMessage(ChatColor.RED + "\"" + value + "\" is not a configurable property.");
+						sender.sendMessage(ChatColor.RED + "\"" + args[1] + "\" is not a configurable property.");
 						break;
 				}
 			}

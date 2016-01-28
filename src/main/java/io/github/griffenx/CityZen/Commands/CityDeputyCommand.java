@@ -67,10 +67,12 @@ public class CityDeputyCommand {
 			}
 		} if (city == null) return;
 		
-		sender.sendMessage(ChatColor.GOLD + "Deputies" + ChatColor.BLUE + " of " + city.getChatName());
-		for (Citizen d : city.getDeputies()) {
-			sender.sendMessage(ChatColor.GOLD + d.getName());
-		}
+		if (city.getDeputies().size() > 0) {
+			sender.sendMessage(ChatColor.GOLD + "Deputies" + ChatColor.BLUE + " of " + city.getChatName());
+			for (Citizen d : city.getDeputies()) {
+				sender.sendMessage(ChatColor.GOLD + d.getName());
+			}
+		} else sender.sendMessage(city.getChatName() + ChatColor.BLUE + " has no Deputies.");
 	}
 	
 	private static void add(CommandSender sender, String[] args) {

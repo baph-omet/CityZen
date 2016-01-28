@@ -647,12 +647,12 @@ public class City implements Reputable {
 	 */
 	public List<Citizen> getBanlist() {
 		List<Citizen> banned = new Vector<Citizen>();
-		for (String key : properties.getConfigurationSection("banlist").getKeys(false)) {
+		for (String u : properties.getStringList("banlist")) {
 			Citizen c = null;
 			try {
-				c = Citizen.getCitizen(UUID.fromString(key));
+				c = Citizen.getCitizen(UUID.fromString(u));
 			} catch (IllegalArgumentException e) {
-				CityZen.getPlugin().getLogger().log(Level.INFO,"Unable to parse player in banlist for city " + getName() + ": " + key);
+				CityZen.getPlugin().getLogger().log(Level.INFO,"Unable to parse player in banlist for city " + getName() + ": " + u);
 			}
 			if (c != null) banned.add(c);
 		}

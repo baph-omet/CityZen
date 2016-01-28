@@ -19,8 +19,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import io.github.griffenx.CityZen.Tasks.AlertNotifyTask;
 
-
-
 public class CityZenEventListener implements Listener {
 	@EventHandler (priority = EventPriority.MONITOR)
 	public void onLogin(PlayerLoginEvent event) {
@@ -305,6 +303,7 @@ public class CityZenEventListener implements Listener {
 		}
 	}
 	
+	@EventHandler (priority=EventPriority.LOW)
 	public void onMobSpawn(CreatureSpawnEvent event) {
 		Location location = event.getLocation();
 		City city = City.getCity(location);

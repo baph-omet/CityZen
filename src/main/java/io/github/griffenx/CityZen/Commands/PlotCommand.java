@@ -395,11 +395,11 @@ public class PlotCommand {
 			}
 			
 			if (citizen.getAffiliation() != null && citizen.getPlots().size() > 0) {
-				StringBuilder message = new StringBuilder(ChatColor.BLUE + "Plots owned by: " + ChatColor.GOLD + citizen.getName() + ChatColor.BLUE + ":");
+				StringBuilder message = new StringBuilder(ChatColor.BLUE + "Plots owned by: " + ChatColor.GOLD + citizen.getName() + ChatColor.BLUE + ":\n");
 				for (Plot p : citizen.getPlots()) {
 					message.append(ChatColor.BLUE + "| " + p.getIdentifier() + ": (" + (int)p.getCorner1().getX() + "," + (int)p.getCorner1().getZ() + "),(" 
-							+ (int)p.getCorner2().getX() + "," + (int)p.getCorner2().getX() + ") Height: " + p.getBaseHeight() + " Protection: " 
-							+ p.getProtectionLevel() + " Creator: " + p.getCreator().getName() + " Co-Owners:");
+							+ (int)p.getCorner2().getX() + "," + (int)p.getCorner2().getZ() + ") Height: " + p.getBaseHeight() + " Protection: " 
+							+ p.getProtectionLevel() + "\n|   Creator: " + p.getCreator().getName() + " Co-Owners:");
 					for (Citizen c : p.getOwners()) {
 						if (!citizen.equals(c)) message.append(" " + c.getName());
 					}

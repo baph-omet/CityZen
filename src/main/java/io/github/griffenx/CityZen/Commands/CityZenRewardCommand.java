@@ -92,8 +92,8 @@ public class CityZenRewardCommand {
                 
                 Reward.createReward(rType,initialRep,intervalRep,isBroadcast,command.toString(),"");
                 sender.sendMessage(ChatColor.BLUE + "Reward created successfully.");
-            }
-        }
+            } else sender.sendMessage(Messaging.notEnoughArguments("/cityzen rewards add <citizen | city> <initialRep> <intervalRep> <isBroadcast> <command...>"));
+        } else sender.sendMessage(Messaging.noPerms("cityzen.rewards.add"));
     }
     
     private static void remove(CommandSender sender, String[] args) {

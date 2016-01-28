@@ -6,6 +6,7 @@ import org.bukkit.plugin.Plugin;
 
 import io.github.griffenx.CityZen.CityZen;
 import io.github.griffenx.CityZen.Messaging;
+import io.github.griffenx.CityZen.Util;
 
 public class CityZenCommand {
 	public static void delegate(CommandSender sender, String[] args) {
@@ -65,11 +66,7 @@ public class CityZenCommand {
 	private static void help(CommandSender sender, String[] args) {
 		String category = "none";
 		if (args.length > 1) {
-			StringBuilder cat = new StringBuilder(args[1]);
-			for (int i=2;i<args.length;i++) {
-				cat.append(" " + args[i]);
-			}
-			category = cat.toString();
+			category = Util.collapseArguments(args, 1);
 		}
 		String[] categories = {
 				"basic",
@@ -92,15 +89,15 @@ public class CityZenCommand {
 			message.append(ChatColor.GRAY + "Key: (C) Citizens of Cities only, (P) Plot owners only, (O) City officials only, (M) Mayors only");
 		} else {
 			String[] basic = {
-				 "- cityzen - Show basic plugin info",
-				 "- cityzen help (category) - Show all useable commands by category",
+				" - cityzen - Show basic plugin info",
+				" - cityzen help (category) - Show all useable commands by category",
 				"reload - cityzen reload - Reload config files from disk",
 				"save - cityzen save - Save changes to config files",
 				"reputation - reputation - Show your reputation",
 				"reputation.others - reputation (Citizen) - Show the reputation of the specified Citizen",
 				"passport - passport - Show all your Citizen data",
 				"passport.others - passport (Citizen) - Show all the Citizen data for the specified Citizen",
-				 "- alert - Show all your pending alerts and dismisses them"
+				" - alert - Show all your pending alerts and dismisses them"
 			};
 			String[] city = {
 				"city.list - city list - List all cities that exist on this server",
@@ -132,7 +129,7 @@ public class CityZenCommand {
 				"city.deputy.remove.others - city deputy remove <Citizen> <City> - Demotes the specified Deputy of the specified City"
 			};
 			String[] cityset = {
-				"city.set- city set name <name...> - Set a new name for your City (M)",
+				"city.set - city set name <name...> - Set a new name for your City (M)",
 				"city.set.others - city set name <name...> <City> - Set a new name for the specified City",
 				"city.set - city set slogan <slogan...> - Set a new slogan for your City (M)",
 				"city.set.others - city set slogan <slogan...> <City> - Set a new slogan for the specified City",
