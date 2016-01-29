@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 
 public class Plot {
@@ -397,7 +398,7 @@ public class Plot {
 	 * True if location is inside the plot, else false
 	 */
 	public boolean isInPlot(Location location) {
-		return isInPlot(location.getX(), location.getY());
+		return isInPlot(location.getBlockX(), location.getBlockZ());
 	}
 	/**
 	 * Determines whether or not the specified coordinates are inside this Plot.
@@ -409,8 +410,10 @@ public class Plot {
 	 * True if (x,z) is inside this plot, else false
 	 */
 	public boolean isInPlot(double x, double z) {
-		if ((x < getCorner2().getX() && x > getCorner1().getX()) || (x > getCorner2().getX() && x < getCorner1().getX())) {
-			if ((z < getCorner2().getZ() && z > getCorner1().getZ()) || (z > getCorner2().getZ() && z < getCorner1().getZ())) {
+		//CityZen.getPlugin().getLogger().info("Location: (" + x + "," + z + ") Corner1: (" + getCorner1().getX() + "," + getCorner1().getZ() 
+		//	+ ") Corner2: (" + getCorner2().getX() + "," + getCorner2().getZ() + ")");
+		if ((x <= getCorner2().getX() && x >= getCorner1().getX()) || (x >= getCorner2().getX() && x <= getCorner1().getX())) {
+			if ((z <= getCorner2().getZ() && z >= getCorner1().getZ()) || (z >= getCorner2().getZ() && z <= getCorner1().getZ())) {
 				return true;
 			}
 		}
@@ -425,12 +428,16 @@ public class Plot {
 		if (isInPlot(x,z)) return false;
 		double buffer = CityZen.getPlugin().getConfig().getDouble("plotBuffer");
 		if (buffer <= 0) return false;
-		double[] bufferX = {getCorner1().getX() + (Math.abs(getCorner1().getX()) / getCorner1().getX()) * buffer,
-				getCorner2().getX() + (Math.abs(getCorner2().getX()) / getCorner2().getX()) * buffer};
-		double[] bufferZ = {getCorner1().getZ() + (Math.abs(getCorner1().getZ()) / getCorner1().getZ()) * buffer,
-				getCorner2().getZ() + (Math.abs(getCorner2().getZ()) / getCorner2().getZ()) * buffer};
-		if ((x < bufferX[0] && x > bufferX[1]) || (x > bufferX[0] && x < bufferX[1])) {
-			if ((z < bufferZ[0] && z > bufferZ[1]) || (z > bufferZ[0] && z < bufferZ[1])) {
+		double[] bufferX = {
+			getCorner1().getX() + (getCorner1().getX() < getCorner2().getX() ? -1 : 1) * buffer,
+			getCorner2().getX() + (getCorner1().getX() < getCorner2().getX() ? 1 : -1) * buffer
+		};
+		double[] bufferZ = {
+			getCorner1().getZ() + (getCorner1().getZ() < getCorner2().getZ() ? -1 : 1) * buffer,
+			getCorner2().getZ() + (getCorner1().getZ() < getCorner2().getZ() ? 1 : -1) * buffer
+		};
+		if ((x <= bufferX[0] && x >= bufferX[1]) || (x >= bufferX[0] && x <= bufferX[1])) {
+			if ((z <= bufferZ[0] && z >= bufferZ[1]) || (z >= bufferZ[0] && z <= bufferZ[1])) {
 				return true;
 			}
 		}
@@ -490,31 +497,36 @@ public class Plot {
 	 * Wipes this plot based on the wipe settings for the City. Ignores plots that have at least 1 owner
 	 */
 	public void wipe() {
-		if (getOwners().size() == 0) {
-			World world = getAffiliation().getWorld();
-			int xDirection = 1;
-			int zDirection = 1;
-			if (getCorner1().getX() > getCorner2().getX()) xDirection = -1;
-			if (getCorner1().getZ() > getCorner2().getZ()) zDirection = -1;
-			for (int y = 1; y <= getBaseHeight(); y++) {
-				for (int x = (int) getCorner1().getX(); x < ((int) getCorner2().getX() * xDirection)+ (1 * xDirection); x = x + (1 * xDirection)) {
-					for (int z = (int) getCorner1().getZ(); z < ((int) getCorner2().getZ() * zDirection)+ (1 * zDirection); z = z + (1 * zDirection)) {
-						Environment dimension = world.getEnvironment();
-						/*if (getAffiliation().isNaturalWipe()) {
-						} else {*/
-						if (dimension == Environment.NETHER) {
-							if (y < 5) world.getBlockAt(x, y, z).setType(Material.BEDROCK);
-							else if (y < 10) world.getBlockAt(x,y,z).setType(Material.LAVA);
-							else world.getBlockAt(x, y, z).setType(Material.NETHERRACK);
-						} else if (dimension == Environment.THE_END) {
-							if (y < getBaseHeight() - 10) world.getBlockAt(x, y, z).setType(Material.AIR);
-							else world.getBlockAt(x, y, z).setType(Material.ENDER_STONE);
-						} else {
-							if (y < 5) world.getBlockAt(x, y, z).setType(Material.BEDROCK);
-							else if (y < getBaseHeight() - 5) world.getBlockAt(x, y, z).setType(Material.STONE);
-							else if (y < getBaseHeight()) world.getBlockAt(x, y, z).setType(Material.DIRT);
-							else world.getBlockAt(x, y, z).setType(Material.GRASS);
-						}
+		World world = getAffiliation().getWorld();
+		int xDirection = 1;
+		int zDirection = 1;
+		if (getCorner1().getX() > getCorner2().getX()) xDirection = -1;
+		if (getCorner1().getZ() > getCorner2().getZ()) zDirection = -1;
+		for (int y = 1; y <= world.getMaxHeight(); y++) {
+			for (int x = (int) getCorner1().getX(); x < ((int) getCorner2().getX() * xDirection)+ (1 * xDirection); x = x + (1 * xDirection)) {
+				for (int z = (int) getCorner1().getZ(); z < ((int) getCorner2().getZ() * zDirection)+ (1 * zDirection); z = z + (1 * zDirection)) {
+					Environment dimension = world.getEnvironment();
+					/*if (getAffiliation().isNaturalWipe()) {
+					} else {*/
+					Block block = world.getBlockAt(x, y, z);
+					if (dimension == Environment.NETHER) {
+						if (y < 5) block.setType(Material.BEDROCK);
+						else if (y < 10) block.setType(Material.LAVA);
+						else if (y < getBaseHeight()) block.setType(Material.NETHERRACK);
+						else if (y < world.getMaxHeight() - 30) block.setType(Material.AIR);
+						else if (y < world.getMaxHeight() - 20) block.setType(Material.NETHERRACK);
+						else if (y < world.getMaxHeight() - 19) block.setType(Material.BEDROCK);
+						else block.setType(Material.AIR);
+					} else if (dimension == Environment.THE_END) {
+						if (y < getBaseHeight() - 10) block.setType(Material.AIR);
+						else if (y < getBaseHeight()) block.setType(Material.ENDER_STONE);
+						else block.setType(Material.AIR);
+					} else {
+						if (y < 5) block.setType(Material.BEDROCK);
+						else if (y < getBaseHeight() - 5) block.setType(Material.STONE);
+						else if (y < getBaseHeight() - 1) block.setType(Material.DIRT);
+						else if (y < getBaseHeight()) block.setType(Material.GRASS);
+						else block.setType(Material.AIR);
 					}
 				}
 			}

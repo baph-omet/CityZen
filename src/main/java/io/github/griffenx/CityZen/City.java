@@ -893,22 +893,26 @@ public class City implements Reputable {
 	public Position getCenter() {
 		Position center = null;
 		if (getPlots().size() > 0) {
-			double maxX = 0,
-					minX = 0,
-					maxZ = 0,
-					minZ = 0;
+			Double maxX = null,
+				minX = null,
+				maxZ = null,
+				minZ = null;
 			for (Plot p : getPlots()) {
-				if (p.getCorner1().getX() > maxX) maxX = p.getCorner1().getX();
-				if (p.getCorner1().getX() < minX) minX = p.getCorner1().getX();
-				if (p.getCorner1().getZ() > maxZ) maxZ = p.getCorner1().getZ();
-				if (p.getCorner1().getZ() < minZ) minZ = p.getCorner1().getZ();
+				maxX = null;
+				minX = null;
+				maxZ = null;
+				minZ = null;
+				if (maxX == null || p.getCorner1().getX() > maxX) maxX = p.getCorner1().getX();
+				if (minX == null || p.getCorner1().getX() < minX) minX = p.getCorner1().getX();
+				if (maxZ == null || p.getCorner1().getZ() > maxZ) maxZ = p.getCorner1().getZ();
+				if (minZ == null || p.getCorner1().getZ() < minZ) minZ = p.getCorner1().getZ();
 				
 				if (p.getCorner2().getX() > maxX) maxX = p.getCorner2().getX();
 				if (p.getCorner2().getX() < minX) minX = p.getCorner2().getX();
 				if (p.getCorner2().getZ() > maxZ) maxZ = p.getCorner2().getZ();
 				if (p.getCorner2().getZ() < minZ) minZ = p.getCorner2().getZ();
 			}
-			center = new Position(getPlots().get(0).getCorner1().getWorld(),(maxX + minX) / 2, 0, (maxZ + minZ) / 2);
+			if (maxX != null && minX != null && maxZ != null && minZ != null) center = new Position(getPlots().get(0).getCorner1().getWorld(),(maxX + minX) / 2, 0, (maxZ + minZ) / 2);
 		}
 		return center;
 	}

@@ -135,7 +135,7 @@ public class PlotCommand {
 								case "p1":
 								case "pos1":
 									// Format: world;x;y;z
-									Location pos = user.getLocation();
+									Location pos = new Location(user.getLocation().getWorld(), user.getLocation().getX(), user.getLocation().getY() - 1, user.getLocation().getZ());
 									for (City c : City.getCities()) for (Plot p : c.getPlots()) if (p.isInPlot(pos)) {
 										sender.sendMessage(ChatColor.RED + "This location is inside an existing plot. Try a different location.");
 										return;
@@ -155,7 +155,7 @@ public class PlotCommand {
 								case "p2":
 								case "pos2":
 									// Format: world;x;y;z
-									Location pos2 = user.getLocation();
+									Location pos2 = new Location(user.getLocation().getWorld(), user.getLocation().getX(), user.getLocation().getY() - 1, user.getLocation().getZ());
 									for (City c : City.getCities()) for (Plot p : c.getPlots()) if (p.isInPlot(pos2)) {
 										sender.sendMessage(ChatColor.RED + "This location is inside an existing plot. Try a different location.");
 										return;
@@ -594,8 +594,8 @@ public class PlotCommand {
 									c.subReputation(rep);
 								}
 								plot.wipe();
-								plot.delete();
 								if (!plot.getOwners().contains(citizen)) sender.sendMessage(ChatColor.BLUE + "You successfully deleted this plot.");
+								plot.delete();
 							} else sender.sendMessage(ChatColor.RED + "You don't have permission to delete this plot. Only Admins, "
 									+ "city officials, and owners of the plot can delete it.");
 						} else sender.sendMessage(Messaging.noPlotFound());
@@ -800,29 +800,26 @@ public class PlotCommand {
 	private static void info(CommandSender sender) {
 		if (sender instanceof Player) {
 			if (sender.hasPermission("cityzen.plot.info")) {
-				Plot plot = null;
-				for (City c : City.getCities()) {
-					if (c.isInCity(sender)) {
-						plot = c.getPlot(sender);
-						break;
-					}
-				}
+				Plot plot = Plot.getPlot(((Player)sender).getLocation());
 				if (plot != null) {
 					StringBuilder message = new StringBuilder();
 					message.append(ChatColor.BLUE + "This Plot:\n");
 					message.append(ChatColor.BLUE + "Affiliation: " + plot.getAffiliation().getChatName() + " ID: " + plot.getIdentifier() + "\n");
 					if (plot.isMega()) message.append(ChatColor.BLUE + "MegaPlot\n");
-					message.append(ChatColor.BLUE + "Corner 1: (" + plot.getCorner1().getBlockX() + "," + plot.getCorner1().getBlockZ() + ")\n");
-					message.append(ChatColor.BLUE + "Corner 2: (" + plot.getCorner2().getBlockX() + "," + plot.getCorner2().getBlockZ() + ")\n");
-					message.append(ChatColor.BLUE + "Center: " + plot.getCenterCoords() + "\n");
-					message.append(ChatColor.BLUE + "Size: " + (int)Math.sqrt(plot.getArea()) + " Area: " + plot.getArea() + "\n");
-					message.append(ChatColor.BLUE + "Base Height:" + plot.getBaseHeight());
-					message.append(ChatColor.BLUE + "Protection: " + plot.getProtectionLevel().toString());
+					message.append(ChatColor.BLUE + "Corner 1: (" + ChatColor.WHITE + plot.getCorner1().getBlockX() + ChatColor.BLUE + "," 
+						+ ChatColor.WHITE + plot.getCorner1().getBlockZ() + ChatColor.BLUE + ")\n");
+					message.append(ChatColor.BLUE + "Corner 2: (" + ChatColor.WHITE + plot.getCorner2().getBlockX() + ChatColor.BLUE + "," 
+						+ ChatColor.WHITE + plot.getCorner2().getBlockZ() + ChatColor.BLUE + ")\n");
+					message.append(ChatColor.BLUE + "Center: " + ChatColor.WHITE + plot.getCenterCoords() + "\n");
+					message.append(ChatColor.BLUE + "Size: " + ChatColor.WHITE + (int)Math.sqrt(plot.getArea()) + ChatColor.BLUE + " Area: " + ChatColor.WHITE + plot.getArea().intValue() + "\n");
+					message.append(ChatColor.BLUE + "Base Height:" + ChatColor.WHITE + plot.getBaseHeight() + "\n");
+					message.append(ChatColor.BLUE + "Protection: " + ChatColor.WHITE + plot.getProtectionLevel().toString() + "\n");
 					message.append(ChatColor.BLUE + "Owners:\n");
-					for (Citizen o : plot.getOwners()) message.append(ChatColor.BLUE + "- " + o.getName() + "\n");
+					for (Citizen o : plot.getOwners()) message.append(ChatColor.BLUE + "    - " + o.getName() + "\n");
 					message.append(ChatColor.BLUE + "Creator: " + plot.getCreator().getName() + "\n");
 					if (config.getBoolean("useEconomy") && plot.getPrice() > 0) message.append(ChatColor.BLUE + 
-						"Price: " + ChatColor.GREEN + plot.getPrice() + " " + CityZen.econ.currencyNamePlural());
+						"Price: " + ChatColor.GREEN + plot.getPrice() + " " + CityZen.econ.currencyNamePlural() + "\n");
+					sender.sendMessage(message.toString());
 				} else sender.sendMessage(Messaging.noPlotFound());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.plot.info"));
 		} else sender.sendMessage(Messaging.playersOnly());

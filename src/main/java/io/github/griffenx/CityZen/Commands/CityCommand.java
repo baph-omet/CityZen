@@ -338,11 +338,16 @@ public class CityCommand {
 					ChatColor.BLUE + "| Date Founded: " + ChatColor.WHITE + city.getFoundingDate("dd MMM yyyy"),
 					ChatColor.BLUE + "| Population: " + ChatColor.WHITE + city.getCitizens().size(),
 					ChatColor.BLUE + "| Reputation: " + ChatColor.GOLD + city.getReputation(),
+					ChatColor.BLUE + "| Max Reputation: " + ChatColor.RED + city.getMaxReputation(),
 					ChatColor.BLUE + "| Mayor: " + ChatColor.GOLD + city.getMayor().getName() 
 						+ (deps > 0 ? "(" + deps + " Deput" + (deps > 1 ? "ies" : "y") + ")" : ""),
-					ChatColor.BLUE + "| Plots: " + ChatColor.WHITE + city.getPlots().size(),
-					ChatColor.BLUE + "| FreeJoin: " + city.isFreeJoin() + " OpenPlotting: " + city.isOpenPlotting() + " BlockExclusion: " 
-						+ (city.isBlockExclusion() ? (city.isWhitelisted() ? "Whitelist" : "Blacklist") : "None")
+					ChatColor.BLUE + "| Plots: " + ChatColor.WHITE + city.getPlots().size() + "/" + (long)Math.round(CityZen.getPlugin().getConfig().getDouble("plotDensity") * city.getCitizens().size()),
+					ChatColor.BLUE + "| FreeJoin: " + ChatColor.WHITE + city.isFreeJoin(),
+					ChatColor.BLUE + "| OpenPlotting: " + ChatColor.WHITE + city.isOpenPlotting(),
+					ChatColor.BLUE + "| WipePlots: " + ChatColor.WHITE + city.isWipePlots(),
+					ChatColor.BLUE + "| Protection: " + ChatColor.WHITE + city.getProtectionLevel().toString(),
+					ChatColor.BLUE + "| Plot Sizes: " + ChatColor.WHITE + city.getMinPlotSize() + ChatColor.BLUE + " to " + ChatColor.WHITE + city.getMaxPlotSize(),
+					ChatColor.BLUE + "| BlockExclusion: " + ChatColor.WHITE + (city.isBlockExclusion() ? (city.isWhitelisted() ? "Whitelist" : "Blacklist") : "None")
 				};
 				
 				sender.sendMessage(messages);
@@ -705,8 +710,8 @@ public class CityCommand {
 					else if (cityX - x < -100.0) direction += "East";
 					else direction += "ward";
 					
-					sender.sendMessage(ChatColor.BLUE + "Distance to the center of " + city.getChatName() + ChatColor.BLUE + String.format("(%1$.2f,%2$.2f):\n", cityX,cityZ)
-							+ String.format("| %1$.2f Blocks %2s of your location",distance,direction));
+					sender.sendMessage(ChatColor.BLUE + "Distance to the center of " + city.getChatName() + ChatColor.BLUE + String.format(" (%1$.2f,%2$.2f):\n", cityX,cityZ)
+							+ String.format("| %1$.2f Blocks ",distance) + direction + " of your location");
 				} else sender.sendMessage(ChatColor.RED + "Could not locate the center of " + city.getName() + ". This is probably because the City doesn't have any plots yet.");
 			}
 		} else {
