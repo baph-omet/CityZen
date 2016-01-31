@@ -32,7 +32,7 @@ public class CityZenEventListener implements Listener {
 		} else {
 			if (!player.getName().equals(citizen.getName())) citizen.setName(player.getName());
 			if (citizen.getAlerts().size() > 0) new AlertNotifyTask(citizen).runTaskLater(CityZen.getPlugin(), 20 * 3);
-			if (citizen.getRewards().size() > 0) {
+			if (citizen.getQueuedRewards().size() > 0) {
 				List<Reward> rewards = citizen.getQueuedRewards();
 				citizen.clearQueuedRewards();
 				for (Reward reward : rewards) {
