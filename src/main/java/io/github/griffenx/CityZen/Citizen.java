@@ -28,7 +28,23 @@ public class Citizen implements Reputable {
 	 * The UUID to use to identify this Citizen
 	 */
 	private Citizen(UUID uuid) {
-		this(CityZen.getPlugin().getServer().getOfflinePlayer(uuid).getPlayer());
+		OfflinePlayer player = plugin.getServer().getOfflinePlayer(uuid);
+		if (CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + uuid.toString()) != null) {
+			properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + uuid.toString());
+		} else {
+			CityZen.citizenConfig.getConfig().createSection("citizens." + player.getUniqueId().toString());
+			properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + uuid.toString());
+			properties.set("name", player.getName());
+			properties.set("reputation", CityZen.getPlugin().getConfig().getLong("reputation.default"));
+			properties.set("maxReputation", CityZen.getPlugin().getConfig().getLong("reputation.default"));
+			properties.set("maxPlots", 1);
+			properties.set("issueDate", new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date()));
+			List<String> alerts = new ArrayList<String>();
+			alerts.add("Welcome to CityZen! These alerts will inform you about various goings-on with Cities on this server. Type \"/cityzen help\" for more info.");
+			properties.set("alerts", alerts);
+			properties.set("queuedRewards", new ArrayList<String>());
+			CityZen.citizenConfig.save();
+		}
 	}
 	/**
 	 * Initializes a new Citizen object based on the corresponding player
@@ -36,21 +52,7 @@ public class Citizen implements Reputable {
 	 * The player whose Citizen record to initialize
 	 */
 	private Citizen(Player player) {
-		if (CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString()) != null) {
-			properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString());
-		} else {
-			CityZen.citizenConfig.getConfig().createSection("citizens." + player.getUniqueId().toString());
-			properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString());
-			properties.set("name", player.getName());
-			properties.set("reputation", CityZen.getPlugin().getConfig().getLong("reputation.default"));
-			properties.set("maxReputation", CityZen.getPlugin().getConfig().getLong("reputation.default"));
-			properties.set("maxPlots", 1);
-			properties.set("issueDate", new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date()));
-			List<String> alerts = new ArrayList<String>();
-			alerts.add("Welcome to CityZen!");
-			properties.set("alerts", alerts);
-			CityZen.citizenConfig.save();
-		}
+		this(player.getUniqueId());
 	}
 	
 	/**
@@ -104,7 +106,8 @@ public class Citizen implements Reputable {
 	 * A Citizen that corresponds to this UUID if one exists, else {@literal null}.
 	 */
 	public static Citizen getCitizen(UUID uuid) {
-		return getCitizen(plugin.getServer().getOfflinePlayer(uuid));
+		if (CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + uuid.toString()) != null) return new Citizen(uuid);
+		else return null;
 	}
 	/**
 	 * Gets a Citizen from the config based on an OfflinePlayer reference
@@ -114,7 +117,7 @@ public class Citizen implements Reputable {
 	 * A Citizen that corresponds to this OfflinePlayer if one exists, else {@literal null}.
 	 */
 	public static Citizen getCitizen(OfflinePlayer player) {
-		return getCitizen((Player) player);
+		return getCitizen(player.getUniqueId());
 	}
 	/**
 	 * Gets a Citizen from the config based on a Player reference
@@ -124,8 +127,7 @@ public class Citizen implements Reputable {
 	 * A Citizen that corresponds to this Player if one exists, else {@literal null}.
 	 */
 	public static Citizen getCitizen(Player player) {
-		if (CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + player.getUniqueId().toString()) != null) return new Citizen(player);
-		else return null;
+		return getCitizen(player.getUniqueId());
 	}
 	/**
 	 * Gets a Citizen from the config based on a CommandSender reference
@@ -136,7 +138,7 @@ public class Citizen implements Reputable {
 	 */
 	public static Citizen getCitizen(CommandSender sender) {
 		if (sender instanceof Player) {
-			return Citizen.getCitizen((Player) sender);
+			return Citizen.getCitizen(((Player) sender).getUniqueId());
 		}
 		return null;
 	}
@@ -261,8 +263,8 @@ public class Citizen implements Reputable {
 	
 	private void setMaxReputation(long amount) {
 		if (amount < 0) amount = 0;
-		for (long i = getMaxReputation();i<amount;i=i + (amount - i) / Math.abs(amount - i)) {
-			setProperty("maxReputation",amount);
+		for (long i = getMaxReputation() + 1; i <= amount; i++) {
+			setProperty("maxReputation",i);
 			City city = getAffiliation();
 			if (city != null && city.getReputation() > city.getMaxReputation()) city.setMaxReputation(city.getReputation());
 			for (Reward r : getRewards()) {
@@ -333,9 +335,9 @@ public class Citizen implements Reputable {
 	 * @return
 	 * This Citizen's Player
 	 */
-	public Player getPassport() {
+	public OfflinePlayer getPassport() {
 		String foundUUID = null;
-		Player passport = null;
+		OfflinePlayer ofp = null;
 		ConfigurationSection cits = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens");
 		for (String key : cits.getKeys(false)) {
 			if (cits.getString(key + ".name").equalsIgnoreCase(CityZen.getPlugin().getServer().getOfflinePlayer(UUID.fromString(key)).getName())) {
@@ -344,9 +346,13 @@ public class Citizen implements Reputable {
 			}
 		}
 		if (foundUUID != null) {
-			passport = CityZen.getPlugin().getServer().getOfflinePlayer(UUID.fromString(foundUUID)).getPlayer();
+			ofp = CityZen.getPlugin().getServer().getOfflinePlayer(UUID.fromString(foundUUID));
 		}
-		return passport;
+		return ofp;
+	}
+	
+	public Player getPlayer() {
+		return getPassport().getPlayer();
 	}
 	
 	/**
@@ -409,7 +415,7 @@ public class Citizen implements Reputable {
 	 */
 	public void sendMessage(String message) {
 		if (getPassport().isOnline()) {
-			getPassport().sendMessage(message);
+			getPlayer().sendMessage(message);
 		} else {
 			addAlert(ChatColor.stripColor(message));
 		}
@@ -471,7 +477,7 @@ public class Citizen implements Reputable {
 		List<Reward> rewards = new Vector<Reward>();
         for (Reward r : Reward.getRewards()) {
             if (r.getType().equals("p")) {
-            	if (r.getIntervalRep() > 0 && getMaxReputation() > r.getInitialRep() && 
+            	if (r.getIntervalRep() > 0 && getMaxReputation() >= r.getInitialRep() && 
             			(getMaxReputation() - r.getInitialRep()) % r.getIntervalRep() == 0) rewards.add(r);
             	else if (getMaxReputation() == r.getInitialRep()) rewards.add(r);
             }
@@ -479,7 +485,7 @@ public class Citizen implements Reputable {
 	}
 	
 	public void sendReward(Reward r) {
-		if (getPassport().isOnline() && Reward.getAllowedWorlds().contains(getPassport().getWorld())) {
+		if (getPassport().isOnline() && Reward.getEnabledWorlds().contains(getPlayer().getWorld())) {
 			CityZen.getPlugin().getServer().dispatchCommand(plugin.getServer().getConsoleSender(), r.getFormattedString(r.getCommand(),this));
 			if (r.getIsBroadcast()) {
 				CityZen.getPlugin().getServer().broadcastMessage(r.getFormattedString(r.getMessage(), this));
@@ -490,7 +496,9 @@ public class Citizen implements Reputable {
 	}
 	
 	public void queueReward(Reward r) {
-		setProperty("queuedRewards",properties.getStringList("queuedRewards").add(r.getID() + ""));
+		List<String> rewards = properties.getStringList("queuedRewards");
+		rewards.add(Integer.toString(r.getID()));
+		setProperty("queuedRewards",rewards);
 	}
 	
 	public void cancelReward(Reward r) {
@@ -507,6 +515,10 @@ public class Citizen implements Reputable {
 			}
 		} return rewards;
 	}
+	
+	public void clearQueuedRewards() {
+		setProperty("queuedRewards", new ArrayList<String>());
+	}
 
 	/**
 	 * Determines if two Citizen objects are the same by their UUID
@@ -515,12 +527,10 @@ public class Citizen implements Reputable {
 	 * @return
 	 * Whether or not these Citizens are the same
 	 */
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (this.getClass() != obj.getClass()) return false;
-		Citizen citizen = (Citizen)obj; 
-		return getPassport().getUniqueId().equals(citizen.getPassport().getUniqueId());
+	public boolean equals(Citizen ctz) {
+		if (this == ctz) return true;
+		if (ctz == null) return false;
+		return getPassport().getUniqueId().equals(ctz.getPassport().getUniqueId());
 	}
 	
 	private void fixRep() {

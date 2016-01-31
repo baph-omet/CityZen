@@ -14,7 +14,7 @@ public class AlertNotifyTask extends BukkitRunnable {
 	
 	@Override
 	public void run() {
-		if (target != null && target.getAlerts().size() > 0) target.getPassport().sendMessage(ChatColor.BLUE + "You have " + ChatColor.GOLD 
+		if (target != null && target.getAlerts().size() > 0) target.getPlayer().sendMessage(ChatColor.BLUE + "You have " + ChatColor.GOLD 
 				+ target.getAlerts().size() + ChatColor.BLUE + " unread Alerts! Type \""
 				+ ChatColor.GOLD + "/alert" + ChatColor.BLUE + "\" to read.");
 		

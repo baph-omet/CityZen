@@ -3,6 +3,7 @@ package io.github.griffenx.CityZen;
 import java.util.List;
 import java.util.Vector;
 
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -27,7 +28,11 @@ public class Reward {
             intervalRep = Long.parseLong(properties[3]);
             isBroadcast = Boolean.valueOf(properties[4]);
             command = properties[5];
-            message = properties[6];
+            try {
+            	message = properties[6];
+            } catch (ArrayIndexOutOfBoundsException e) {
+            	message = "";
+            }
         }
     }
     
@@ -50,7 +55,7 @@ public class Reward {
         for (String r : CityZen.rewardConfig.getConfig().getStringList("rewards")) {
             try {
                 rewards.add(new Reward(Integer.parseInt(r.split(";")[0])));
-            } catch (Exception e) {
+            } catch (IllegalArgumentException e) {
                 continue;
             }
         } return rewards;
@@ -84,7 +89,7 @@ public class Reward {
         }
     }
     
-    public static List<World> getAllowedWorlds() {
+    public static List<World> getEnabledWorlds() {
     	List<World> worlds = new Vector<World>();
     	for (String w : CityZen.rewardConfig.getConfig().getStringList("enabledWorlds")) {
     		World world = CityZen.getPlugin().getServer().getWorld(w);
@@ -156,7 +161,7 @@ public class Reward {
     }
     
     public String getMessage() {
-        return message;
+        return ChatColor.translateAlternateColorCodes('&', message);
     }
     
     public void setMessage(String message) {

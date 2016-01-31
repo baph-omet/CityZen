@@ -79,7 +79,7 @@ public class Plot {
 	 */
 	public static Plot createEmptyPlot(City city, Location corner1, Location corner2, Citizen creator) {
 		Plot newPlot = createPlot(city, corner1, corner2, creator);
-		newPlot.addOwner(creator);
+		//newPlot.addOwner(creator);
 		return newPlot;
 	}
 	
@@ -444,12 +444,20 @@ public class Plot {
 		return false;
 	}
 	public boolean isInBuffer(Selection s) {
-		int xDirection = 1;
-		int zDirection = 1;
-		if (s.pos1.x > s.pos2.x) xDirection = -1;
-		if (s.pos1.z > s.pos2.z) zDirection = -1;
-		for (int x = (int) s.pos1.x; x < ((int) s.pos2.x * xDirection) + (1 * xDirection); x = x + (1 * xDirection)) {
-			for (int z = (int) s.pos1.z; z < ((int) s.pos2.z * zDirection) + (1 * zDirection); z = z + (1 * zDirection)) {
+		double xLow = s.pos1.x;
+		double xHigh = s.pos2.x;
+		double zLow = s.pos1.z;
+		double zHigh = s.pos2.z;
+		if (s.pos2.x < xLow) {
+			xLow = s.pos2.x;
+			xHigh = s.pos1.x;
+		}
+		if (s.pos2.z < zLow) {
+			zLow = s.pos2.z;
+			zHigh = s.pos1.z;
+		}
+		for (double x = xLow; x < xHigh; x++) {
+			for (double z = zLow; z < zHigh; z++) {
 				if (isInBuffer(x, z)) return true;
 			}
 		}
@@ -502,12 +510,14 @@ public class Plot {
 		int zDirection = 1;
 		if (getCorner1().getX() > getCorner2().getX()) xDirection = -1;
 		if (getCorner1().getZ() > getCorner2().getZ()) zDirection = -1;
+		
+		double xSide = Math.abs(getCorner1().getX() - getCorner2().getX());
+		double zSide = Math.abs(getCorner1().getZ() - getCorner2().getZ());
+		
 		for (int y = 1; y <= world.getMaxHeight(); y++) {
-			for (int x = (int) getCorner1().getX(); x < ((int) getCorner2().getX() * xDirection)+ (1 * xDirection); x = x + (1 * xDirection)) {
-				for (int z = (int) getCorner1().getZ(); z < ((int) getCorner2().getZ() * zDirection)+ (1 * zDirection); z = z + (1 * zDirection)) {
+			for (int x = (int) getCorner1().getX(); x != (int) getCorner2().getX() + xDirection && Math.abs(x - getCorner1().getBlockX()) <= xSide; x = x + xDirection) {
+				for (int z = (int) getCorner1().getZ(); z != (int) getCorner2().getZ() + zDirection && Math.abs(z - getCorner1().getBlockZ()) <= zSide; z = z + zDirection) {
 					Environment dimension = world.getEnvironment();
-					/*if (getAffiliation().isNaturalWipe()) {
-					} else {*/
 					Block block = world.getBlockAt(x, y, z);
 					if (dimension == Environment.NETHER) {
 						if (y < 5) block.setType(Material.BEDROCK);
@@ -519,13 +529,13 @@ public class Plot {
 						else block.setType(Material.AIR);
 					} else if (dimension == Environment.THE_END) {
 						if (y < getBaseHeight() - 10) block.setType(Material.AIR);
-						else if (y < getBaseHeight()) block.setType(Material.ENDER_STONE);
+						else if (y <= getBaseHeight()) block.setType(Material.ENDER_STONE);
 						else block.setType(Material.AIR);
 					} else {
 						if (y < 5) block.setType(Material.BEDROCK);
 						else if (y < getBaseHeight() - 5) block.setType(Material.STONE);
-						else if (y < getBaseHeight() - 1) block.setType(Material.DIRT);
-						else if (y < getBaseHeight()) block.setType(Material.GRASS);
+						else if (y < getBaseHeight()) block.setType(Material.DIRT);
+						else if (y == getBaseHeight()) block.setType(Material.GRASS);
 						else block.setType(Material.AIR);
 					}
 				}
@@ -564,7 +574,7 @@ public class Plot {
 		Boolean idChanged = false;
 		Set<String> keys = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + city.getIdentifier() + ".plots").getKeys(false);
 		do {
-			if (keys.contains(id)) {
+			if (keys.contains(Integer.toString(id))) {
 				id++;
 			} else {
 				idChanged = true;

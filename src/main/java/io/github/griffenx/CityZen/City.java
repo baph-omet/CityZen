@@ -54,7 +54,8 @@ public class City implements Reputable {
 		properties.set("minPlotSize",cnfg.getInt("minPlotSize"));
 		properties.set("founder", founder.getUUID().toString());
 		properties.set("foundingDate", new SimpleDateFormat("yyyyMMdd").format(new Date()));
-		properties.set("world", founder.getPassport().getWorld().getName());
+		if (founder.getPassport().isOnline()) properties.set("world", founder.getPlayer().getWorld().getName());
+		else properties.set("world", "");
 		properties.set("mayor", founder.getUUID().toString());
 		properties.set("deputies", new Vector<String>());
 		Vector<String> citizens = new Vector<String>();
@@ -120,7 +121,9 @@ public class City implements Reputable {
 	}
 	
 	public static City getCity(Citizen citizen) {
-		return getCity(citizen.getPassport());
+		if (citizen.getPassport().isOnline()) {
+			return getCity(citizen.getPlayer());
+		} return null;
 	}
 	
 	public static City getCity(Location location) {
@@ -725,7 +728,9 @@ public class City implements Reputable {
 	 */
 	public List<Plot> getPlots() {
 		List<Plot> plts = new Vector<Plot>();
-		for (String key : CityZen.cityConfig.getConfig().getConfigurationSection("cities." + identifier + ".plots").getKeys(false)) {
+		FileConfiguration config = CityZen.cityConfig.getConfig();
+		if (config.getConfigurationSection("cities." + identifier + ".plots") == null) config.createSection("cities." + identifier + ".plots");
+		for (String key : config.getConfigurationSection("cities." + identifier + ".plots").getKeys(false)) {
 			plts.add(Plot.getPlot(this,Integer.valueOf(key)));
 		} return plts;
 	}

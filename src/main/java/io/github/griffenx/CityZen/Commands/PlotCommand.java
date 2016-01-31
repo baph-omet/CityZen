@@ -120,13 +120,13 @@ public class PlotCommand {
 								case "sele":
 								case "selec":
 								case "select":
-									if (citizen.getPassport().hasMetadata("plotSelectEnabled")) {
-										citizen.getPassport().removeMetadata("plotSelectEnabled", CityZen.getPlugin());
-										citizen.getPassport().removeMetadata("pos1", CityZen.getPlugin());
-										citizen.getPassport().removeMetadata("pos2", CityZen.getPlugin());
+									if (citizen.getPlayer().hasMetadata("plotSelectEnabled")) {
+										citizen.getPlayer().removeMetadata("plotSelectEnabled", CityZen.getPlugin());
+										citizen.getPlayer().removeMetadata("pos1", CityZen.getPlugin());
+										citizen.getPlayer().removeMetadata("pos2", CityZen.getPlugin());
 										sender.sendMessage(ChatColor.BLUE + "Plot selection disabled.");
 									} else {
-										citizen.getPassport().setMetadata("plotSelectEnabled", new FixedMetadataValue(CityZen.getPlugin(), true));
+										citizen.getPlayer().setMetadata("plotSelectEnabled", new FixedMetadataValue(CityZen.getPlugin(), true));
 										sender.sendMessage(ChatColor.BLUE + "Plot selection enabled. Select corners with \"/plot pos1\" and \"/plot pos2\". "
 												+ "Disable plot selection with \"/plot select\"");
 									}
@@ -134,42 +134,46 @@ public class PlotCommand {
 								case "1":
 								case "p1":
 								case "pos1":
-									// Format: world;x;y;z
-									Location pos = new Location(user.getLocation().getWorld(), user.getLocation().getX(), user.getLocation().getY() - 1, user.getLocation().getZ());
-									for (City c : City.getCities()) for (Plot p : c.getPlots()) if (p.isInPlot(pos)) {
-										sender.sendMessage(ChatColor.RED + "This location is inside an existing plot. Try a different location.");
-										return;
-									}
-									if (citizen.getPassport().hasMetadata("pos2")) {
-										World w = CityZen.getPlugin().getServer().getWorld(citizen.getPassport().getMetadata("pos2").get(0).asString().split(";")[0]);
-										if (!w.equals(user.getWorld())) {
-											citizen.getPassport().removeMetadata("pos2", CityZen.getPlugin());
+									if (citizen.getPlayer().hasMetadata("plotSelectEnabled")) {
+										// Format: world;x;y;z
+										Location pos = new Location(user.getLocation().getWorld(), user.getLocation().getX(), user.getLocation().getY() - 1, user.getLocation().getZ());
+										for (City c : City.getCities()) for (Plot p : c.getPlots()) if (p.isInPlot(pos)) {
+											sender.sendMessage(ChatColor.RED + "This location is inside an existing plot. Try a different location.");
+											return;
 										}
-									}
-									String newPos = String.join(";",user.getWorld().getName(),Integer.toString(pos.getBlockX()),
-											Integer.toString(pos.getBlockY()),Integer.toString(pos.getBlockZ()));
-									citizen.getPassport().setMetadata("pos1", new FixedMetadataValue(CityZen.getPlugin(), newPos));
-									sender.sendMessage(ChatColor.BLUE + "Position 1 set (" + newPos + ")");
+										if (citizen.getPlayer().hasMetadata("pos2")) {
+											World w = CityZen.getPlugin().getServer().getWorld(citizen.getPlayer().getMetadata("pos2").get(0).asString().split(";")[0]);
+											if (!w.equals(user.getWorld())) {
+												citizen.getPlayer().removeMetadata("pos2", CityZen.getPlugin());
+											}
+										}
+										String newPos = String.join(";",user.getWorld().getName(),Integer.toString(pos.getBlockX()),
+												Integer.toString(pos.getBlockY()),Integer.toString(pos.getBlockZ()));
+										citizen.getPlayer().setMetadata("pos1", new FixedMetadataValue(CityZen.getPlugin(), newPos));
+										sender.sendMessage(ChatColor.BLUE + "Position 1 set (" + newPos + ")");
+									} else sender.sendMessage(ChatColor.RED + "Please enable plot selection with \"/plot select\" before selecting corners.");
 									break;
 								case "2":
 								case "p2":
 								case "pos2":
-									// Format: world;x;y;z
-									Location pos2 = new Location(user.getLocation().getWorld(), user.getLocation().getX(), user.getLocation().getY() - 1, user.getLocation().getZ());
-									for (City c : City.getCities()) for (Plot p : c.getPlots()) if (p.isInPlot(pos2)) {
-										sender.sendMessage(ChatColor.RED + "This location is inside an existing plot. Try a different location.");
-										return;
-									}
-									if (citizen.getPassport().hasMetadata("pos1")) {
-										World w = CityZen.getPlugin().getServer().getWorld(citizen.getPassport().getMetadata("pos1").get(0).asString().split(";")[0]);
-										if (!w.equals(user.getWorld())) {
-											citizen.getPassport().removeMetadata("pos1", CityZen.getPlugin());
+									if (citizen.getPlayer().hasMetadata("plotSelectEnabled")) {
+										// Format: world;x;y;z
+										Location pos2 = new Location(user.getLocation().getWorld(), user.getLocation().getX(), user.getLocation().getY() - 1, user.getLocation().getZ());
+										for (City c : City.getCities()) for (Plot p : c.getPlots()) if (p.isInPlot(pos2)) {
+											sender.sendMessage(ChatColor.RED + "This location is inside an existing plot. Try a different location.");
+											return;
 										}
-									}
-									String newPos2 = String.join(";",user.getWorld().getName(),Integer.toString(pos2.getBlockX()),
-											Integer.toString(pos2.getBlockY()),Integer.toString(pos2.getBlockZ()));
-									citizen.getPassport().setMetadata("pos2", new FixedMetadataValue(CityZen.getPlugin(), newPos2));
-									sender.sendMessage(ChatColor.BLUE + "Position 2 set (" + newPos2 + ")");
+										if (citizen.getPlayer().hasMetadata("pos1")) {
+											World w = CityZen.getPlugin().getServer().getWorld(citizen.getPlayer().getMetadata("pos1").get(0).asString().split(";")[0]);
+											if (!w.equals(user.getWorld())) {
+												citizen.getPlayer().removeMetadata("pos1", CityZen.getPlugin());
+											}
+										}
+										String newPos2 = String.join(";",user.getWorld().getName(),Integer.toString(pos2.getBlockX()),
+												Integer.toString(pos2.getBlockY()),Integer.toString(pos2.getBlockZ()));
+										citizen.getPlayer().setMetadata("pos2", new FixedMetadataValue(CityZen.getPlugin(), newPos2));
+										sender.sendMessage(ChatColor.BLUE + "Position 2 set (" + newPos2 + ")");
+									} else sender.sendMessage(ChatColor.RED + "Please enable plot selection with \"/plot select\" before selecting corners.");
 									break;
 								case "c":
 								case "cr":
@@ -219,16 +223,16 @@ public class PlotCommand {
 		if (sender.hasPermission("cityzen.plot.create")) {
 			if (citizen.getPlots().size() < citizen.getMaxPlots() || citizen.isCityOfficial()) {
 				if (city.getPlots().size() < Math.round(city.getCitizens().size() * config.getDouble("plotDensity"))) {
-					if (citizen.getPassport().hasMetadata("pos1") && citizen.getPassport().hasMetadata("pos2")) {
-						Position position1 = new Position(citizen.getPassport().getMetadata("pos1").get(0).asString());
-						Position position2 = new Position(citizen.getPassport().getMetadata("pos2").get(0).asString());
+					if (citizen.getPlayer().hasMetadata("pos1") && citizen.getPlayer().hasMetadata("pos2")) {
+						Position position1 = new Position(citizen.getPlayer().getMetadata("pos1").get(0).asString());
+						Position position2 = new Position(citizen.getPlayer().getMetadata("pos2").get(0).asString());
 						Selection sel = new Selection(position1,position2);
 						if (!sel.worldGuardConflicts(citizen)) {
 							if (position1.world.equals(position2.world)) {
 								if (position1.world.equals(city.getWorld())) {
 									boolean isMega = false;
-									if (!(sel.getArea() <= Math.pow((double)city.getMaxPlotSize(), 2) 
-											&& sel.getArea() <= Math.pow(config.getDouble("maxPlotSize"),2))) {
+									if (sel.getArea() > Math.pow((double)city.getMaxPlotSize(), 2) 
+											|| sel.getArea() > Math.pow(config.getDouble("maxPlotSize"),2)) {
 										if (!citizen.isCityOfficial()) {
 											sender.sendMessage(ChatColor.RED + "You cannot create a Plot this big. Max Plot Size: " + city.getMaxPlotSize() 
 												+ " (City), " + config.getDouble("maxPlotSize") + " (Server)\n"
@@ -277,7 +281,11 @@ public class PlotCommand {
 															+ "This area is now protected from interference by non-owners. Type \""
 															+ ChatColor.GOLD + "/cityzen help plot management"
 															+ ChatColor.BLUE + "\" for ways to customize your new Plot.");
-												} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot here. Plots must be no more than " + config.getInt("plotBuffer") + " blocks away from another Plot in the same City.");
+													citizen.getPlayer().removeMetadata("plotSelectEnabled", CityZen.getPlugin());
+													citizen.getPlayer().removeMetadata("pos1", CityZen.getPlugin());
+													citizen.getPlayer().removeMetadata("pos2", CityZen.getPlugin());
+												} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot here. Plots must be no more than " 
+															+ config.getInt("plotBuffer") + " blocks away from another Plot in the same City.");
 											} else {
 												if (citizen.isCityOfficial()) {
 													if (sel.isSpaced(city)) {
@@ -292,8 +300,11 @@ public class PlotCommand {
 																+ "This area is now protected from interference by non-owners. Type \""
 																+ ChatColor.GOLD + "/cityzen help plot management"
 																+ ChatColor.BLUE + "\" for ways to customize your new Plot.");
+														citizen.getPlayer().removeMetadata("plotSelectEnabled", CityZen.getPlugin());
+														citizen.getPlayer().removeMetadata("pos1", CityZen.getPlugin());
+														citizen.getPlayer().removeMetadata("pos2", CityZen.getPlugin());
 													} else sender.sendMessage(ChatColor.RED + "This City is not far away enough from another City. Cities must be " 
-														+ CityZen.getPlugin().getConfig().getInt("minCitySeparation") + " blocks away from one another.");
+														+ CityZen.getPlugin().getConfig().getInt("minCitySeparation") + " blocks away from one another and must not overlap.");
 												} else sender.sendMessage(ChatColor.RED + "This City has no plots yet. Let a City official set the first plot.");
 											}
 										} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot of this size. Both the length and the width of all Plots must be at least " + config.getInt("minPlotWidth") + " blocks each.");
@@ -311,17 +322,17 @@ public class PlotCommand {
 	
 	private static void move(Citizen citizen, City city, CommandSender sender, Plot plot, String[] args) {
 		if (sender.hasPermission("cityzen.plot.move")) {
-			if (citizen.getPlots().size() < citizen.getMaxPlots() || citizen.isCityOfficial()) {
-				if (city.getPlots().size() < Math.round(city.getCitizens().size() * config.getDouble("plotDensity"))) {
-					if (citizen.getPassport().hasMetadata("pos1") && citizen.getPassport().hasMetadata("pos2")) {
-						Position position1 = new Position(citizen.getPassport().getMetadata("pos1").get(0).asString());
-						Position position2 = new Position(citizen.getPassport().getMetadata("pos2").get(0).asString());
+			if (citizen.getPlots().size() <= citizen.getMaxPlots() || citizen.isCityOfficial()) {
+				if (city.getPlots().size() <= Math.round(city.getCitizens().size() * config.getDouble("plotDensity"))) {
+					if (citizen.getPlayer().hasMetadata("pos1") && citizen.getPlayer().hasMetadata("pos2")) {
+						Position position1 = new Position(citizen.getPlayer().getMetadata("pos1").get(0).asString());
+						Position position2 = new Position(citizen.getPlayer().getMetadata("pos2").get(0).asString());
 						Selection sel = new Selection(position1,position2);
 						if (!sel.worldGuardConflicts(citizen)) {
 							if (position1.world.equals(position2.world)) {
 								if (position1.world.equals(city.getWorld())) {
-									if (sel.getArea() <= Math.pow((double)city.getMaxPlotSize(), 2) 
-											&& sel.getArea() <= Math.pow(config.getDouble("maxPlotSize"),2)) {
+									if (sel.getArea() > Math.pow((double)city.getMaxPlotSize(), 2) 
+											|| sel.getArea() > Math.pow(config.getDouble("maxPlotSize"),2)) {
 										if (plot.isMega() && citizen.isCityOfficial()) {
 											if (sel.getArea() > Math.pow(config.getDouble("maxMegaPlotSize"), 2)) {
 												sender.sendMessage(ChatColor.RED + "This selection is too big for even a MegaPlot.");
@@ -363,6 +374,9 @@ public class PlotCommand {
 														+ "This area is now protected from interference by non-owners. Type \""
 														+ ChatColor.GOLD + "/cityzen help plot management"
 														+ ChatColor.BLUE + "\" for ways to customize your new Plot.");
+												citizen.getPlayer().removeMetadata("plotSelectEnabled", CityZen.getPlugin());
+												citizen.getPlayer().removeMetadata("pos1", CityZen.getPlugin());
+												citizen.getPlayer().removeMetadata("pos2", CityZen.getPlugin());
 											} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot here. Plots must be no more than " + config.getInt("plotBuffer") + " blocks away from another Plot in the same City.");
 										} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot of this size. Both the length and the width of all Plots must be at least " + config.getInt("minPlotWidth") + " blocks each.");
 									} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot this small. Min Plot Size: " + city.getMinPlotSize()
@@ -419,7 +433,7 @@ public class PlotCommand {
 				Plot plot = null;
 				for (City c : City.getCities()) {
 					for (Plot p : c.getPlots()) {
-						if (p.isInPlot(citizen.getPassport().getLocation())) {
+						if (p.isInPlot(citizen.getPlayer().getLocation())) {
 							plot = p;
 							break;
 						}
@@ -552,7 +566,7 @@ public class PlotCommand {
 						if (!city.isOpenPlotting()) {
 							Plot plot = null;
 							for (Plot p : city.getPlots()) {
-								if (p.isInPlot(citizen.getPassport().getLocation())) plot = p;
+								if (p.isInPlot(citizen.getPlayer().getLocation())) plot = p;
 							}
 							if (plot != null) {
 								if (plot.getOwners().size() == 0) {
@@ -681,15 +695,15 @@ public class PlotCommand {
 										if (citizen.getAffiliation().equals(target.getAffiliation())) {
 											if (!plot.getOwners().contains(target)) {
 												if (target.getPlots().size() < target.getMaxPlots()) {
-													if (target.getPassport().isOnline()) {
-														if (!target.getPassport().hasMetadata("plotInvite")) {
-															target.getPassport().setMetadata("plotInvite", new FixedMetadataValue(CityZen.getPlugin(), citizen.getName() + ";" + plot.getIdentifier()));
-															new ClearMetadataTask((Metadatable) target.getPassport(),"plotInvite").runTaskLater(CityZen.getPlugin(), 20 * 120);
-															sender.sendMessage(ChatColor.BLUE + "Invite sent to " + target.getPassport().getDisplayName() + ChatColor.BLUE + ". You will be notified if they accept.");
-															target.sendMessage(ChatColor.BLUE + "You have a new plot invite from " + citizen.getPassport().getDisplayName() + "!\n"
+													if (target.getPlayer().isOnline()) {
+														if (!target.getPlayer().hasMetadata("plotInvite")) {
+															target.getPlayer().setMetadata("plotInvite", new FixedMetadataValue(CityZen.getPlugin(), citizen.getName() + ";" + plot.getIdentifier()));
+															new ClearMetadataTask((Metadatable) target.getPlayer(),"plotInvite").runTaskLater(CityZen.getPlugin(), 20 * 120);
+															sender.sendMessage(ChatColor.BLUE + "Invite sent to " + target.getPlayer().getDisplayName() + ChatColor.BLUE + ". You will be notified if they accept.");
+															target.sendMessage(ChatColor.BLUE + "You have a new plot invite from " + citizen.getPlayer().getDisplayName() + "!\n"
 																	+ "Type \"" + ChatColor.GOLD + "/plot accept" + ChatColor.BLUE + "\" or \"" + ChatColor.WHITE + "/plot deny" + ChatColor.BLUE + "\"\n"
 																	+ "This invite will expire in 2 minutes.");
-														} else sender.sendMessage(ChatColor.RED + target.getPassport().getDisplayName() + ChatColor.RED + " already has a pending invite. Please try again later.");
+														} else sender.sendMessage(ChatColor.RED + target.getPlayer().getDisplayName() + ChatColor.RED + " already has a pending invite. Please try again later.");
 													} else {
 														target.sendMessage(citizen.getName() + " wanted to invite you to a plot, but you were offline.");
 														sender.sendMessage(ChatColor.BLUE + target.getName() + " was offline, but they were notified that you want to add them to your plot. Try again when they're online.");
@@ -716,11 +730,11 @@ public class PlotCommand {
 					City city = citizen.getAffiliation();
 					if (city != null) {
 						if (citizen.getPlots().size() < citizen.getMaxPlots()) {
-							if (citizen.getPassport().hasMetadata("plotInvite")) {
-								String[] invite = citizen.getPassport().getMetadata("plotInvite").get(0).asString().split(";");
+							if (citizen.getPlayer().hasMetadata("plotInvite")) {
+								String[] invite = citizen.getPlayer().getMetadata("plotInvite").get(0).asString().split(";");
 								Citizen host = Citizen.getCitizen(invite[0]);
 								if (host != null) {
-									citizen.getPassport().removeMetadata("plotInvite", CityZen.getPlugin());
+									citizen.getPlayer().removeMetadata("plotInvite", CityZen.getPlugin());
 									if (args[0].substring(0, 1).equalsIgnoreCase("a")) {
 										if (city.equals(host.getAffiliation())) {
 											Plot plot = Plot.getPlot(city, Integer.parseInt(invite[1]));
@@ -729,7 +743,7 @@ public class PlotCommand {
 													if (!plot.getOwners().contains(citizen)) {
 														plot.addOwner(citizen);
 														citizen.sendMessage(ChatColor.BLUE + "You have sucessfully become an owner of this Plot!");
-														host.sendMessage(ChatColor.BLUE + citizen.getPassport().getDisplayName() + ChatColor.BLUE + " accepted your Plot invitation."
+														host.sendMessage(ChatColor.BLUE + citizen.getPlayer().getDisplayName() + ChatColor.BLUE + " accepted your Plot invitation."
 																+ " They are now an owner of your Plot!");
 													} else sender.sendMessage(ChatColor.RED + "You are already an owner of this Plot");
 												} else sender.sendMessage(ChatColor.RED + host.getName() + " no longer owns this Plot.");

@@ -58,7 +58,7 @@ public class InfoCommand {
 					if (target != null) {
 						String[] messages = {
 								ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() + ChatColor.RESET + ChatColor.RED + " OFFICIAL PASSPORT",
-								ChatColor.BLUE + "| Username: " + ChatColor.WHITE + target.getPassport().getDisplayName(),
+								ChatColor.BLUE + "| Username: " + ChatColor.WHITE + (target.getPassport().isOnline() ? target.getPlayer().getDisplayName() : target.getPassport().getName()),
 								ChatColor.BLUE + "| City: " + (target.getAffiliation() != null ? target.getAffiliation().getChatName()
 										+ ChatColor.BLUE + (target.isMayor() ? " (Mayor)" : (target.isDeputy() ? " (Deputy)" : ""))
 										+ "\n" + ChatColor.BLUE + "| Plots Owned: " + ChatColor.WHITE + target.getPlots().size() + "/" + target.getMaxPlots()
@@ -77,7 +77,7 @@ public class InfoCommand {
 				if (target != null) {
 					String[] messages = {
 							ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() + ChatColor.RESET + ChatColor.RED + " OFFICIAL PASSPORT",
-							ChatColor.BLUE + "| Username: " + ChatColor.WHITE + target.getPassport().getDisplayName(),
+							ChatColor.BLUE + "| Username: " + ChatColor.WHITE + (target.getPassport().isOnline() ? target.getPlayer().getDisplayName() : target.getPassport().getName()),
 							ChatColor.BLUE + "| City: " + (target.getAffiliation() != null ? target.getAffiliation().getChatName()
 									+ ChatColor.BLUE + (target.isMayor() ? " (Mayor)" : (target.isDeputy() ? " (Deputy)" : ""))
 									+ "\n" + ChatColor.BLUE + "| Plots Owned: " + ChatColor.WHITE + target.getPlots().size() + "/" + target.getMaxPlots()

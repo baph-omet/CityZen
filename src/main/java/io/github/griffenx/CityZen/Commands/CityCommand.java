@@ -372,12 +372,12 @@ public class CityCommand {
 					if (city != null) {
 						long rep = target.getReputation();
 						city.removeCitizen(target,true);
-						if (target.getPassport().isOnline()) {
+						if (target.getPlayer().isOnline()) {
 							String message = ChatColor.RED + "You were evicted from " + city.getChatName() + ChatColor.RED + " by " 
 								+ sender.getName() + ". You lost " + ChatColor.GOLD + (rep - target.getReputation()) 
 								+ ChatColor.RED + " Reputation. You have been removed from ownership of all plots"
 								+ " and may not rejoin this City unless approved by a City official.";
-							target.getPassport().sendMessage(message);
+							target.getPlayer().sendMessage(message);
 						} else {
 							target.addAlert("[CityZen] You were evicted from " + city.getName() + " by " + sender.getName() + ". You lost "
 								+ (rep - target.getReputation()) + " Reputation. You have been removed from ownership of all plots"
@@ -397,13 +397,13 @@ public class CityCommand {
 					Citizen citizen = Citizen.getCitizen(sender);
 					if (citizen != null) {
 						if (citizen.isMayor()) {
-							if (citizen.getPassport().hasMetadata("deleteConfirm")) {
+							if (citizen.getPlayer().hasMetadata("deleteConfirm")) {
 								City city = citizen.getAffiliation();
-								citizen.getPassport().removeMetadata("deleteConfirm", CityZen.getPlugin());
+								citizen.getPlayer().removeMetadata("deleteConfirm", CityZen.getPlugin());
 								List<Citizen> refugees = city.getCitizens();
 								citizen.getAffiliation().delete();
 								for (Citizen r : refugees) {
-									if (r.getPassport().isOnline()) r.getPassport().sendMessage(ChatColor.RED + "Your city has been deleted."
+									if (r.getPlayer().isOnline()) r.getPlayer().sendMessage(ChatColor.RED + "Your city has been deleted."
 										+ " You have not lost any reputation from this and are free to join another city.");
 									else r.addAlert("Your city has been deleted."
 										+ " You have not lost any reputation from this and are free to join another city.");
@@ -413,8 +413,8 @@ public class CityCommand {
 								sender.sendMessage(ChatColor.RED + "Are you sure you want to delete " + citizen.getAffiliation().getChatName()
 										+ ChatColor.RED + "? It will be gone forever (a long time). This action cannot be reversed. Type the command"
 												+ " again in the next 60 seconds to confirm.");
-								citizen.getPassport().setMetadata("deleteConfirm", new FixedMetadataValue(CityZen.getPlugin(),"asked"));
-								new ClearMetadataTask((Metadatable) citizen.getPassport(),"deleteConfirm").runTaskLater(CityZen.getPlugin(), 20 * 60);
+								citizen.getPlayer().setMetadata("deleteConfirm", new FixedMetadataValue(CityZen.getPlugin(),"asked"));
+								new ClearMetadataTask((Metadatable) citizen.getPlayer(),"deleteConfirm").runTaskLater(CityZen.getPlugin(), 20 * 60);
 							}
 						} else sender.sendMessage(Messaging.notMayor());
 					} else sender.sendMessage(Messaging.missingCitizenRecord());
@@ -428,7 +428,7 @@ public class CityCommand {
 					sender.sendMessage(ChatColor.BLUE + "You deleted the City " + city.getChatName());
 					city.delete();
 					for (Citizen r : refugees) {
-						if (r.getPassport().isOnline()) r.getPassport().sendMessage(ChatColor.RED + "Your city has been deleted."
+						if (r.getPlayer().isOnline()) r.getPlayer().sendMessage(ChatColor.RED + "Your city has been deleted."
 							+ " You have not lost any reputation from this and are free to join another city.");
 						else r.addAlert("Your city has been deleted."
 							+ " You have not lost any reputation from this and are free to join another city.");
@@ -703,12 +703,12 @@ public class CityCommand {
 					double cityZ = cityLocation.getZ();
 					double distance = Math.sqrt(Math.pow(x - cityX,2.0) + Math.pow(z - cityZ, 2.0));
 					String direction = "";
-					if (cityZ - z > 100.0) direction += "South";
-					else if (cityZ - z < -100.0) direction += "North";
-					else direction += "Due ";
-					if (cityX - x > 100.0) direction += "West";
-					else if (cityX - x < -100.0) direction += "East";
-					else direction += "ward";
+					if (cityZ - z > 0.0) direction += "South";
+					else if (cityZ - z < 0.0) direction += "North";
+					//else direction += "Due ";
+					if (cityX - x > 0.0) direction += "West";
+					else if (cityX - x < 0.0) direction += "East";
+					//else direction += "ward";
 					
 					sender.sendMessage(ChatColor.BLUE + "Distance to the center of " + city.getChatName() + ChatColor.BLUE + String.format(" (%1$.2f,%2$.2f):\n", cityX,cityZ)
 							+ String.format("| %1$.2f Blocks ",distance) + direction + " of your location");
