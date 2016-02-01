@@ -130,6 +130,7 @@ permissions:
             cityzen.plot.setprotection: true
             cityzen.plot.wipe: true
             cityzen.city.alert: true
+            cityzen.city.distance: true
         default: true
     cityzen.reload:
         description: Reload config files from disk
@@ -347,3 +348,9 @@ permissions:
         description: Set a message to be broadcast when a reward is disbursed.
     cityzen.rewards.remove:
         description: Remove a specified reward
+    cityzen.city.distance:
+        description: Show the distance to and direction of your City
+    cityzen.city.distance.others:
+        description: Show the distance to and direction of the specified City
+        children:
+            cityzen.city.distance: true

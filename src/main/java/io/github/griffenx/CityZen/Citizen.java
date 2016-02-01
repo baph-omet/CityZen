@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -22,21 +23,23 @@ public class Citizen implements Reputable {
 	private static FileConfiguration citizenConfig = CityZen.citizenConfig.getConfig();
 	private ConfigurationSection properties;
 	
+	@SuppressWarnings(value = { "unused" })
+	private static final Logger log = plugin.getLogger();
+	
 	/**
 	 * Initializes a new Citizen object based on their UUID
 	 * @param uuid
 	 * The UUID to use to identify this Citizen
 	 */
-	private Citizen(UUID uuid) {
-		OfflinePlayer player = plugin.getServer().getOfflinePlayer(uuid);
+	private Citizen(UUID uuid, String name) {
 		if (CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + uuid.toString()) != null) {
-			properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + uuid.toString());
+			properties = citizenConfig.getConfigurationSection("citizens." + uuid.toString());
 		} else {
-			CityZen.citizenConfig.getConfig().createSection("citizens." + player.getUniqueId().toString());
-			properties = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + uuid.toString());
-			properties.set("name", player.getName());
-			properties.set("reputation", CityZen.getPlugin().getConfig().getLong("reputation.default"));
-			properties.set("maxReputation", CityZen.getPlugin().getConfig().getLong("reputation.default"));
+			citizenConfig.createSection("citizens." + uuid.toString());
+			properties = citizenConfig.getConfigurationSection("citizens." + uuid.toString());
+			properties.set("name", name);
+			properties.set("reputation", plugin.getConfig().getLong("reputation.default"));
+			properties.set("maxReputation", plugin.getConfig().getLong("reputation.default"));
 			properties.set("maxPlots", 1);
 			properties.set("issueDate", new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date()));
 			List<String> alerts = new ArrayList<String>();
@@ -52,7 +55,7 @@ public class Citizen implements Reputable {
 	 * The player whose Citizen record to initialize
 	 */
 	private Citizen(Player player) {
-		this(player.getUniqueId());
+		this(player.getUniqueId(), player.getName());
 	}
 	
 	/**
@@ -93,7 +96,7 @@ public class Citizen implements Reputable {
 		ConfigurationSection config = citizenConfig.getConfigurationSection("citizens");
 		for (String c : config.getKeys(false)) {
 			if (citizenConfig.getString("citizens." + c + ".name").equalsIgnoreCase(name)) {
-				return new Citizen(UUID.fromString(c));
+				return new Citizen(UUID.fromString(c),name);
 			}
 		}
 		return null;
@@ -106,7 +109,10 @@ public class Citizen implements Reputable {
 	 * A Citizen that corresponds to this UUID if one exists, else {@literal null}.
 	 */
 	public static Citizen getCitizen(UUID uuid) {
-		if (CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + uuid.toString()) != null) return new Citizen(uuid);
+		OfflinePlayer player = plugin.getServer().getOfflinePlayer(uuid);
+		if (CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + uuid.toString()) != null) {
+			return new Citizen(uuid,player.getName());
+		}
 		else return null;
 	}
 	/**
@@ -152,7 +158,7 @@ public class Citizen implements Reputable {
 		List<Citizen> citizens = new Vector<Citizen>();
 		ConfigurationSection configSection = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens");
 		for (String c : configSection.getKeys(false)) {
-			citizens.add(new Citizen(UUID.fromString(c)));
+			citizens.add(new Citizen(UUID.fromString(c),configSection.getString(c + ".name")));
 		}
 		return citizens;
 	}
@@ -336,18 +342,10 @@ public class Citizen implements Reputable {
 	 * This Citizen's Player
 	 */
 	public OfflinePlayer getPassport() {
-		String foundUUID = null;
 		OfflinePlayer ofp = null;
-		ConfigurationSection cits = CityZen.citizenConfig.getConfig().getConfigurationSection("citizens");
-		for (String key : cits.getKeys(false)) {
-			if (cits.getString(key + ".name").equalsIgnoreCase(CityZen.getPlugin().getServer().getOfflinePlayer(UUID.fromString(key)).getName())) {
-				foundUUID = key;
-				break;
-			}
-		}
-		if (foundUUID != null) {
-			ofp = CityZen.getPlugin().getServer().getOfflinePlayer(UUID.fromString(foundUUID));
-		}
+		
+		UUID uuid = UUID.fromString(properties.getName());
+		if (uuid != null) ofp = plugin.getServer().getOfflinePlayer(uuid);
 		return ofp;
 	}
 	
@@ -450,6 +448,10 @@ public class Citizen implements Reputable {
 	 */
 	public boolean isCityOfficial() {
 		return isMayor() || isDeputy();
+	}
+	
+	public boolean isCityOfficial(City city) {
+		return (isMayor() || isDeputy()) && getAffiliation().equals(city);
 	}
 	
 	/**

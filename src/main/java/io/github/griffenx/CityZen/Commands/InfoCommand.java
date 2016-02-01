@@ -1,6 +1,7 @@
 package io.github.griffenx.CityZen.Commands;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -14,6 +15,7 @@ import io.github.griffenx.CityZen.Messaging;
 public class InfoCommand {
 	
 	private static final Plugin plugin = CityZen.getPlugin();
+	private static final Logger log = plugin.getLogger();
 	
 	public static void reputation(CommandSender sender, String[] args) {
 		if (args.length == 0) {
@@ -56,6 +58,7 @@ public class InfoCommand {
 				if (sender.hasPermission("cityzen.passport")) {
 					Citizen target = Citizen.getCitizen(sender);
 					if (target != null) {
+						log.info("Fetched passport for " + target.getName());
 						String[] messages = {
 								ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() + ChatColor.RESET + ChatColor.RED + " OFFICIAL PASSPORT",
 								ChatColor.BLUE + "| Username: " + ChatColor.WHITE + (target.getPassport().isOnline() ? target.getPlayer().getDisplayName() : target.getPassport().getName()),

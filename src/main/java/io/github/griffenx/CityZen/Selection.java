@@ -34,14 +34,23 @@ public class Selection {
 	}
 	
 	public boolean isSpaced(City affiliation) {
-		int xDirection = 1;
-		int zDirection = 1;
-		if (pos1.x > pos2.x) xDirection = -1;
-		if (pos1.z > pos2.z) zDirection = -1;
-		for (int x = (int) pos1.x; x < ((int) pos2.x * xDirection) + (1 * xDirection); x = x + (1 * xDirection)) {
-			for (int z = (int) pos1.z; z < ((int) pos2.z * zDirection) + (1 * zDirection); z = z + (1 * zDirection)) {
+		double xLow = pos1.x;
+		double xHigh = pos2.x;
+		double zLow = pos1.z;
+		double zHigh = pos2.z;
+		if (pos2.x < xLow) {
+			xLow = pos2.x;
+			xHigh = pos1.x;
+		}
+		if (pos2.z < zLow) {
+			zLow = pos2.z;
+			zHigh = pos1.z;
+		}
+		
+		for (double x = xLow; x <= xHigh; x++) {
+			for (double z = zLow; z <= zHigh; z++) {
 				for (City c : City.getCities()) {
-					if (!c.equals(affiliation)) {
+					if (!c.equals(affiliation) && c.getCenter() != null) {
 						if (c.isInCity(x,z) || (c.getWorld().equals(pos1.world) 
 								&& Util.getDistace(new Position(pos1.world, x, 0, z), c.getCenter()) < CityZen.getPlugin().getConfig().getInt("minCitySeparation"))) return false;
 					}
@@ -52,13 +61,22 @@ public class Selection {
 	
 	public boolean worldGuardConflicts(Citizen citizen) {
 		if (CityZen.WorldGuard != null) {
-			int xDirection = 1;
-			int zDirection = 1;
-			if (pos1.x > pos2.x) xDirection = -1;
-			if (pos1.z > pos2.z) zDirection = -1;
-			for (int x = (int) pos1.x; x < ((int) pos2.x * xDirection) + (1 * xDirection); x = x + (1 * xDirection)) {
-				for (int z = (int) pos1.z; z < ((int) pos2.z * zDirection) + (1 * zDirection); z = z + (1 * zDirection)) {
-					for (int y = 0; y < pos1.world.getMaxHeight(); y++) {
+			double xLow = pos1.x;
+			double xHigh = pos2.x;
+			double zLow = pos1.z;
+			double zHigh = pos2.z;
+			if (pos2.x < xLow) {
+				xLow = pos2.x;
+				xHigh = pos1.x;
+			}
+			if (pos2.z < zLow) {
+				zLow = pos2.z;
+				zHigh = pos1.z;
+			}
+			
+			for (double y = 1; y <= pos1.world.getMaxHeight(); y++) {
+				for (double x = xLow; x <= xHigh; x++) {
+					for (double z = zLow; z <= zHigh; z++) {
 						if (!CityZen.WorldGuard.canBuild(citizen.getPlayer(), new Position(pos1.world,x,y,z).asLocation())) {
 							return true;
 						}

@@ -15,7 +15,14 @@ public class CitySetCommand {
 		if (args.length >= 3) {
 			City city = null;
 			boolean admin = false;
-			if (args.length == 3) {
+			
+			String foundCityName = Util.findCityName(args, 2);
+			
+			if (foundCityName != null && sender.hasPermission("cityzen.city.set.others")) {
+				city = City.getCity(foundCityName);
+				admin = true;
+				if (city == null) sender.sendMessage(Messaging.cityNotFound());
+			} else {
 				if (sender.hasPermission("cityzen.city.set")) {
 					Citizen citizen = Citizen.getCitizen(sender);
 					if (citizen != null) {
@@ -24,13 +31,9 @@ public class CitySetCommand {
 						}
 					}
 				}
-			} else {
-				if (sender.hasPermission("cityzen.city.set.others")) {
-					city = City.getCity(Util.findCityName(args));
-					admin = true;
-					if (city == null) sender.sendMessage(Messaging.cityNotFound());
-				}
-			} if (city != null) {
+			}
+			
+			if (city != null) {
 				String value = args[2];
 				switch (args[1].toLowerCase()) {
 					case "name":
@@ -163,7 +166,7 @@ public class CitySetCommand {
 						sender.sendMessage(ChatColor.RED + "\"" + args[1] + "\" is not a configurable property.");
 						break;
 				}
-			}
+			} else sender.sendMessage(Messaging.cityNotFound());
 		} else {
 			sender.sendMessage(Messaging.notEnoughArguments("/city set <property> <value>"));
 		} return true;

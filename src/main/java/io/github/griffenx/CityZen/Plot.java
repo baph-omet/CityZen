@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,6 +15,8 @@ import org.bukkit.configuration.ConfigurationSection;
 
 public class Plot {
 	private int identifier;
+	
+	private static final Logger log = CityZen.getPlugin().getLogger();
 	
 	/**
 	 * Initializes a Plot so that it can be loaded from config
@@ -92,10 +95,17 @@ public class Plot {
 	 */
 	public static Plot getPlot(Location location) {
 		for (City c : City.getCities()) {
+			log.info("Checking for overlapped plot in City " + c.getName());
+			log.info("City identifier: " + c.getIdentifier());
 			for (Plot p : c.getPlots()) {
-				if (p.isInPlot(location)) return p;
+				log.info("Checking for overlapped plot in plot " + p.getIdentifier() + " at " + p.getCenterCoords());
+				if (p.isInPlot(location)) {
+					log.info("Returning plot " + p.getIdentifier());
+					return p;
+				}
 			}
 		}
+		log.info("Couldn't find a plot at this location. Returning Null");
 		return null;
 	}
 	
@@ -410,7 +420,7 @@ public class Plot {
 	 * True if (x,z) is inside this plot, else false
 	 */
 	public boolean isInPlot(double x, double z) {
-		//CityZen.getPlugin().getLogger().info("Location: (" + x + "," + z + ") Corner1: (" + getCorner1().getX() + "," + getCorner1().getZ() 
+		//log.info("Location: (" + x + "," + z + ") Corner1: (" + getCorner1().getX() + "," + getCorner1().getZ() 
 		//	+ ") Corner2: (" + getCorner2().getX() + "," + getCorner2().getZ() + ")");
 		if ((x <= getCorner2().getX() && x >= getCorner1().getX()) || (x >= getCorner2().getX() && x <= getCorner1().getX())) {
 			if ((z <= getCorner2().getZ() && z >= getCorner1().getZ()) || (z >= getCorner2().getZ() && z <= getCorner1().getZ())) {
@@ -456,8 +466,8 @@ public class Plot {
 			zLow = s.pos2.z;
 			zHigh = s.pos1.z;
 		}
-		for (double x = xLow; x < xHigh; x++) {
-			for (double z = zLow; z < zHigh; z++) {
+		for (double x = xLow; x <= xHigh; x++) {
+			for (double z = zLow; z <= zHigh; z++) {
 				if (isInBuffer(x, z)) return true;
 			}
 		}
@@ -485,12 +495,20 @@ public class Plot {
 	 */
 	public Boolean overlaps(Location corner1, Location corner2) {
 		if (corner1.getWorld().equals(corner2.getWorld()) && corner1.getWorld().equals(getCorner1().getWorld())) {
-			int xDirection = 1;
-			int zDirection = 1;
-			if (corner1.getX() > corner2.getX()) xDirection = -1;
-			if (corner1.getZ() > corner2.getZ()) zDirection = -1;
-			for (int x = (int) corner1.getX(); x < ((int) corner2.getX() * xDirection); x = x + (1 * xDirection)) {
-				for (int z = (int) corner1.getZ(); z < ((int) corner2.getZ() * zDirection); z = z + (1 * zDirection)) {
+			double xLow = corner1.getBlockX();
+			double xHigh = corner2.getBlockX();
+			double zLow = corner1.getBlockZ();
+			double zHigh = corner2.getBlockZ();
+			if (corner2.getBlockX() < xLow) {
+				xLow = corner2.getBlockX();
+				xHigh = corner1.getBlockX();
+			}
+			if (corner2.getBlockZ() < zLow) {
+				zLow = corner2.getBlockZ();
+				zHigh = corner1.getBlockZ();
+			}
+			for (double x = xLow; x <= xHigh; x++) {
+				for (double z = zLow; z <= zHigh; z++) {
 					if (isInPlot(x, z)) return true;
 				}
 			}
@@ -506,17 +524,22 @@ public class Plot {
 	 */
 	public void wipe() {
 		World world = getAffiliation().getWorld();
-		int xDirection = 1;
-		int zDirection = 1;
-		if (getCorner1().getX() > getCorner2().getX()) xDirection = -1;
-		if (getCorner1().getZ() > getCorner2().getZ()) zDirection = -1;
-		
-		double xSide = Math.abs(getCorner1().getX() - getCorner2().getX());
-		double zSide = Math.abs(getCorner1().getZ() - getCorner2().getZ());
+		int xLow = getCorner1().getBlockX();
+		int xHigh = getCorner2().getBlockX();
+		int zLow = getCorner1().getBlockZ();
+		int zHigh = getCorner2().getBlockZ();
+		if (getCorner2().getBlockX() < xLow) {
+			xLow = getCorner2().getBlockX();
+			xHigh = getCorner1().getBlockX();
+		}
+		if (getCorner2().getBlockZ() < zLow) {
+			zLow = getCorner2().getBlockZ();
+			zHigh = getCorner1().getBlockZ();
+		}
 		
 		for (int y = 1; y <= world.getMaxHeight(); y++) {
-			for (int x = (int) getCorner1().getX(); x != (int) getCorner2().getX() + xDirection && Math.abs(x - getCorner1().getBlockX()) <= xSide; x = x + xDirection) {
-				for (int z = (int) getCorner1().getZ(); z != (int) getCorner2().getZ() + zDirection && Math.abs(z - getCorner1().getBlockZ()) <= zSide; z = z + zDirection) {
+			for (int x = xLow; x <= xHigh; x++) {
+				for (int z = zLow; z <= zHigh; z++) {
 					Environment dimension = world.getEnvironment();
 					Block block = world.getBlockAt(x, y, z);
 					if (dimension == Environment.NETHER) {

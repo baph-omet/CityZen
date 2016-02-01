@@ -728,9 +728,9 @@ public class City implements Reputable {
 	 */
 	public List<Plot> getPlots() {
 		List<Plot> plts = new Vector<Plot>();
-		FileConfiguration config = CityZen.cityConfig.getConfig();
-		if (config.getConfigurationSection("cities." + identifier + ".plots") == null) config.createSection("cities." + identifier + ".plots");
-		for (String key : config.getConfigurationSection("cities." + identifier + ".plots").getKeys(false)) {
+		ConfigurationSection cnfg = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + getIdentifier() + ".plots");
+		if (cnfg == null) properties.createSection("plots");
+		for (String key : cnfg.getKeys(false)) {
 			plts.add(Plot.getPlot(this,Integer.valueOf(key)));
 		} return plts;
 	}

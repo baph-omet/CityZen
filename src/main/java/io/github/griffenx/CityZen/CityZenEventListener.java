@@ -1,6 +1,7 @@
 package io.github.griffenx.CityZen;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -23,13 +24,19 @@ import io.github.griffenx.CityZen.Tasks.AlertNotifyTask;
 import io.github.griffenx.CityZen.Tasks.RewardDisbursementTask;
 
 public class CityZenEventListener implements Listener {
+	
+	private final Logger log = CityZen.getPlugin().getLogger();
+	
 	@EventHandler (priority = EventPriority.MONITOR)
 	public void onLogin(PlayerLoginEvent event) {
 		Player player = event.getPlayer();
+		log.info(player.getName() + " logged in.");
 		Citizen citizen = Citizen.getCitizen(player);
 		if (citizen == null) {
 			citizen = Citizen.createCitizen(player);
+			log.info("Created Citizen record for " + citizen.getName());
 		} else {
+			log.info("Fetched Citizen record for " + citizen.getName());
 			if (!player.getName().equals(citizen.getName())) citizen.setName(player.getName());
 			if (citizen.getAlerts().size() > 0) new AlertNotifyTask(citizen).runTaskLater(CityZen.getPlugin(), 20 * 3);
 			if (citizen.getQueuedRewards().size() > 0) {
@@ -77,7 +84,7 @@ public class CityZenEventListener implements Listener {
 							}
 							break;
 						case PROTECTED:
-							if (!plot.getOwners().contains(citizen) && !citizen.isCityOfficial()) {
+							if (!plot.getOwners().contains(citizen) && !citizen.isCityOfficial(city)) {
 								player.sendMessage(ChatColor.RED + "You can't build here. Only owners of this Plot and City officials of " + city.getName() 
 									+ " can build in this Plot");
 								event.setCancelled(true);
@@ -95,7 +102,7 @@ public class CityZenEventListener implements Listener {
 							}
 							break;
 						case PROTECTED:
-							if (!citizen.isCityOfficial()) {
+							if (!citizen.isCityOfficial(city)) {
 								player.sendMessage(ChatColor.RED + "You can't build here. Only City officials of " + city.getName() + " can build between the Plots of the City");
 								event.setCancelled(true);
 							}
@@ -156,7 +163,7 @@ public class CityZenEventListener implements Listener {
 							}
 							break;
 						case PROTECTED:
-							if (!plot.getOwners().contains(citizen) && !citizen.isCityOfficial()) {
+							if (!plot.getOwners().contains(citizen) && !citizen.isCityOfficial(city)) {
 								player.sendMessage(ChatColor.RED + "You can't build here. Only owners of this Plot and City officials of " + city.getName() 
 									+ " can build in this Plot");
 								event.setCancelled(true);
@@ -215,7 +222,7 @@ public class CityZenEventListener implements Listener {
 							}
 							break;
 						case PROTECTED:
-							if (!citizen.isCityOfficial()) {
+							if (!citizen.isCityOfficial(city)) {
 								player.sendMessage(ChatColor.RED + "You can't build here. Only City officials of " + city.getName() + " can build between the Plots of the City");
 								event.setCancelled(true);
 							} else {
@@ -263,7 +270,7 @@ public class CityZenEventListener implements Listener {
 								}
 								break;
 							case PROTECTED:
-								if (!plot.getOwners().contains(citizen) && !citizen.isCityOfficial()) {
+								if (!plot.getOwners().contains(citizen) && !citizen.isCityOfficial(city)) {
 									player.sendMessage(ChatColor.RED + "You can't break entities here. Only owners of this Plot and City officials of " + city.getName() 
 										+ " can build in this Plot");
 									event.setCancelled(true);
@@ -281,7 +288,7 @@ public class CityZenEventListener implements Listener {
 								}
 								break;
 							case PROTECTED:
-								if (!citizen.isCityOfficial()) {
+								if (!citizen.isCityOfficial(city)) {
 									player.sendMessage(ChatColor.RED + "You can't break entities. Only City officials of " + city.getName() + " can build between the Plots of the City");
 									event.setCancelled(true);
 								}

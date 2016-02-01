@@ -147,8 +147,8 @@ public class PlotCommand {
 												citizen.getPlayer().removeMetadata("pos2", CityZen.getPlugin());
 											}
 										}
-										String newPos = String.join(";",user.getWorld().getName(),Integer.toString(pos.getBlockX()),
-												Integer.toString(pos.getBlockY()),Integer.toString(pos.getBlockZ()));
+										String newPos = user.getWorld().getName() + ";" + Integer.toString(pos.getBlockX()) + ";"
+												+ Integer.toString(pos.getBlockY()) + ";" + Integer.toString(pos.getBlockZ());
 										citizen.getPlayer().setMetadata("pos1", new FixedMetadataValue(CityZen.getPlugin(), newPos));
 										sender.sendMessage(ChatColor.BLUE + "Position 1 set (" + newPos + ")");
 									} else sender.sendMessage(ChatColor.RED + "Please enable plot selection with \"/plot select\" before selecting corners.");
@@ -169,8 +169,8 @@ public class PlotCommand {
 												citizen.getPlayer().removeMetadata("pos1", CityZen.getPlugin());
 											}
 										}
-										String newPos2 = String.join(";",user.getWorld().getName(),Integer.toString(pos2.getBlockX()),
-												Integer.toString(pos2.getBlockY()),Integer.toString(pos2.getBlockZ()));
+										String newPos2 = user.getWorld().getName() + ";" + Integer.toString(pos2.getBlockX()) + ";"
+												+ Integer.toString(pos2.getBlockY()) + ";" + Integer.toString(pos2.getBlockZ());
 										citizen.getPlayer().setMetadata("pos2", new FixedMetadataValue(CityZen.getPlugin(), newPos2));
 										sender.sendMessage(ChatColor.BLUE + "Position 2 set (" + newPos2 + ")");
 									} else sender.sendMessage(ChatColor.RED + "Please enable plot selection with \"/plot select\" before selecting corners.");
@@ -814,6 +814,7 @@ public class PlotCommand {
 	private static void info(CommandSender sender) {
 		if (sender instanceof Player) {
 			if (sender.hasPermission("cityzen.plot.info")) {
+				CityZen.getPlugin().getLogger().info("Sender location: " + ((Player)sender).getLocation().getBlockX() + "," + ((Player)sender).getLocation().getBlockZ());
 				Plot plot = Plot.getPlot(((Player)sender).getLocation());
 				if (plot != null) {
 					StringBuilder message = new StringBuilder();
@@ -847,7 +848,7 @@ public class PlotCommand {
 					Plot plot = City.getCity(sender).getPlot(sender);
 					if (plot != null) {
 						if (plot.getOwners().contains(citizen) || citizen.isCityOfficial() || sender.hasPermission("cityzen.plot.setprotection.others")) {
-							switch (args[2].toLowerCase()) {
+							switch (args[1].toLowerCase()) {
 								case "0":
 								case "none":
 								case "pu":
@@ -878,7 +879,7 @@ public class PlotCommand {
 											+ "Only City officials can now build in this plot.");
 									break;
 								default:
-									sender.sendMessage(ChatColor.RED + "\"" + args[2] + "\" is not a protection level.");
+									sender.sendMessage(ChatColor.RED + "\"" + args[1] + "\" is not a protection level.");
 							}
 						} else sender.sendMessage(Messaging.notPlotOwner());
 					} else sender.sendMessage(Messaging.noPlotFound()); 
