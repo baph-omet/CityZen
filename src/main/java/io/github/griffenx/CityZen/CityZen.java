@@ -12,7 +12,7 @@ import io.github.griffenx.CityZen.Tasks.SaveConfigTask;
 import net.milkbowl.vault.economy.Economy;
 
 public final class CityZen extends JavaPlugin {
-	private static final Logger log = Logger.getLogger("Minecraft");
+	private static final Logger serverLog = Logger.getLogger("Minecraft");
 	private static Plugin plugin;
 	
 	public static Config citizenConfig;
@@ -21,6 +21,8 @@ public final class CityZen extends JavaPlugin {
 	
 	public static Economy econ = null;
 	public static WorldGuardPlugin WorldGuard = null;
+	
+	public static CityLog cityLog;
 	
 	@Override
 	public void onEnable() {
@@ -37,17 +39,35 @@ public final class CityZen extends JavaPlugin {
 		rewardConfig.save();
 		rewardConfig.reload();
 		
+		if (CityZen.getPlugin().getConfig().getBoolean("logEnabled")) serverLog.info("Logging enabled. Check for logs in the Logs folder of your CityZen folder.");
+		if (CityZen.getPlugin().getConfig().getBoolean("logDebug")) serverLog.info("Debug mode enabled for logs.");
+		cityLog = new CityLog(plugin.getDataFolder().getPath() + "/" + CityLog.generateLogName());
+		cityLog.write("Enabling plugin...");
+		cityLog.debug("Started logging in Debug mode.");
+		
 		if (getConfig().getBoolean("useEconomy")) {
 			if (!setupEconomy() ) {
-	            log.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
+	            serverLog.severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
 	            getServer().getPluginManager().disablePlugin(this);
 	            return;
 	        }
-		} else log.info("Economy disabled in config. Set \"useEconomy\" to true in config.yml to use Economy features.");
+			cityLog.write("Economy hooked. Econ features should be enabled.");
+			cityLog.debug("Using economy: " + econ.getName());
+		} else {
+			serverLog.info("Economy disabled in config. Set \"useEconomy\" to true in config.yml to use Economy features.");
+			cityLog.write("Economy disabled in config. Set \"useEconomy\" to true in config.yml to use Economy features.");
+		}
 		
 		WorldGuard = getWorldGuard();
-		if (WorldGuard != null) log.info("WorldGuard successfully hooked! Regions will be protected from CityZen activity.");
-		else log.info("WorldGuard not found. WorldGuard-dependent functions will be ignored.");
+		if (WorldGuard != null) {
+			serverLog.info("WorldGuard successfully hooked! Regions will be protected from CityZen activity.");
+			cityLog.write("WorldGuard successfully hooked! Regions will be protected from CityZen activity.");
+		}
+		else {
+			serverLog.info("WorldGuard not found. WorldGuard-dependent functions will be ignored.");
+			cityLog.write("WorldGuard not found. WorldGuard-dependent functions will be ignored.");
+		}
+		
 		
 		Commander commander = new Commander();
 		String[] commands = {
@@ -70,11 +90,13 @@ public final class CityZen extends JavaPlugin {
 		int saveInterval = getConfig().getInt("saveInterval");
 		if (saveInterval > 0) {
 			new SaveConfigTask().runTaskTimer(plugin, 20 * 60 * saveInterval, 20 * 60 * saveInterval);
-			log.info("CityZen AutoSave started. Plugin will automatically save data every " + saveInterval + " minutes.");
-		} else log.warning("Autosaving is disabled. This is not recommended. To enable AutoSave, set \"saveInterval\" in config.yml to a value greater than 0.");
+			serverLog.info("CityZen AutoSave started. Plugin will automatically save data every " + saveInterval + " minutes.");
+			cityLog.write("CityZen AutoSave started. Plugin will automatically save data every " + saveInterval + " minutes.");
+		} else serverLog.warning("Autosaving is disabled. This is not recommended. To enable AutoSave, set \"saveInterval\" in config.yml to a value greater than 0.");
 	}
 	
 	public void onDisable() {
+		cityLog.write("Disabling plugin...");
 		saveConfig();
 		citizenConfig.save();
 		cityConfig.save();

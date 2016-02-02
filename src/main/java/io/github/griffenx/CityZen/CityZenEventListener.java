@@ -1,7 +1,6 @@
 package io.github.griffenx.CityZen;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -25,18 +24,18 @@ import io.github.griffenx.CityZen.Tasks.RewardDisbursementTask;
 
 public class CityZenEventListener implements Listener {
 	
-	private final Logger log = CityZen.getPlugin().getLogger();
+	private final CityLog log = CityZen.cityLog;
 	
 	@EventHandler (priority = EventPriority.MONITOR)
 	public void onLogin(PlayerLoginEvent event) {
 		Player player = event.getPlayer();
-		log.info(player.getName() + " logged in.");
+		log.write(player.getName() + " logged in.");
 		Citizen citizen = Citizen.getCitizen(player);
 		if (citizen == null) {
 			citizen = Citizen.createCitizen(player);
-			log.info("Created Citizen record for " + citizen.getName());
+			log.write("Created Citizen record for " + citizen.getName());
 		} else {
-			log.info("Fetched Citizen record for " + citizen.getName());
+			log.write("Fetched Citizen record for " + citizen.getName());
 			if (!player.getName().equals(citizen.getName())) citizen.setName(player.getName());
 			if (citizen.getAlerts().size() > 0) new AlertNotifyTask(citizen).runTaskLater(CityZen.getPlugin(), 20 * 3);
 			if (citizen.getQueuedRewards().size() > 0) {

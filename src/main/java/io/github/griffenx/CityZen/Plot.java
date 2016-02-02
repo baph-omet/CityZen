@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
-import java.util.logging.Logger;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,7 +15,7 @@ import org.bukkit.configuration.ConfigurationSection;
 public class Plot {
 	private int identifier;
 	
-	private static final Logger log = CityZen.getPlugin().getLogger();
+	private static final CityLog log = CityZen.cityLog;
 	
 	/**
 	 * Initializes a Plot so that it can be loaded from config
@@ -95,17 +94,17 @@ public class Plot {
 	 */
 	public static Plot getPlot(Location location) {
 		for (City c : City.getCities()) {
-			log.info("Checking for overlapped plot in City " + c.getName());
-			log.info("City identifier: " + c.getIdentifier());
+			log.debug("Checking for overlapped plot in City " + c.getName());
+			log.debug("City identifier: " + c.getIdentifier());
 			for (Plot p : c.getPlots()) {
-				log.info("Checking for overlapped plot in plot " + p.getIdentifier() + " at " + p.getCenterCoords());
+				log.debug("Checking for overlapped plot in plot " + p.getIdentifier() + " at " + p.getCenterCoords());
 				if (p.isInPlot(location)) {
-					log.info("Returning plot " + p.getIdentifier());
+					log.debug("Returning plot " + p.getIdentifier());
 					return p;
 				}
 			}
 		}
-		log.info("Couldn't find a plot at this location. Returning Null");
+		log.write("Couldn't find a plot at this location. Returning Null");
 		return null;
 	}
 	
@@ -420,8 +419,6 @@ public class Plot {
 	 * True if (x,z) is inside this plot, else false
 	 */
 	public boolean isInPlot(double x, double z) {
-		//log.info("Location: (" + x + "," + z + ") Corner1: (" + getCorner1().getX() + "," + getCorner1().getZ() 
-		//	+ ") Corner2: (" + getCorner2().getX() + "," + getCorner2().getZ() + ")");
 		if ((x <= getCorner2().getX() && x >= getCorner1().getX()) || (x >= getCorner2().getX() && x <= getCorner1().getX())) {
 			if ((z <= getCorner2().getZ() && z >= getCorner1().getZ()) || (z >= getCorner2().getZ() && z <= getCorner1().getZ())) {
 				return true;

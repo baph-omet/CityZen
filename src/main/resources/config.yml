@@ -16,6 +16,14 @@
 # == saveInterval ==
 # The interval (in minutes) in which to auto-save configs
 # Set to -1 to disable autosave
+#
+# == logEnabled ==
+# If true, daily log files will be generated in subfolder /log.
+# Useful for tracking player changes. Default true
+#
+# == logDebug ==
+# If true, prints debug messages to the log. Useful for finding errors.
+# Set to false to keep log file size low. Default false
 #   
 # == plotBuffer ==
 # Number of blocks around each plot that are protected as part of the city
@@ -66,6 +74,8 @@
 useEconomy: true
 minCitySeparation: 1000
 saveInterval: 10
+logEnabled: true
+logDebug: false
 plotBuffer: 16
 maxPlotSize: 16
 minPlotSize: 4
