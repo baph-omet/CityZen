@@ -24,6 +24,8 @@ public class City implements Reputable {
 	
 	private ConfigurationSection properties;
 	
+	private static final CityLog log = CityZen.cityLog;
+	
 	/**
 	 * Loads a new City into memory
 	 * @param id
@@ -729,10 +731,21 @@ public class City implements Reputable {
 	public List<Plot> getPlots() {
 		List<Plot> plts = new Vector<Plot>();
 		ConfigurationSection cnfg = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + getIdentifier() + ".plots");
-		if (cnfg == null) properties.createSection("plots");
+		
+		log.debug("Getting plots for city " + getName() + " (" + getIdentifier() + ") ");
+		if (cnfg == null) {
+			properties.createSection("plots");
+			log.debug("Couldn't find plot section for this City. Creating config section at cities." + getIdentifier() + ".plots");
+		}
+		log.debug("Checking configuration section " + cnfg.getCurrentPath());
+		
+		log.debug("Here are all the keys in this City's plot section: " + cnfg.getKeys(false).toString());
 		for (String key : cnfg.getKeys(false)) {
+			log.debug("Adding plot stored at config location: " + cnfg.getCurrentPath() + "." + key);
 			plts.add(Plot.getPlot(this,Integer.valueOf(key)));
-		} return plts;
+		}
+		log.debug("Returning " + plts.size() + " plot(s)");
+		return plts;
 	}
 	
 	/**
@@ -766,7 +779,11 @@ public class City implements Reputable {
 	 * The Plot found at that location if one exists, else null
 	 */
 	public Plot getPlot(Location location) {
-		for (Plot p : getPlots()) {
+		List<Plot> plots = getPlots();
+		
+		log.debug("Received " + plots.size() + " plots");
+		
+		for (Plot p : plots) {
 			if (p.isInPlot(location)) return p;
 		} return null;
 	}

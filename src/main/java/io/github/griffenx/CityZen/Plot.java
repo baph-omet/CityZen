@@ -14,6 +14,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 public class Plot {
 	private int identifier;
+	private City affiliation;
 	
 	private static final CityLog log = CityZen.cityLog;
 	
@@ -26,6 +27,7 @@ public class Plot {
 	 */
 	private Plot(City city, Location corner1, Location corner2, Citizen creator) {
 		identifier = generateID(city);
+		affiliation = city;
 		ConfigurationSection properties = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + city.getIdentifier() + ".plots")
 				.createSection(Integer.toString(identifier));
 		properties.set("corner1", corner1.getBlockX() + "," + corner1.getBlockZ());
@@ -44,6 +46,7 @@ public class Plot {
 				== null) throw new IllegalArgumentException("Attempted to get a Plot that doesn't exist");
 		else {
 			identifier = id;
+			affiliation = city;
 		}
 	}
 	
@@ -96,13 +99,12 @@ public class Plot {
 		for (City c : City.getCities()) {
 			log.debug("Checking for overlapped plot in City " + c.getName());
 			log.debug("City identifier: " + c.getIdentifier());
-			for (Plot p : c.getPlots()) {
-				log.debug("Checking for overlapped plot in plot " + p.getIdentifier() + " at " + p.getCenterCoords());
-				if (p.isInPlot(location)) {
-					log.debug("Returning plot " + p.getIdentifier());
-					return p;
-				}
-			}
+			
+			Plot p = c.getPlot(location);
+			if (p != null) {
+				log.debug("Found plot at location.");
+				return p;
+			} else log.debug("Couldn't find a plot in this city at this location.");
 		}
 		log.write("Couldn't find a plot at this location. Returning Null");
 		return null;
@@ -283,14 +285,7 @@ public class Plot {
 	 * The City that this Plot is in
 	 */
 	public City getAffiliation() {
-		for (City c : City.getCities()) {
-			for (Plot p : c.getPlots()) {
-				if (p.equals(this)) {
-					return c;
-				}
-			}
-		}
-		return null;
+		return affiliation;
 	}
 	
 	/**
@@ -419,6 +414,9 @@ public class Plot {
 	 * True if (x,z) is inside this plot, else false
 	 */
 	public boolean isInPlot(double x, double z) {
+		log.debug("Checking coordinates: (" + x + "," + z + ")");
+		log.debug("Corner 1: (" + getCorner1().getX() + "," + getCorner1().getZ() + ")");
+		log.debug("Corner 2: (" + getCorner2().getX() + "," + getCorner2().getZ() + ")");
 		if ((x <= getCorner2().getX() && x >= getCorner1().getX()) || (x >= getCorner2().getX() && x <= getCorner1().getX())) {
 			if ((z <= getCorner2().getZ() && z >= getCorner1().getZ()) || (z >= getCorner2().getZ() && z <= getCorner1().getZ())) {
 				return true;
@@ -570,18 +568,14 @@ public class Plot {
 	 * @returns True if the plots have the same corners
 	 */
 	public Boolean equals(Plot plot) {
-		return identifier == plot.getIdentifier();
+		return identifier == plot.getIdentifier() && affiliation.equals(plot.getAffiliation()); 
+		
 	}
 	
 	private String getProperty(String property) {
-		String val = "";
+		String val = null;
 		ConfigurationSection props = CityZen.cityConfig.getConfig().getConfigurationSection("cities." + getAffiliation().getIdentifier() + ".plots." + identifier);
-		for (String prop : props.getKeys(false)) {
-			if (prop.equalsIgnoreCase(property)) {
-				val = props.getString(property);
-				break;
-			}
-		}
+		val = props.getString(property);
 		return val;
 	}
 	

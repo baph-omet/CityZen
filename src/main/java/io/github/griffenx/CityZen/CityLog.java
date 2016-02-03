@@ -8,18 +8,20 @@ import java.util.Date;
 
 public class CityLog {
 	private String filename;
+	private String filepath;
 	private File file = null;
 	private FileWriter writer;
 	private boolean debug;
 	
-	public CityLog(String filepath) {
-		filename = filepath;
+	public CityLog() {
+		filepath = CityZen.getPlugin().getDataFolder().getPath() + "/Logs";
+		filename = CityLog.generateLogName();
 		if (CityZen.getPlugin().getConfig().getBoolean("logEnabled")) {
-			file = new File(filepath);
+			file = new File(filepath + "/" + filename);
 			debug = CityZen.getPlugin().getConfig().getBoolean("logDebug");
 			try {
 				if (!file.exists()) {
-					file.mkdirs();
+					new File(filepath).mkdirs();
 					file.createNewFile();
 				}
 				file.setWritable(true);
@@ -33,7 +35,7 @@ public class CityLog {
 	public void write(String text) {
 		if (file != null) {
 			try {
-				String timeStamp = "[" + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + "]";
+				String timeStamp = "[" + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + "] ";
 				writer.write(timeStamp + text + "\n");
 				writer.flush();
 			} catch (IOException e) {

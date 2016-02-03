@@ -814,7 +814,7 @@ public class PlotCommand {
 	private static void info(CommandSender sender) {
 		if (sender instanceof Player) {
 			if (sender.hasPermission("cityzen.plot.info")) {
-				CityZen.getPlugin().getLogger().info("Sender location: " + ((Player)sender).getLocation().getBlockX() + "," + ((Player)sender).getLocation().getBlockZ());
+				CityZen.cityLog.debug("Sender location: " + ((Player)sender).getLocation().getBlockX() + "," + ((Player)sender).getLocation().getBlockZ());
 				Plot plot = Plot.getPlot(((Player)sender).getLocation());
 				if (plot != null) {
 					StringBuilder message = new StringBuilder();

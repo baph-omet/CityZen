@@ -41,7 +41,7 @@ public final class CityZen extends JavaPlugin {
 		
 		if (CityZen.getPlugin().getConfig().getBoolean("logEnabled")) serverLog.info("Logging enabled. Check for logs in the Logs folder of your CityZen folder.");
 		if (CityZen.getPlugin().getConfig().getBoolean("logDebug")) serverLog.info("Debug mode enabled for logs.");
-		cityLog = new CityLog(plugin.getDataFolder().getPath() + "/" + CityLog.generateLogName());
+		cityLog = new CityLog();
 		cityLog.write("Enabling plugin...");
 		cityLog.debug("Started logging in Debug mode.");
 		
