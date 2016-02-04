@@ -534,6 +534,10 @@ public class Citizen implements Reputable {
 		if (ctz == null) return false;
 		return getPassport().getUniqueId().equals(ctz.getPassport().getUniqueId());
 	}
+	public boolean equals(Object obj) {
+		if (obj.getClass() == this.getClass()) return equals((Citizen)obj);
+		return false;
+	}
 	
 	private void fixRep() {
 		if (getReputation() < 0) setReputation(0);

@@ -446,10 +446,10 @@ public class PlotCommand {
 					return;
 				}
 				if (args.length == 1) {
-					if (sender.hasPermission("cityzen.plot.price.check")) {
+					if (sender.hasPermission("cityzen.plot.price")) {
 						if (plot.isMega() || (plot.getOwners().size() > 0 && plot.getPrice() == 0)) sender.sendMessage(ChatColor.RED + "This plot is not for sale.");
 						else sender.sendMessage(ChatColor.BLUE + "Price: " + ChatColor.GOLD + plot.getPrice());
-					} else sender.sendMessage(Messaging.noPerms("cityzen.plot.price.check"));
+					} else sender.sendMessage(Messaging.noPerms("cityzen.plot.price"));
 				}
 				else if (args[1].equalsIgnoreCase("set")) {
 					if (sender.hasPermission("cityzen.plot.price.set")) {
@@ -570,6 +570,7 @@ public class PlotCommand {
 							}
 							if (plot != null) {
 								if (plot.getOwners().size() == 0) {
+									if (!plot.isMega() || citizen.isCityOfficial())
 									if (citizen.getPlots().size() < citizen.getMaxPlots()) {
 										plot.addOwner(citizen);
 										long rep = config.getLong("reputation.gainedOnClaimPlot");
@@ -776,7 +777,7 @@ public class PlotCommand {
 					if (city != null) {
 						Plot plot = city.getPlot(sender);
 						if (plot != null) {
-							if (citizen.isCityOfficial() || sender.hasPermission("cityzen.plot.modifyowners.others")) {
+							if (plot.getOwners().contains(citizen) || citizen.isCityOfficial() || sender.hasPermission("cityzen.plot.modifyowners.others")) {
 								if (args.length > 1) {
 									Citizen target = Citizen.getCitizen(args[1]);
 									if (target != null && plot.getOwners().contains(target)) {

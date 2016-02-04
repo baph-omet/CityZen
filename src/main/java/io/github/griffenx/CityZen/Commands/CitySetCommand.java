@@ -66,12 +66,14 @@ public class CitySetCommand {
 							+ "Please try again with these words omitted.");
 						break;
 					case "color":
-						ChatColor color;
-						if (value.length() <= 2) {
-							color = ChatColor.getByChar(value.charAt(value.length() - 1));
-						} else {
-							color = ChatColor.valueOf(value.toUpperCase());
-						}
+						ChatColor color = null;
+						try {
+							if (value.length() <= 2) {
+								color = ChatColor.getByChar(value.charAt(value.length() - 1));
+							} else {
+								color = ChatColor.valueOf(value.toUpperCase());
+							}
+						} catch (IllegalArgumentException e) {}
 						if (color != null) {
 							city.setColor(color.getChar());
 							sender.sendMessage(ChatColor.BLUE + "The color for " + city.getChatName() + ChatColor.BLUE + " is now "
@@ -100,7 +102,7 @@ public class CitySetCommand {
 							sender.sendMessage(ChatColor.RED + "Could not interpret " + value + " as a number.");
 							break;
 						}
-						city.setMaxPlotSize(minSize);
+						city.setMinPlotSize(minSize);
 						sender.sendMessage(ChatColor.BLUE + "The minimum plot size for " + city.getChatName() + ChatColor.BLUE + " is now " + value);
 						break;
 					case "freejoin":

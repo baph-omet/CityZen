@@ -605,10 +605,11 @@ public class City implements Reputable {
 	 * A List of Citizens who have requested to join this City. Returns null if freeJoin is false.
 	 */
 	public List<Citizen> getWaitlist() {
-		if (isFreeJoin()) return null;
 		List<Citizen> citizens = new Vector<Citizen>();
-		for (String u : properties.getStringList("waitlist")) {
-			citizens.add(Citizen.getCitizen(UUID.fromString(u)));
+		if (!isFreeJoin()) {
+			for (String u : properties.getStringList("waitlist")) {
+				citizens.add(Citizen.getCitizen(UUID.fromString(u)));
+			}
 		}
 		return citizens;
 	}

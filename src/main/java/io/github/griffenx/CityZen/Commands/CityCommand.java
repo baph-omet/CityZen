@@ -706,8 +706,8 @@ public class CityCommand {
 					if (cityZ - z > 0.0) direction += "South";
 					else if (cityZ - z < 0.0) direction += "North";
 					//else direction += "Due ";
-					if (cityX - x > 0.0) direction += "West";
-					else if (cityX - x < 0.0) direction += "East";
+					if (cityX - x > 0.0) direction += "East";
+					else if (cityX - x < 0.0) direction += "West";
 					//else direction += "ward";
 					
 					sender.sendMessage(ChatColor.BLUE + "Distance to the center of " + city.getChatName() + ChatColor.BLUE + String.format(" (%1$.2f,%2$.2f):\n", cityX,cityZ)

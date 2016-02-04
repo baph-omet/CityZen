@@ -29,6 +29,7 @@ public class CityDeputyCommand {
 			}
 			return true;
 		} else {
+			sender.sendMessage(Messaging.noArguments("city management"));
 			return false;
 		}
 	}

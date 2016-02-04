@@ -47,6 +47,10 @@ public class Messaging {
 		return ChatColor.RED + "No arguments supplied. Type \"/cityzen help\" for a list of useable commands.";
 	}
 	
+	public static String noArguments(String helpCategory) {
+		return ChatColor.RED + "No arguments supplied. Check \"/cityzen help " + helpCategory + "\" for help.";
+	}
+	
 	public static String invalidArguments(String useage) {
 		return ChatColor.RED + "Invalid arguments supplied. Useage: \"" + useage + "\"";
 	}

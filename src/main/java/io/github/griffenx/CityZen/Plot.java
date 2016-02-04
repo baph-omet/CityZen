@@ -187,7 +187,8 @@ public class Plot {
 	 * A Location object representing this Plot's geographic center in the XZ plane.
 	 */
 	public Location getCenter() {
-		return new Location(getCorner1().getWorld(), Math.pow((getCorner1().getX() - getCorner2().getX()),2), getBaseHeight(), Math.pow((getCorner1().getZ() - getCorner2().getZ()),2));
+		Selection sel = getSelection();
+		return new Location(getCorner1().getWorld(), (sel.pos1.x + sel.pos2.x) / 2, getBaseHeight(), (sel.pos1.z + sel.pos2.z) / 2);
 	}
 	
 	/**
@@ -197,6 +198,10 @@ public class Plot {
 	 */
 	public String getCenterCoords() {
 		return "(" + getCenter().getBlockX() + "," + getCenter().getBlockZ() + ")";
+	}
+	
+	public Selection getSelection() {
+		return new Selection(new Position(getCorner1()), new Position(getCorner2()));
 	}
 	
 	/**
