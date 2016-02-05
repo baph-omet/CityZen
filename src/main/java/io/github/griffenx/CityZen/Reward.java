@@ -146,13 +146,15 @@ public class Reward {
     }
     
     public String getFormattedString(String input, Citizen target) {
+        boolean isAffiliated = target.getAffiliation() != null;
         return input.replace("%p",target.getName()).replace("%r",target.getReputation() + "")
-            .replace("%c",(target.getAffiliation() != null ? target.getAffiliation().getName() : "(None)"))
-            .replace("%i",(target.getAffiliation() != null ? target.getAffiliation().getIdentifier() : "(None)"));
+            .replace("%c",(isAffiliated ? target.getAffiliation().getName() : "(None)"))
+            .replace("%i",(isAffiliated ? target.getAffiliation().getIdentifier() : "(None)"))
+            .replace("%f",(isAffiliated ? target.getAffiliation().getChatName() : "(None)");
     }
     public String getFormattedString(String input, City target) {
         return input.replace("%r",target.getReputation() + "").replace("%c",target.getName())
-            .replace("%i",target.getName());
+            .replace("%i",target.getIdentifier().replace("%f",target.getChatName());
     }
     
     public void setCommand(String command) {
