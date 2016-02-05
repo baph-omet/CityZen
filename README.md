@@ -9,6 +9,8 @@ In CityZen, a player can create a city wherever they want. The space where the c
 
 ## Details:
 
+Visit [the wiki](/wiki) to learn in-depth how to use this plugin.
+
 In order to fully grasp how CityZen works, there are a few basic concepts to grasp.
 
 **Citizen** - A citizen is any player on the server. Typically this refers to a player who is a member of a city, however nomadic players are technically just city-less citizens. A citizen has an individual reputation, and can be affiliated with one city at a time.
@@ -21,8 +23,8 @@ In order to fully grasp how CityZen works, there are a few basic concepts to gra
 
 **Deputy** - A Deputy is a player appointed by the Mayor with limited mayoral powers. Deputies have permission to invite and evict citizens, place new plots, but do not have control over basic city properties. A City may have an arbitrary number of Deputies.
 
-## Commands
-*Coming soon!*
+## Installation:
+Download the latest release or compile for yourself from the latest commit, then simply load up on your Bukkit/Spigot server like you would any other plugin. You'll probably want to customize your `config.yml` and `rewards.yml` files to your liking, as the defaults may not be what you want. Make sure to visit the [wiki](/wiki) for more info.
 
-## Permissions
-*Coming soon!*
+## Credits:
+This project is created and managed by Nathan Gunzenhauser ([iamvishnu](http://iamvishnu.tumblr.com)/griffenx). Built with suggestions and testing by [The Minecraft Blog](http://the-minecraft-blog.com) community.
