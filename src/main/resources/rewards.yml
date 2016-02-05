@@ -25,6 +25,7 @@
 #     Allowed variables: 
 #       - %p player username (not available for City rewards)
 #       - %r player or city reputation
+#       - %f color-formatted name of affiliated city
 #       - %c chat-safe name of affiliated city
 #       - %i internal name of affiliated city
 #   message: The chat-formatted message to show when this reward is disbursed.
