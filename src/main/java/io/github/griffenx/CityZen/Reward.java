@@ -41,7 +41,9 @@ public class Reward {
         if (newID >= 0) {
             FileConfiguration config = CityZen.rewardConfig.getConfig();
             String properties = newID + ";" + type + ";" + initialRep + ";" + intervalRep + ";" + isBroadcast + ";" + command + ";" + message;
-            config.set("rewards",config.getStringList("rewards").add(properties));
+            List<String> rewards = config.getStringList("rewards");
+            rewards.add(properties);
+            config.set("rewards",rewards);
             try {
             	return new Reward(newID);
             } catch (Exception e) {
@@ -62,31 +64,34 @@ public class Reward {
     }
     
     public static void deleteReward(int id) throws Exception {
-    	Reward target;
+    	Reward target = null;
     	try {
     		target = new Reward(id);
     	} catch (Exception e) {
     		throw e;
     	}
-        List<String> rewards = CityZen.rewardConfig.getConfig().getStringList("rewards");
-        int i = 0;
-        while (i<rewards.size()) {
-            try {
-                if (Integer.parseInt(rewards.get(i).split(";")[0]) == id) {
-                    for (Citizen c : Citizen.getCitizens()) {
-                        for (Reward r : c.getRewards()) {
-                            if (target.equals(r)) {
-                                c.cancelReward(r);
-                            }
-                        }
-                    }
-                    rewards.remove(i);
-                    return;
-                } else i++;
-            } catch (NumberFormatException e) {
-                rewards.remove(i);
-            }
-        }
+    	if (target != null) {
+	        List<String> rewards = CityZen.rewardConfig.getConfig().getStringList("rewards");
+	        int i = 0;
+	        while (i<rewards.size()) {
+	            try {
+	                if (Integer.parseInt(rewards.get(i).split(";")[0]) == id) {
+	                    for (Citizen c : Citizen.getCitizens()) {
+	                        for (Reward r : c.getRewards()) {
+	                            if (target.equals(r)) {
+	                                c.cancelReward(r);
+	                            }
+	                        }
+	                    }
+	                    rewards.remove(i);
+	                    return;
+	                } else i++;
+	            } catch (NumberFormatException e) {
+	                rewards.remove(i);
+	            }
+	        }
+	        CityZen.rewardConfig.getConfig().set("rewards", rewards);
+    	}
     }
     
     public static List<World> getEnabledWorlds() {
