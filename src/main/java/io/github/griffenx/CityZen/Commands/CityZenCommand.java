@@ -107,7 +107,9 @@ public class CityZenCommand {
 				"city.join - city join <city> - Join the specified City",
 				"city.leave - city leave - Leave your current City (C)",
 				"city.deputy.list - city deputy list - Lists all Deputies of your City (C)",
-				"city.deputy.list.others - city deputy list <City> - Lists all deputies of the specified City"
+				"city.deputy.list.others - city deputy list <City> - Lists all deputies of the specified City",
+				"city.alert city - alert <message...> - Sends an alert message to all members of your City (O)",
+				"city.alert.others city - alert <message...> <City> - Sends an alert message to all members of the specified City"
 			};
 			String[] citymgmt = {
 				"city.evict - city evict <Citizen> - Forcibly remove the specified Citizen from your City (O)",
@@ -198,7 +200,8 @@ public class CityZenCommand {
 				"plot.modifyowners - plot removeowner <Citizen> - Remove owner of a Plot in your City (O)",
 				"plot.modifyowners.others - plot removeowner <Citizen> - Remove owner of any Plot",
 				"plot.setprotection - plot setprotection <level> - Set the protection level of a Plot you own (P)",
-				"plot.setprotection.others - plot setprotection <level> - Set the protection level of any Plot"
+				"plot.setprotection.others - plot setprotection <level> - Set the protection level of any Plot",
+				"plot.wipe - plot wipe - Wipe the plot in which you're standing"
 			};
 			String[] rewards = {
 				"rewards.list - cityzen rewards list - List all registered rewards",

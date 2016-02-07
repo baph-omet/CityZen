@@ -435,6 +435,7 @@ public class Citizen implements Reputable {
 	 * True if this Citizen is a Deputy of their City, else false.
 	 */
 	public Boolean isDeputy() {
+		if (getAffiliation() == null) return false;
 		for (Citizen c : getAffiliation().getDeputies()) {
 			if (equals(c)) return true;
 		}
@@ -532,10 +533,10 @@ public class Citizen implements Reputable {
 	public boolean equals(Citizen ctz) {
 		if (this == ctz) return true;
 		if (ctz == null) return false;
-		return getPassport().getUniqueId().equals(ctz.getPassport().getUniqueId());
+		return getUUID().equals(ctz.getUUID());
 	}
 	public boolean equals(Object obj) {
-		if (obj.getClass() == this.getClass()) return equals((Citizen)obj);
+		if (obj.getClass().equals(this.getClass())) return equals((Citizen)obj);
 		return false;
 	}
 	

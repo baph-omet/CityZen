@@ -539,7 +539,7 @@ public class City implements Reputable {
 					}
 				}
 				else {
-					ctzs.add(c.getPassport().getUniqueId().toString());
+					ctzs.add(c.getUUID().toString());
 				}
 			}
 			setProperty("citizens",ctzs);

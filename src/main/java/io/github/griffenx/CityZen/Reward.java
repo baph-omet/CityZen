@@ -67,7 +67,7 @@ public class Reward {
     	Reward target = null;
     	try {
     		target = new Reward(id);
-    	} catch (Exception e) {
+    	} catch (IllegalArgumentException e) {
     		throw e;
     	}
     	if (target != null) {
@@ -155,11 +155,11 @@ public class Reward {
         return input.replace("%p",target.getName()).replace("%r",target.getReputation() + "")
             .replace("%c",(isAffiliated ? target.getAffiliation().getName() : "(None)"))
             .replace("%i",(isAffiliated ? target.getAffiliation().getIdentifier() : "(None)"))
-            .replace("%f",(isAffiliated ? target.getAffiliation().getChatName() : "(None)");
+            .replace("%f",(isAffiliated ? target.getAffiliation().getChatName() : "(None)"));
     }
     public String getFormattedString(String input, City target) {
         return input.replace("%r",target.getReputation() + "").replace("%c",target.getName())
-            .replace("%i",target.getIdentifier().replace("%f",target.getChatName());
+            .replace("%i",target.getIdentifier()).replace("%f",target.getChatName());
     }
     
     public void setCommand(String command) {

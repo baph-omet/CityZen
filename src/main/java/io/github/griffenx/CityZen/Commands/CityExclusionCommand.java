@@ -39,7 +39,12 @@ public class CityExclusionCommand {
 	
 	private static void mode(CommandSender sender, String[] args) {
 		City city = null;
-		if (args.length == 4) {
+		if (args.length > 3) {
+			if (sender.hasPermission("cityzen.city.exclusion.mode.others")) {
+				city = City.getCity(Util.findCityName(args));
+				if (city == null) sender.sendMessage(Messaging.cityNotFound());
+			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.mode.others"));
+		} else {
 			if (sender.hasPermission("cityzen.city.exclusion.mode")) {
 				Citizen citizen = Citizen.getCitizen(sender);
 				if (citizen != null) {
@@ -48,11 +53,6 @@ public class CityExclusionCommand {
 					} else sender.sendMessage(Messaging.notCityOfficial());
 				} else sender.sendMessage(Messaging.missingCitizenRecord());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.mode"));
-		} else {
-			if (sender.hasPermission("cityzen.city.exclusion.mode.others")) {
-				city = City.getCity(Util.findCityName(args));
-				if (city == null) sender.sendMessage(Messaging.cityNotFound());
-			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.mode.others"));
 		}
 		if (city == null) return;
 		else {
@@ -98,7 +98,12 @@ public class CityExclusionCommand {
 	
 	private static void add(CommandSender sender, String[] args) {
 		City city = null;
-		if (args.length == 4) {
+		if (args.length > 3) {
+			if (sender.hasPermission("cityzen.city.exclusion.add.others")) {
+				city = City.getCity(Util.findCityName(args));
+				if (city == null) sender.sendMessage(Messaging.cityNotFound());
+			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.add.others"));
+		} else {
 			if (sender.hasPermission("cityzen.city.exclusion.add")) {
 				Citizen citizen = Citizen.getCitizen(sender);
 				if (citizen != null) {
@@ -107,11 +112,6 @@ public class CityExclusionCommand {
 					} else sender.sendMessage(Messaging.notCityOfficial());
 				} else sender.sendMessage(Messaging.missingCitizenRecord());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.add"));
-		} else {
-			if (sender.hasPermission("cityzen.city.exclusion.add.others")) {
-				city = City.getCity(Util.findCityName(args));
-				if (city == null) sender.sendMessage(Messaging.cityNotFound());
-			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.add.others"));
 		}
 		if (city == null) return;
 		else {
@@ -128,7 +128,12 @@ public class CityExclusionCommand {
 	
 	private static void remove(CommandSender sender, String[] args) {
 		City city = null;
-		if (args.length == 4) {
+		if (args.length > 3) {
+			if (sender.hasPermission("cityzen.city.exclusion.remove.others")) {
+				city = City.getCity(Util.findCityName(args));
+				if (city == null) sender.sendMessage(Messaging.cityNotFound());
+			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.remove.others"));
+		} else {
 			if (sender.hasPermission("cityzen.city.exclusion.remove")) {
 				Citizen citizen = Citizen.getCitizen(sender);
 				if (citizen != null) {
@@ -137,11 +142,6 @@ public class CityExclusionCommand {
 					} else sender.sendMessage(Messaging.notCityOfficial());
 				} else sender.sendMessage(Messaging.missingCitizenRecord());
 			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.remove"));
-		} else {
-			if (sender.hasPermission("cityzen.city.exclusion.remove.others")) {
-				city = City.getCity(Util.findCityName(args));
-				if (city == null) sender.sendMessage(Messaging.cityNotFound());
-			} else sender.sendMessage(Messaging.noPerms("cityzen.city.exclusion.remove.others"));
 		}
 		if (city == null) return;
 		else {

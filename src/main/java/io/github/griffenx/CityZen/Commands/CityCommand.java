@@ -98,33 +98,42 @@ public class CityCommand {
 					Citizen citizen = Citizen.getCitizen(sender);
 					if (citizen != null) {
 						
-						City preexistingWaitlist = citizen.getWaitlistedCity();
-						if (preexistingWaitlist == null) {
-							
-							if (city.isFreeJoin()) {
+						if (citizen.getAffiliation() == null) {
+						
+							City preexistingWaitlist = citizen.getWaitlistedCity();
+							if (preexistingWaitlist == null) {
 								
-								city.addCitizen(citizen);
-								sender.sendMessage("You successfully joined " + cityName + "!");
-								
-								long rep = plugin.getConfig().getLong("gainedOnJoinCity");
-								citizen.addReputation(rep);
-								sender.sendMessage("You gained " + rep + " Reputation for joining!");
-								
+								if (city.isFreeJoin()) {
+									
+									city.addCitizen(citizen);
+									sender.sendMessage("You successfully joined " + cityName + "!");
+									for (Player p : CityZen.getPlugin().getServer().getOnlinePlayers()) {
+										if (!p.equals((Player)sender)) {
+											p.sendMessage(((Player)sender).getDisplayName() + ChatColor.BLUE + " has joined " + city.getChatName());
+										}
+									}
+									
+									long rep = plugin.getConfig().getLong("gainedOnJoinCity");
+									citizen.addReputation(rep);
+									sender.sendMessage("You gained " + rep + " Reputation for joining!");
+									
+								} else {
+									city.addWaitlist(citizen);
+									sender.sendMessage(city.getChatName() + ChatColor.BLUE + " does not allow Free Join."
+											+ " A request to join this City has been sent instead and will be reviewed by an official of that City."
+											+ " To cancel this request, type \"/city cancel\"");
+									
+									String alertMessage = citizen.getName() + " has requested to join " + city.getName() 
+										+ ". Type \"/city approve " + citizen.getName() + "\" or \"/city deny " + citizen.getName() + "\"";
+									city.getMayor().addAlert(alertMessage);
+									for (Citizen d : city.getDeputies()) d.addAlert(alertMessage);
+								}
 							} else {
-								city.addWaitlist(citizen);
-								sender.sendMessage(city.getChatName() + ChatColor.BLUE + " does not allow Free Join."
-										+ " A request to join this City has been sent instead and will be reviewed by an official of that City."
-										+ " To cancel this request, type \"/city cancel\"");
-								
-								String alertMessage = citizen.getName() + " has requested to join " + city.getName() 
-									+ ". Type \"/city approve " + citizen.getName() + "\" or \"/city deny " + citizen.getName() + "\"";
-								city.getMayor().addAlert(alertMessage);
-								for (Citizen d : city.getDeputies()) d.addAlert(alertMessage);
+								sender.sendMessage(ChatColor.RED + "You are already on the waitlist for " + preexistingWaitlist.getChatName()
+									+ ChatColor.RED + ". Please cancel your request there or wait for it to be denied before attempting to join another city.");
 							}
-						} else {
-							sender.sendMessage(ChatColor.RED + "You are already on the waitlist for " + preexistingWaitlist.getChatName()
-								+ ChatColor.RED + ". Please cancel your request there or wait for it to be denied before attempting to join another city.");
-						}
+						} else sender.sendMessage(ChatColor.RED + "You are already a resident of " + citizen.getAffiliation().getName() 
+								+ ". You cannot join another city without first leaving your current city.");
 					} else {
 						sender.sendMessage(Messaging.missingCitizenRecord());
 					}
@@ -340,7 +349,7 @@ public class CityCommand {
 					ChatColor.BLUE + "| Reputation: " + ChatColor.GOLD + city.getReputation(),
 					ChatColor.BLUE + "| Max Reputation: " + ChatColor.RED + city.getMaxReputation(),
 					ChatColor.BLUE + "| Mayor: " + ChatColor.GOLD + city.getMayor().getName() 
-						+ (deps > 0 ? "(" + deps + " Deput" + (deps > 1 ? "ies" : "y") + ")" : ""),
+						+ (deps > 0 ? " (" + deps + " Deput" + (deps > 1 ? "ies" : "y") + ")" : ""),
 					ChatColor.BLUE + "| Plots: " + ChatColor.WHITE + city.getPlots().size() + "/" + (long)Math.round(CityZen.getPlugin().getConfig().getDouble("plotDensity") * city.getCitizens().size()),
 					ChatColor.BLUE + "| FreeJoin: " + ChatColor.WHITE + city.isFreeJoin(),
 					ChatColor.BLUE + "| OpenPlotting: " + ChatColor.WHITE + city.isOpenPlotting(),
@@ -370,20 +379,22 @@ public class CityCommand {
 					}
 					City city = target.getAffiliation();
 					if (city != null) {
-						long rep = target.getReputation();
-						city.removeCitizen(target,true);
-						if (target.getPlayer().isOnline()) {
-							String message = ChatColor.RED + "You were evicted from " + city.getChatName() + ChatColor.RED + " by " 
-								+ sender.getName() + ". You lost " + ChatColor.GOLD + (rep - target.getReputation()) 
-								+ ChatColor.RED + " Reputation. You have been removed from ownership of all plots"
-								+ " and may not rejoin this City unless approved by a City official.";
-							target.getPlayer().sendMessage(message);
-						} else {
-							target.addAlert("[CityZen] You were evicted from " + city.getName() + " by " + sender.getName() + ". You lost "
-								+ (rep - target.getReputation()) + " Reputation. You have been removed from ownership of all plots"
-								+ " and may not rejoin this City unless approved by a City official.");
-						}
-						sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was evicted from " + city.getChatName());
+						if (!target.isMayor()) {
+							long rep = target.getReputation();
+							city.removeCitizen(target,true);
+							if (target.getPlayer().isOnline()) {
+								String message = ChatColor.RED + "You were evicted from " + city.getChatName() + ChatColor.RED + " by " 
+									+ sender.getName() + ". You lost " + ChatColor.GOLD + (rep - target.getReputation()) 
+									+ ChatColor.RED + " Reputation. You have been removed from ownership of all plots"
+									+ " and may not rejoin this City unless approved by a City official.";
+								target.getPlayer().sendMessage(message);
+							} else {
+								target.addAlert("[CityZen] You were evicted from " + city.getName() + " by " + sender.getName() + ". You lost "
+									+ (rep - target.getReputation()) + " Reputation. You have been removed from ownership of all plots"
+									+ " and may not rejoin this City unless approved by a City official.");
+							}
+							sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was evicted from " + city.getChatName());
+						} else sender.sendMessage(ChatColor.RED + "You cannot evict the Mayor.");
 					} else sender.sendMessage(Messaging.noAffiliation(target));
 				} else sender.sendMessage(Messaging.citizenNotFound(args[1]));
 			} else sender.sendMessage(ChatColor.RED + "Not enough arguments. Please specify a Citizen to evict from their City.");
@@ -642,11 +653,11 @@ public class CityCommand {
 				
 				String[][] pages = new String[numberOfPages][5];
 				
-				for (int page=0;page<numberOfPages;page++) {
-					for (int i=0; i < 5;i++) {
+				for (int page = 0; page < numberOfPages; page++) {
+					for (int i = 0; i < 5; i++) {
 						try {
 							Citizen banee = banlist.get(page * 5 + i);
-							pages[page][i] = banee.getName();
+							pages[page][i] = ChatColor.RED + banee.getName();
 						} catch (IndexOutOfBoundsException e) {
 							pages[page][i] = null;
 						}

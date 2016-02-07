@@ -453,16 +453,18 @@ public class PlotCommand {
 				}
 				else if (args[1].equalsIgnoreCase("set")) {
 					if (sender.hasPermission("cityzen.plot.price.set")) {
-						if (!plot.isMega() || plot.getOwners().contains(citizen) || ((citizen.isMayor() || citizen.isDeputy()) && citizen.getAffiliation().equals(plot.getAffiliation()))
-								|| sender.hasPermission("cityzen.plot.price.set.others")) {
-							try {
-								plot.setPrice(Double.valueOf(args[2]));
-								sender.sendMessage(ChatColor.BLUE + "The price of this plot is now " + plot.getPrice() + "." + (plot.getPrice() == 0 ? " This plot is not for sale." : ""));
-								
-							} catch(NumberFormatException e) {
-								sender.sendMessage(ChatColor.RED + "Price must be a number.");
-							}
-						} else sender.sendMessage(ChatColor.RED + "You cannot set a price for this plot.");
+						if (args.length > 2) {
+							if (!plot.isMega() || plot.getOwners().contains(citizen) || ((citizen.isMayor() || citizen.isDeputy()) && citizen.getAffiliation().equals(plot.getAffiliation()))
+									|| sender.hasPermission("cityzen.plot.price.set.others")) {
+								try {
+									plot.setPrice(Double.valueOf(args[2]));
+									sender.sendMessage(ChatColor.BLUE + "The price of this plot is now " + plot.getPrice() + "." + (plot.getPrice() == 0 ? " This plot is not for sale." : ""));
+									
+								} catch(NumberFormatException e) {
+									sender.sendMessage(ChatColor.RED + "Price must be a number.");
+								}
+							} else sender.sendMessage(ChatColor.RED + "You cannot set a price for this plot.");
+						} else sender.sendMessage(Messaging.notEnoughArguments("/plot price set <price>"));
 					} else sender.sendMessage(Messaging.noPerms("cityzen.plot.price.set"));
 				} else sender.sendMessage(Messaging.invalidArguments("/plot price (set) (price)"));
 			} else sender.sendMessage(Messaging.playersOnly());
@@ -635,7 +637,10 @@ public class PlotCommand {
 									if (!c.equals(citizen)) c.sendMessage(ChatColor.BLUE + citizen.getName() + " left ownership of your plot centered at (" + plot.getCenter().getBlockX() + "," 
 											+ plot.getCenter().getBlockZ() + ").");
 								}
-								boolean isAbandoned = true;
+								
+								plot.removeOwner(citizen);
+								
+								boolean isAbandoned = false;
 								if (plot.getOwners().size() == 0) {
 									if (city.isOpenPlotting()) {
 										plot.wipe();
@@ -790,17 +795,20 @@ public class PlotCommand {
 												plot.addOwner(target);
 												target.sendMessage(ChatColor.BLUE + "You were added to a plot centered at (" 
 													+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
+												sender.sendMessage(ChatColor.BLUE + "Successfully added " + target.getName() + " t this plot.");
 											} else {
 												sender.sendMessage(ChatColor.RED + target.getName() + " cannot own any more plots.");
 											}
 										} else {
 											plot.removeOwner(target);
-												for (Citizen c : plot.getOwners()) {
-													c.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was removed from your plot centered at (" 
-														+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
-												}
-												target.sendMessage(ChatColor.BLUE + "You were removed from a plot centered at (" 
+											for (Citizen c : plot.getOwners()) {
+												c.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was removed from your plot centered at (" 
 													+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
+											}
+											target.sendMessage(ChatColor.BLUE + "You were removed from a plot centered at (" 
+												+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
+											sender.sendMessage(ChatColor.BLUE + "Successfully removed " + target.getName() + " from this plot.");
+												
 										}
 									} else sender.sendMessage(ChatColor.RED + "This plot is not owned by a Citizen named " + args[1]);
 								} else sender.sendMessage(Messaging.notEnoughArguments("/plot " + args[0] + " <Citizen>"));
@@ -849,39 +857,41 @@ public class PlotCommand {
 					Plot plot = City.getCity(sender).getPlot(sender);
 					if (plot != null) {
 						if (plot.getOwners().contains(citizen) || citizen.isCityOfficial() || sender.hasPermission("cityzen.plot.setprotection.others")) {
-							switch (args[1].toLowerCase()) {
-								case "0":
-								case "none":
-								case "pu":
-								case "pub":
-								case "public":
-									plot.setProtectionLevel(ProtectionLevel.PUBLIC);
-									sender.sendMessage(ChatColor.BLUE + "You set the protection level for this plot to PUBLIC. "
-											+ "Any player can now build in this plot.");
-									break;
-								case "1":
-								case "c":
-								case "co":
-								case "com":
-								case "comm":
-								case "communal":
-									plot.setProtectionLevel(ProtectionLevel.COMMUNAL);
-									sender.sendMessage(ChatColor.BLUE + "You set the protection level for this plot to COMMUNAL. "
-											+ "Any Citizen of this City can now build in this plot.");
-									break;
-								case "2":
-								case "p":
-								case "pr":
-								case "pro":
-								case "prot":
-								case "protected":
-									plot.setProtectionLevel(ProtectionLevel.PROTECTED);
-									sender.sendMessage(ChatColor.BLUE + "You set the protection level for this plot to PROTECTED. "
-											+ "Only City officials can now build in this plot.");
-									break;
-								default:
-									sender.sendMessage(ChatColor.RED + "\"" + args[1] + "\" is not a protection level.");
-							}
+							if (args.length > 1) {
+								switch (args[1].toLowerCase()) {
+									case "0":
+									case "none":
+									case "pu":
+									case "pub":
+									case "public":
+										plot.setProtectionLevel(ProtectionLevel.PUBLIC);
+										sender.sendMessage(ChatColor.BLUE + "You set the protection level for this plot to PUBLIC. "
+												+ "Any player can now build in this plot.");
+										break;
+									case "1":
+									case "c":
+									case "co":
+									case "com":
+									case "comm":
+									case "communal":
+										plot.setProtectionLevel(ProtectionLevel.COMMUNAL);
+										sender.sendMessage(ChatColor.BLUE + "You set the protection level for this plot to COMMUNAL. "
+												+ "Any Citizen of this City can now build in this plot.");
+										break;
+									case "2":
+									case "p":
+									case "pr":
+									case "pro":
+									case "prot":
+									case "protected":
+										plot.setProtectionLevel(ProtectionLevel.PROTECTED);
+										sender.sendMessage(ChatColor.BLUE + "You set the protection level for this plot to PROTECTED. "
+												+ "Only City officials can now build in this plot.");
+										break;
+									default:
+										sender.sendMessage(ChatColor.RED + "\"" + args[1] + "\" is not a protection level. Valid levels: public, communal, private.");
+								}
+							} else sender.sendMessage(Messaging.notEnoughArguments("/plot setprotection <level>"));
 						} else sender.sendMessage(Messaging.notPlotOwner());
 					} else sender.sendMessage(Messaging.noPlotFound()); 
 				} else sender.sendMessage(Messaging.missingCitizenRecord());

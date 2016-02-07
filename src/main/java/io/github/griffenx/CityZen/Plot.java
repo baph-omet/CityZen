@@ -338,7 +338,6 @@ public class Plot {
 			}
 		}
 		setProperty("owners",owners);
-		wipe();
 	}
 	
 	/**

@@ -113,7 +113,7 @@ public class CitySetCommand {
 					case "openplotting":
 						boolean openPlotting = Boolean.parseBoolean(value);
 						city.setOpenPlotting(openPlotting);
-						sender.sendMessage(ChatColor.BLUE + "FreeJoin for " + city.getChatName() + ChatColor.BLUE + " is now set to " + openPlotting);
+						sender.sendMessage(ChatColor.BLUE + "OpenPlotting for " + city.getChatName() + ChatColor.BLUE + " is now set to " + openPlotting);
 						break;
 					case "wipeplots":
 						boolean wipePlots = Boolean.parseBoolean(value);
