@@ -48,7 +48,7 @@ public class CityExclusionCommand {
 			if (sender.hasPermission("cityzen.city.exclusion.mode")) {
 				Citizen citizen = Citizen.getCitizen(sender);
 				if (citizen != null) {
-					if (!(citizen.isDeputy() || citizen.isMayor())) {
+					if (citizen.isDeputy() || citizen.isMayor()) {
 						city = citizen.getAffiliation();
 					} else sender.sendMessage(Messaging.notCityOfficial());
 				} else sender.sendMessage(Messaging.missingCitizenRecord());
@@ -107,7 +107,7 @@ public class CityExclusionCommand {
 			if (sender.hasPermission("cityzen.city.exclusion.add")) {
 				Citizen citizen = Citizen.getCitizen(sender);
 				if (citizen != null) {
-					if (!(citizen.isDeputy() || citizen.isMayor())) {
+					if (citizen.isDeputy() || citizen.isMayor()) {
 						city = citizen.getAffiliation();
 					} else sender.sendMessage(Messaging.notCityOfficial());
 				} else sender.sendMessage(Messaging.missingCitizenRecord());
@@ -137,7 +137,7 @@ public class CityExclusionCommand {
 			if (sender.hasPermission("cityzen.city.exclusion.remove")) {
 				Citizen citizen = Citizen.getCitizen(sender);
 				if (citizen != null) {
-					if (!(citizen.isDeputy() || citizen.isMayor())) {
+					if (citizen.isDeputy() || citizen.isMayor()) {
 						city = citizen.getAffiliation();
 					} else sender.sendMessage(Messaging.notCityOfficial());
 				} else sender.sendMessage(Messaging.missingCitizenRecord());

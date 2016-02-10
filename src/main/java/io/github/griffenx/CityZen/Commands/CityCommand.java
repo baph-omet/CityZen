@@ -58,6 +58,7 @@ public class CityCommand {
 			case "pardon":
 				pardon(sender,args);
 				break;
+			case "approve":
 			case "accept":
 				accept(sender,args);
 				break;
@@ -124,7 +125,7 @@ public class CityCommand {
 											+ " To cancel this request, type \"/city cancel\"");
 									
 									String alertMessage = citizen.getName() + " has requested to join " + city.getName() 
-										+ ". Type \"/city approve " + citizen.getName() + "\" or \"/city deny " + citizen.getName() + "\"";
+										+ ". Type \"/city accept " + citizen.getName() + "\" or \"/city deny " + citizen.getName() + "\"";
 									city.getMayor().addAlert(alertMessage);
 									for (Citizen d : city.getDeputies()) d.addAlert(alertMessage);
 								}
@@ -545,7 +546,7 @@ public class CityCommand {
 					if (city != null) {
 						if (citizen.isMayor() || citizen.isDeputy()) {
 							if (args.length > 1) {
-								Citizen target = Citizen.getCitizen(args[2]);
+								Citizen target = Citizen.getCitizen(args[1]);
 								if (target != null) {
 									if (city.isInWaitlist(target)) {
 										long rep = target.getReputation();
@@ -640,6 +641,7 @@ public class CityCommand {
 			if (args.length > 1) {
 				try {
 					pageNumber = Integer.parseInt(args[1]);
+					if (pageNumber < 1) pageNumber = 1;
 				} catch (NumberFormatException e) {
 					pageNumber = 1;
 				}

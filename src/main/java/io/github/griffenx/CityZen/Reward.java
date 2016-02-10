@@ -46,7 +46,7 @@ public class Reward {
             config.set("rewards",rewards);
             try {
             	return new Reward(newID);
-            } catch (Exception e) {
+            } catch (IllegalArgumentException e) {
             	return null;
             }
         } return null;

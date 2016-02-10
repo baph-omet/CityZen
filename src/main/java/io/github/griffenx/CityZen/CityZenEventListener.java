@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -11,13 +12,20 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityBreakDoorEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.player.PlayerBucketEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import io.github.griffenx.CityZen.Tasks.AlertNotifyTask;
 import io.github.griffenx.CityZen.Tasks.RewardDisbursementTask;
@@ -314,6 +322,39 @@ public class CityZenEventListener implements Listener {
 		}
 	}
 	
+	@EventHandler (priority=EventPriority.NORMAL)
+	public void onBucketUse(PlayerBucketEvent event) {
+		if (!Util.canBuild(event.getPlayer(), event.getBlockClicked().getLocation())) {
+			event.setCancelled(true);
+			event.getPlayer().sendMessage(ChatColor.RED + "You cannot use buckets in cities in which you cannot build.");
+		}
+	}
+	
+	@EventHandler (priority=EventPriority.NORMAL)
+	public void onContainerOpen(PlayerInteractEvent event) {
+		if (event.hasBlock()) {
+			Material[] types = {
+					Material.CHEST,
+					Material.TRAPPED_CHEST,
+					Material.BEACON,
+					Material.FURNACE,
+					Material.BURNING_FURNACE,
+					Material.DISPENSER,
+					Material.DROPPER,
+					Material.HOPPER
+			};
+			for (Material material : types) {
+				if (event.getClickedBlock().getType().equals(material)) {
+					if (!Util.canBuild(event.getPlayer(), event.getClickedBlock().getLocation())) {
+						event.setCancelled(true);
+						event.getPlayer().sendMessage(ChatColor.RED + "You cannot interact with this block in a city in which you cannot build.");
+						break;
+					}
+				}
+			}
+		}
+	}
+	
 	@EventHandler (priority=EventPriority.LOW)
 	public void onMobSpawn(CreatureSpawnEvent event) {
 		Location location = event.getLocation();
@@ -347,4 +388,79 @@ public class CityZenEventListener implements Listener {
 			}
 		}
 	}
+	
+	@EventHandler (priority=EventPriority.NORMAL)
+	public void onExplosion(EntityExplodeEvent event) {
+		for (Block b : event.blockList()) {
+			if (City.getCity(b.getLocation()) != null) {
+				event.setCancelled(true);
+				return;
+			}
+		}
+	}
+	
+	@EventHandler (priority=EventPriority.NORMAL)
+	public void onBurn(BlockBurnEvent event) {
+		if (City.getCity(event.getBlock().getLocation()) != null) {
+			event.setCancelled(true);
+		}
+	}
+	
+	@EventHandler (priority=EventPriority.NORMAL)
+	public void onEntityDamage(EntityDamageByEntityEvent event) {
+		if (event.getDamager().getType().equals(EntityType.PLAYER)) {
+			Player player = (Player)event.getDamager();
+			EntityType[] passives = {
+					EntityType.PIG,
+					EntityType.COW,
+					EntityType.CHICKEN,
+					EntityType.SHEEP,
+					EntityType.RABBIT,
+					EntityType.SQUID,
+					EntityType.HORSE,
+					EntityType.IRON_GOLEM,
+					EntityType.WOLF,
+					EntityType.OCELOT,
+					EntityType.ITEM_FRAME,
+					EntityType.VILLAGER,
+					EntityType.SNOWMAN,
+					EntityType.PAINTING,
+					EntityType.MUSHROOM_COW,
+					EntityType.ARMOR_STAND
+			};
+			
+			for (EntityType type : passives) {
+				if (type.equals(event.getEntityType())) {
+					if (!Util.canBuild(player, event.getEntity().getLocation())) {
+						player.sendMessage(ChatColor.RED + "You cannot damage entities in cities in which you cannot build.");
+						event.setCancelled(true);
+						break;
+					}
+				}
+			}
+		}
+	}
+	
+	@EventHandler (priority=EventPriority.MONITOR)
+	public void onPlayerMove(PlayerMoveEvent event) {
+		Player player = event.getPlayer();
+		City city = City.getCity(player.getLocation());
+		if (city != null) {
+			if (!player.getMetadata("inCity").get(0).asString().equals(city.getName())) {
+				player.setMetadata("inCity", new FixedMetadataValue(CityZen.getPlugin(), city.getName()));
+				player.sendMessage(ChatColor.BLUE + "Welcome to " + city.getChatName() + ChatColor.BLUE + "!");
+				Citizen citizen = Citizen.getCitizen(player);
+				if (citizen != null && city.getCitizens().contains(citizen)) {
+					player.sendMessage(ChatColor.BLUE + "Welcome home, " + player.getDisplayName() + ChatColor.BLUE + "!");
+				}
+			}
+		} else {
+			if (player.hasMetadata("inCity")) {
+				city = City.getCity(player.getMetadata("inCity").get(0).asString());
+				player.sendMessage(ChatColor.BLUE + "Now leaving " + city.getChatName() + ChatColor.BLUE + ". Come again soon!");
+				player.removeMetadata("inCity", CityZen.getPlugin());
+			}
+		}
+	}
+	
 }

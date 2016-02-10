@@ -3,6 +3,9 @@ package io.github.griffenx.CityZen;
 import java.util.List;
 import java.util.Vector;
 
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
 public class Util {
 	public static String collapseArguments(String[] args, int start, int stop) {
 		StringBuilder builder = new StringBuilder(args[start]);
@@ -61,5 +64,47 @@ public class Util {
 	
 	public static double getDistace(Position pos1, Position pos2) {
 		return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.z - pos2.z, 2));
+	}
+	
+	public static boolean canBuild(Player player, Location location) {
+		City city = City.getCity(location);
+		if (city != null) {
+			Citizen citizen = Citizen.getCitizen(player);
+			if (citizen != null) {
+				Plot plot = city.getPlot(location);
+				if (plot != null) {
+					switch (plot.getProtectionLevel()) {
+						case PUBLIC:
+							break;
+						case COMMUNAL:
+							if (!city.getCitizens().contains(citizen)){
+								return false;
+							}
+							break;
+						case PROTECTED:
+							if (!plot.getOwners().contains(citizen) && !citizen.isCityOfficial(city)) {
+								return false;
+							}
+							break;
+					}
+				} else {
+					switch (city.getProtectionLevel()) {
+						case PUBLIC:
+							break;
+						case COMMUNAL:
+							if (!city.getCitizens().contains(citizen)){
+								return false;
+							}
+							break;
+						case PROTECTED:
+							if (!citizen.isCityOfficial(city)) {
+								return false;
+							}
+							break;
+					}
+				}
+			} else return false;
+		}
+		return true;
 	}
 }
