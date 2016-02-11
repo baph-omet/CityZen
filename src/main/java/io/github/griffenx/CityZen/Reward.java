@@ -63,7 +63,7 @@ public class Reward {
         } return rewards;
     }
     
-    public static void deleteReward(int id) throws Exception {
+    public static void deleteReward(int id) throws IllegalArgumentException {
     	Reward target = null;
     	try {
     		target = new Reward(id);
@@ -84,7 +84,7 @@ public class Reward {
 	                        }
 	                    }
 	                    rewards.remove(i);
-	                    return;
+	                    break;
 	                } else i++;
 	            } catch (NumberFormatException e) {
 	                rewards.remove(i);

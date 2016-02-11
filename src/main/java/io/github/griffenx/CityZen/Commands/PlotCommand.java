@@ -785,32 +785,35 @@ public class PlotCommand {
 							if (plot.getOwners().contains(citizen) || citizen.isCityOfficial() || sender.hasPermission("cityzen.plot.modifyowners.others")) {
 								if (args.length > 1) {
 									Citizen target = Citizen.getCitizen(args[1]);
-									if (target != null && plot.getOwners().contains(target)) {
+									if (target != null) {
 										if (args[0].toLowerCase().contains("add")) {
-											if (target.getPlots().size() < target.getMaxPlots()) {
+											if (!plot.getOwners().contains(target)) {
+												if (target.getPlots().size() < target.getMaxPlots()) {
+													for (Citizen c : plot.getOwners()) {
+														c.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was added to your plot centered at (" 
+															+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
+													}
+													plot.addOwner(target);
+													target.sendMessage(ChatColor.BLUE + "You were added to a plot centered at (" 
+														+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
+													sender.sendMessage(ChatColor.BLUE + "Successfully added " + target.getName() + " t this plot.");
+												} else {
+													sender.sendMessage(ChatColor.RED + target.getName() + " cannot own any more plots.");
+												}
+											} else sender.sendMessage(ChatColor.RED + target.getName() + " already owns this plot.");
+										} else {
+											if (plot.getOwners().contains(target)) {
+												plot.removeOwner(target);
 												for (Citizen c : plot.getOwners()) {
-													c.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was added to your plot centered at (" 
+													c.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was removed from your plot centered at (" 
 														+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
 												}
-												plot.addOwner(target);
-												target.sendMessage(ChatColor.BLUE + "You were added to a plot centered at (" 
+												target.sendMessage(ChatColor.BLUE + "You were removed from a plot centered at (" 
 													+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
-												sender.sendMessage(ChatColor.BLUE + "Successfully added " + target.getName() + " t this plot.");
-											} else {
-												sender.sendMessage(ChatColor.RED + target.getName() + " cannot own any more plots.");
-											}
-										} else {
-											plot.removeOwner(target);
-											for (Citizen c : plot.getOwners()) {
-												c.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.BLUE + " was removed from your plot centered at (" 
-													+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
-											}
-											target.sendMessage(ChatColor.BLUE + "You were removed from a plot centered at (" 
-												+ plot.getCenter().getBlockX() + "," + plot.getCenter().getBlockZ() + ") by " + sender.getName());
-											sender.sendMessage(ChatColor.BLUE + "Successfully removed " + target.getName() + " from this plot.");
-												
+												sender.sendMessage(ChatColor.BLUE + "Successfully removed " + target.getName() + " from this plot.");
+											} else sender.sendMessage(ChatColor.RED + "This plot is not owned by " + target.getName());
 										}
-									} else sender.sendMessage(ChatColor.RED + "This plot is not owned by a Citizen named " + args[1]);
+									} else sender.sendMessage(Messaging.citizenNotFound(args[1]));
 								} else sender.sendMessage(Messaging.notEnoughArguments("/plot " + args[0] + " <Citizen>"));
 							} else sender.sendMessage(Messaging.notCityOfficial());
 						} else sender.sendMessage(Messaging.noPlotFound());

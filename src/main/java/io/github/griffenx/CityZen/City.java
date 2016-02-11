@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
-import java.util.logging.Level;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -535,6 +534,10 @@ public class City implements Reputable {
 					for (Plot p : getPlots()) {
 						if (p.getOwners().contains(ctz)) {
 							p.removeOwner(ctz);
+							if (p.getOwners().size() == 0 && p.getAffiliation().isOpenPlotting()) {
+								p.wipe();
+								p.delete();
+							}
 						}
 					}
 				}
@@ -654,13 +657,11 @@ public class City implements Reputable {
 	public List<Citizen> getBanlist() {
 		List<Citizen> banned = new Vector<Citizen>();
 		for (String u : properties.getStringList("banlist")) {
-			Citizen c = null;
 			try {
-				c = Citizen.getCitizen(UUID.fromString(u));
+				banned.add(Citizen.getCitizen(UUID.fromString(u)));
 			} catch (IllegalArgumentException e) {
-				CityZen.getPlugin().getLogger().log(Level.INFO,"Unable to parse player in banlist for city " + getName() + ": " + u);
+				log.write("Unable to parse player in banlist for city " + getName() + ": " + u);
 			}
-			if (c != null) banned.add(c);
 		}
 		return banned;
 	}

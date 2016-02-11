@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityBreakDoorEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -407,6 +408,15 @@ public class CityZenEventListener implements Listener {
 	}
 	
 	@EventHandler (priority=EventPriority.NORMAL)
+	public void onSpread(BlockSpreadEvent event) {
+		if (event.getBlock().getType().equals(Material.FIRE)) {
+			if (City.getCity(event.getBlock().getLocation()) != null) {
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler (priority=EventPriority.NORMAL)
 	public void onEntityDamage(EntityDamageByEntityEvent event) {
 		if (event.getDamager().getType().equals(EntityType.PLAYER)) {
 			Player player = (Player)event.getDamager();
@@ -444,9 +454,9 @@ public class CityZenEventListener implements Listener {
 	@EventHandler (priority=EventPriority.MONITOR)
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
-		City city = City.getCity(player.getLocation());
+		City city = City.getCity(event.getTo());
 		if (city != null) {
-			if (!player.getMetadata("inCity").get(0).asString().equals(city.getName())) {
+			if (!player.hasMetadata("inCity") || !player.getMetadata("inCity").get(0).asString().equals(city.getName())) {
 				player.setMetadata("inCity", new FixedMetadataValue(CityZen.getPlugin(), city.getName()));
 				player.sendMessage(ChatColor.BLUE + "Welcome to " + city.getChatName() + ChatColor.BLUE + "!");
 				Citizen citizen = Citizen.getCitizen(player);

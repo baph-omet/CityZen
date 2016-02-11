@@ -326,11 +326,20 @@ public class CityCommand {
 			City city;
 			if (sender instanceof Player && args.length == 1) {
 				Citizen citizen = Citizen.getCitizen(sender);
-				city = citizen.getAffiliation();
+				city = City.getCity(sender);
 				if (city == null) {
-					sender.sendMessage(ChatColor.RED + "You are not a Citizen of any City."
-						+ " Please specify a City to look up. Useage: \"/city info <City>\"");
-					return;
+					if (citizen != null) {
+						city = citizen.getAffiliation();
+						if (city == null) {
+							sender.sendMessage(ChatColor.RED + "You are not a Citizen of any City."
+								+ " Please specify a City to look up. Useage: \"/city info <City>\"");
+							return;
+						}
+					} else {
+						sender.sendMessage(ChatColor.RED + "You are not a Citizen of any City."
+								+ " Please specify a City to look up. Useage: \"/city info <City>\"");
+						return;
+					}
 				}
 			} else if (args.length > 1) {
 				city = City.getCity(Util.findCityName(args));
@@ -628,7 +637,7 @@ public class CityCommand {
 			if (sender.hasPermission("cityzen.city.banlist.others")) {
 				city = City.getCity(Util.findCityName(args));
 				if (city == null) {
-					sender.sendMessage(Messaging.cityNotFound());
+					sender.sendMessage(Messaging.cityNotFound(Util.collapseArguments(args, 2)));
 					return;
 				}
 			} else {
@@ -651,7 +660,7 @@ public class CityCommand {
 			List<Citizen> banlist = city.getBanlist();
 			
 			if (banlist.size() > 0) {
-				int numberOfPages = (int) Math.ceil(banlist.size() / 5);
+				int numberOfPages = (int) Math.ceil(banlist.size() / 5.0);
 				
 				String[][] pages = new String[numberOfPages][5];
 				
@@ -667,8 +676,8 @@ public class CityCommand {
 				}
 				
 				sender.sendMessage(ChatColor.RED + "Citizens banned from " + city.getChatName()
-						+ ChatColor.RED + "(" + pageNumber + "/" + numberOfPages);
-				sender.sendMessage(pages[pageNumber - 1]);
+						+ ChatColor.RED + " (" + pageNumber + "/" + numberOfPages + ")");
+				for (String s : pages[pageNumber - 1]) if (s != null) sender.sendMessage(s);
 				if (numberOfPages > 1 && pageNumber < numberOfPages) sender.sendMessage(ChatColor.BLUE + "Type \"/city banlist " 
 					+ (pageNumber + 1) + "\" to view the next page.");
 			} else sender.sendMessage(ChatColor.BLUE + "No Citizens are banned from " + city.getChatName());
