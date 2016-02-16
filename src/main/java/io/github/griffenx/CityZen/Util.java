@@ -1,5 +1,6 @@
 package io.github.griffenx.CityZen;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -19,10 +20,15 @@ public class Util {
 	}
 	
 	public static String collapseArgsWithoutCityName(String[] args, int start, String cityName) {
+		return collapseArgsWithoutCityName(args, start, cityName, " ");
+	}
+	
+	public static String collapseArgsWithoutCityName(String[] args, int start, String cityName, String delimiter) {
 		int adjustment = cityName.split(" ").length;
+		if (!String.join(" ", args).contains(cityName)) adjustment = 0;
 		StringBuilder joinedArgs = new StringBuilder(args[start]);
 		for (int i = start + 1; i < args.length - adjustment; i++) {
-			joinedArgs.append(" " + args[i]);
+			joinedArgs.append(delimiter + args[i]);
 		} return joinedArgs.toString();
 	}
 	
@@ -46,7 +52,7 @@ public class Util {
 	public static String findCityName(String[] args, int stop) {
 		List<City> citiesMatched = new Vector<>();
 		for (int i = args.length - 1; i >= stop; i--) {
-			String name = collapseArguments(args, i, args.length);
+			String name = findPartialCityName(collapseArguments(args, i, args.length));
 			City city = City.getCity(name);
 			if (city != null) citiesMatched.add(city);
 		}
@@ -60,6 +66,26 @@ public class Util {
 			if (mostComplexName == null) return null;
 			else return mostComplexName.getName();
 		}
+	}
+	
+	public static String findPartialCityName(String nameForm) {
+		List<String> matchedNames = new ArrayList<>();
+		for (City c : City.getCities()) {
+			if (nameForm.equalsIgnoreCase(c.getName())) return c.getName();
+			else if (c.getName().contains(nameForm)) matchedNames.add(c.getName());
+		}
+		
+		int highestRank = -1;
+		String bestMatch = null;
+		for (String n : matchedNames) {
+			int position = n.indexOf(nameForm);
+			if (position == 0) return n;
+			if (highestRank == -1 || position < highestRank) {
+				highestRank = position;
+				bestMatch = n;
+			}
+		}
+		return bestMatch;
 	}
 	
 	public static double getDistace(Position pos1, Position pos2) {

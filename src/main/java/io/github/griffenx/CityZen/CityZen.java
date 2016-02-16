@@ -22,7 +22,7 @@ public final class CityZen extends JavaPlugin {
 	public static Economy econ = null;
 	public static WorldGuardPlugin WorldGuard = null;
 	
-	public static CityLog cityLog;
+	public static CityLog cityLog = null;
 	
 	@Override
 	public void onEnable() {
@@ -39,9 +39,10 @@ public final class CityZen extends JavaPlugin {
 		rewardConfig.save();
 		rewardConfig.reload();
 		
+		cityLog = new CityLog();
+		
 		if (CityZen.getPlugin().getConfig().getBoolean("logEnabled")) serverLog.info("Logging enabled. Check for logs in the Logs folder of your CityZen folder.");
 		if (CityZen.getPlugin().getConfig().getBoolean("logDebug")) serverLog.info("Debug mode enabled for logs.");
-		cityLog = new CityLog();
 		cityLog.write("Enabling plugin...");
 		cityLog.debug("Started logging in Debug mode.");
 		
@@ -68,7 +69,6 @@ public final class CityZen extends JavaPlugin {
 			cityLog.write("WorldGuard not found. WorldGuard-dependent functions will be ignored.");
 		}
 		
-		
 		Commander commander = new Commander();
 		String[] commands = {
 				"psp",
@@ -81,12 +81,15 @@ public final class CityZen extends JavaPlugin {
 				"citizen",
 				"cty",
 				"city",
+				"cities",
 				"plt",
 				"plot",
 				"cityzen"
 		};
 		for (String cmd : commands) getCommand(cmd).setExecutor(commander);
+		
 		getServer().getPluginManager().registerEvents(new CityZenEventListener(), plugin);
+		
 		int saveInterval = getConfig().getInt("saveInterval");
 		if (saveInterval > 0) {
 			new SaveConfigTask().runTaskTimer(plugin, 20 * 60 * saveInterval, 20 * 60 * saveInterval);

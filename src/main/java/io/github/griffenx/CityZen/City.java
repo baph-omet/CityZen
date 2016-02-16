@@ -534,7 +534,7 @@ public class City implements Reputable {
 					for (Plot p : getPlots()) {
 						if (p.getOwners().contains(ctz)) {
 							p.removeOwner(ctz);
-							if (p.getOwners().size() == 0 && p.getAffiliation().isOpenPlotting()) {
+							if (p.getOwners().size() == 0 && p.getAffiliation().isOpenPlotting() && p.getAffiliation().isWipePlots()) {
 								p.wipe();
 								p.delete();
 							}

@@ -29,6 +29,8 @@ commands:
         description: City management and interaction commands. Type "/cityzen help" for full commands
     cty:
         description: City management and interaction commands. Type "/cityzen help" for full commands
+    cities:
+        description: City management and interaction commands. Type "/cityzen help" for full commands
     ctz:
         description: Citizen management and interaction commands. Type "/cityzen help" for full commands
     citizen:
@@ -75,6 +77,10 @@ permissions:
             cityzen.save: true
             cityzen.citizen.changerep: true
             cityzen.city.alert.others: true
+            cityzen.citizen.remove: true
+            cityzen.citizen.addplots: true
+            cityzen.citizen.setplots: true
+            cityzen.build.others: true
         default: op
     cityzen.user:
         description: Gives access to all basic commands and editing (subject to Citizen status)
@@ -106,12 +112,7 @@ permissions:
             cityzen.city.exclusion.list: true
             cityzen.citizen.top: true
             cityzen.citizen.list: true
-            cityzen.citizen.remove: true
-            cityzen.citizen.addplots: true
-            cityzen.citizen.setplots: true
             cityzen.plot.info: true
-            cityzen.plot.select: true
-            cityzen.plot.select: true
             cityzen.plot.select: true
             cityzen.plot.create: true
             cityzen.plot.move: true
@@ -354,3 +355,5 @@ permissions:
         description: Show the distance to and direction of the specified City
         children:
             cityzen.city.distance: true
+    cityzen.build.others:
+        description: Build in any City, regardless of protection

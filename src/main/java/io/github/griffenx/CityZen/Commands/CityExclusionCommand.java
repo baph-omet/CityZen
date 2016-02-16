@@ -115,7 +115,7 @@ public class CityExclusionCommand {
 		}
 		if (city == null) return;
 		else {
-			Material material = Material.getMaterial(args[2].toUpperCase());
+			Material material = Material.getMaterial(Util.collapseArgsWithoutCityName(args, 2, city.getName(), "_").toUpperCase());
 			if (material != null) {
 				if (!city.getBlacklist().contains(material)) {
 					city.addBlock(material);
@@ -145,7 +145,7 @@ public class CityExclusionCommand {
 		}
 		if (city == null) return;
 		else {
-			Material material = Material.getMaterial(args[2].toUpperCase());
+			Material material = Material.getMaterial(Util.collapseArgsWithoutCityName(args, 2, city.getName(), "_").toUpperCase());
 			if (material != null) {
 				if (city.getBlacklist().contains(material)) {
 					city.removeBlock(material);

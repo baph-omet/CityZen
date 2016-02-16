@@ -489,21 +489,20 @@ public class PlotCommand {
 							if (plot != null) {
 								if (citizen.getPlots().size() < citizen.getMaxPlots()) {
 									if (plot.getPrice() > 0) {
-										if (CityZen.econ.getBalance(CityZen.getPlugin().getServer().getOfflinePlayer(citizen.getUUID())) > plot.getPrice()) {
-											CityZen.econ.withdrawPlayer(CityZen.getPlugin().getServer().getOfflinePlayer(citizen.getUUID()), plot.getPrice());
-											plot.addOwner(citizen);
+										if (CityZen.econ.getBalance(CityZen.getPlugin().getServer().getOfflinePlayer(citizen.getUUID())) >= plot.getPrice()) {
 											citizen.addReputation(config.getLong("reputation.gainedOnBuyPlot"));
-											
 											List<Citizen> formerOwners = plot.getOwners();
 											for (Citizen o : formerOwners) {
 												o.sendMessage(ChatColor.BLUE + "Your plot centered at " + plot.getCenter() + " was sold to " + citizen.getName() + " for " 
 														+ plot.getPrice() + " " + CityZen.econ.currencyNamePlural());
-												CityZen.econ.depositPlayer(CityZen.getPlugin().getServer().getOfflinePlayer(o.getUUID()), plot.getPrice() / formerOwners.size());
+												CityZen.econ.depositPlayer(CityZen.getPlugin().getServer().getOfflinePlayer(o.getUUID()), plot.getPrice() / (double)formerOwners.size());
 												o.subReputation(config.getLong("reputation.lostOnSellPlot"));
 												plot.removeOwner(o);
 											}
-											plot.setPrice(0);
+											CityZen.econ.withdrawPlayer(CityZen.getPlugin().getServer().getOfflinePlayer(citizen.getUUID()), plot.getPrice());
+											plot.addOwner(citizen);
 											sender.sendMessage(ChatColor.BLUE + "You successfully purchased this plot for " + plot.getPrice() + " " + CityZen.econ.currencyNamePlural());
+											plot.setPrice(0);
 										} else sender.sendMessage(ChatColor.RED + "You cannot afford this plot. Price: " + plot.getPrice() + CityZen.econ.currencyNamePlural() 
 											+ " You have: " + CityZen.econ.getBalance(CityZen.getPlugin().getServer().getOfflinePlayer(citizen.getUUID())) + CityZen.econ.currencyNamePlural());
 									} else sender.sendMessage(ChatColor.RED + "This plot is not for sale.");
@@ -543,7 +542,7 @@ public class PlotCommand {
 					StringBuilder plotsList = new StringBuilder();
 					int i = 1;
 					for (Plot p : city.getPlots()) {
-						if (p.getOwners().isEmpty()) {
+						if (p.getOwners().isEmpty() && !p.isMega()) {
 							plotsList.append(ChatColor.BLUE + "| " + i + ". (" + p.getCenter().getBlockX() + "," + p.getCenter().getBlockZ() + ")\n");
 							i++;
 						}

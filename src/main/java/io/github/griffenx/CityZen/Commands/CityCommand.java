@@ -181,7 +181,7 @@ public class CityCommand {
 				sender.sendMessage(ChatColor.AQUA + "Cities on " + ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() 
 						+ ChatColor.RESET + "" + ChatColor.AQUA + " (" + pageNumber + "/" + numberOfPages + ")");
 				for (String m : listCities[pageNumber - 1]) if (m != null) sender.sendMessage(m);
-				if (numberOfPages > 1 && pageNumber < numberOfPages) sender.sendMessage(ChatColor.BLUE + "Type \"/cities list " + (pageNumber + 1) + "\" to view the next page.");
+				if (numberOfPages > 1 && pageNumber < numberOfPages) sender.sendMessage(ChatColor.BLUE + "Type \"/city list " + (pageNumber + 1) + "\" to view the next page.");
 				sender.sendMessage(ChatColor.BLUE + "See more info about a city with \"/city info <City Name...>\"");
 			} else {
 				sender.sendMessage(ChatColor.BLUE + "There are no Cities on this server.");

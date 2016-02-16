@@ -20,7 +20,8 @@ import org.bukkit.event.entity.EntityBreakDoorEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
-import org.bukkit.event.player.PlayerBucketEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
@@ -60,6 +61,7 @@ public class CityZenEventListener implements Listener {
 	@EventHandler (priority = EventPriority.MONITOR)
 	public void onQuit(PlayerQuitEvent event) {
 		CityZen.citizenConfig.save();
+		log.write(event.getPlayer().getName() + " quit.");
 	}
 	
 	@EventHandler (priority = EventPriority.MONITOR)
@@ -78,6 +80,7 @@ public class CityZenEventListener implements Listener {
 		City city = City.getCity(block.getLocation());
 		if (city != null) {
 			Player player = event.getPlayer();
+			if (player.hasPermission("cityzen.build.others")) return;
 			Citizen citizen = Citizen.getCitizen(player);
 			if (citizen != null) {
 				Plot plot = city.getPlot(block.getLocation());
@@ -324,7 +327,15 @@ public class CityZenEventListener implements Listener {
 	}
 	
 	@EventHandler (priority=EventPriority.NORMAL)
-	public void onBucketUse(PlayerBucketEvent event) {
+	public void onBucketUse(PlayerBucketEmptyEvent event) {
+		if (!Util.canBuild(event.getPlayer(), event.getBlockClicked().getLocation())) {
+			event.setCancelled(true);
+			event.getPlayer().sendMessage(ChatColor.RED + "You cannot use buckets in cities in which you cannot build.");
+		}
+	}
+	
+	@EventHandler (priority=EventPriority.NORMAL)
+	public void onBucketUse(PlayerBucketFillEvent event) {
 		if (!Util.canBuild(event.getPlayer(), event.getBlockClicked().getLocation())) {
 			event.setCancelled(true);
 			event.getPlayer().sendMessage(ChatColor.RED + "You cannot use buckets in cities in which you cannot build.");
@@ -451,11 +462,12 @@ public class CityZenEventListener implements Listener {
 		}
 	}
 	
-	@EventHandler (priority=EventPriority.MONITOR)
+	@EventHandler (priority=EventPriority.NORMAL)
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 		City city = City.getCity(event.getTo());
 		if (city != null) {
+			if (player.hasMetadata("inCity")) log.debug("Player inCity metadata: " + player.getMetadata("inCity").get(0).asString());
 			if (!player.hasMetadata("inCity") || !player.getMetadata("inCity").get(0).asString().equals(city.getName())) {
 				player.setMetadata("inCity", new FixedMetadataValue(CityZen.getPlugin(), city.getName()));
 				player.sendMessage(ChatColor.BLUE + "Welcome to " + city.getChatName() + ChatColor.BLUE + "!");

@@ -49,6 +49,7 @@ public class Commander implements CommandExecutor {
 				}
 			case "cty":
 			case "city":
+			case "cities":
 				if (args.length > 0) {
 					switch (args[0].toLowerCase()) {
 						case "deputy":

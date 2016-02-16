@@ -20,6 +20,13 @@ public class CityLog {
 			file = new File(filepath + "/" + filename);
 			debug = CityZen.getPlugin().getConfig().getBoolean("logDebug");
 			try {
+				int id = 0;
+				while (file.exists()) {
+					id++;
+					if (filename.contains("_")) filename = filename.replace(".log", "").split("_")[0] + "_" + id + ".log";
+					else filename = filename.replace(".log", "") + "_" + id + ".log";
+					file = new File(filepath + "/" + filename);
+				}
 				if (!file.exists()) {
 					new File(filepath).mkdirs();
 					file.createNewFile();
