@@ -107,7 +107,7 @@ public class CityCommand {
 								if (city.isFreeJoin()) {
 									
 									city.addCitizen(citizen);
-									sender.sendMessage("You successfully joined " + cityName + "!");
+									sender.sendMessage(ChatColor.BLUE + "You successfully joined " + city.getChatName() + ChatColor.BLUE + "!");
 									for (Player p : CityZen.getPlugin().getServer().getOnlinePlayers()) {
 										if (!p.equals((Player)sender)) {
 											p.sendMessage(((Player)sender).getDisplayName() + ChatColor.BLUE + " has joined " + city.getChatName());
@@ -116,7 +116,7 @@ public class CityCommand {
 									
 									long rep = plugin.getConfig().getLong("gainedOnJoinCity");
 									citizen.addReputation(rep);
-									sender.sendMessage("You gained " + rep + " Reputation for joining!");
+									sender.sendMessage(ChatColor.BLUE + "You gained " + ChatColor.GOLD + rep + " Reputation" + ChatColor.BLUE + " for joining!");
 									
 								} else {
 									city.addWaitlist(citizen);

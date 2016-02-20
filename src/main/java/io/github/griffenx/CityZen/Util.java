@@ -25,7 +25,7 @@ public class Util {
 	
 	public static String collapseArgsWithoutCityName(String[] args, int start, String cityName, String delimiter) {
 		int adjustment = cityName.split(" ").length;
-		if (!String.join(" ", args).contains(cityName)) adjustment = 0;
+		if (stringJoin(" ", args).contains(cityName)) adjustment = 0;
 		StringBuilder joinedArgs = new StringBuilder(args[start]);
 		for (int i = start + 1; i < args.length - adjustment; i++) {
 			joinedArgs.append(delimiter + args[i]);
@@ -132,5 +132,14 @@ public class Util {
 			} else return false;
 		}
 		return true;
+	}
+	
+	public static String stringJoin(String delimiter, String[] args) {
+		if (args.length == 0) return "";
+		StringBuilder str = new StringBuilder(args[0]);
+		for (int i = 1; i < args.length; i++) {
+			str.append(delimiter + args[i]);
+		}
+		return str.toString();
 	}
 }

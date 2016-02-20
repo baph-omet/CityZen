@@ -891,7 +891,7 @@ public class PlotCommand {
 												+ "Only City officials can now build in this plot.");
 										break;
 									default:
-										sender.sendMessage(ChatColor.RED + "\"" + args[1] + "\" is not a protection level. Valid levels: public, communal, private.");
+										sender.sendMessage(ChatColor.RED + "\"" + args[1] + "\" is not a protection level. Valid levels: public, communal, protected.");
 								}
 							} else sender.sendMessage(Messaging.notEnoughArguments("/plot setprotection <level>"));
 						} else sender.sendMessage(Messaging.notPlotOwner());
