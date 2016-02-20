@@ -82,7 +82,8 @@ public class Config {
         saveDefaultConfig();
     }
 
-    public void reload() {        
+    public void reload() {  
+    	this.configFile = new File(plugin.getDataFolder(), fileName);
         fileConfiguration = YamlConfiguration.loadConfiguration(configFile);
 
         // Look for defaults in the jar

@@ -20,7 +20,7 @@ import org.bukkit.plugin.Plugin;
 
 public class Citizen implements Reputable {
 	private static final Plugin plugin = CityZen.getPlugin();
-	private static FileConfiguration citizenConfig = CityZen.citizenConfig.getConfig();
+	//private static FileConfiguration citizenConfig = CityZen.citizenConfig.getConfig();
 	private ConfigurationSection properties;
 	
 	@SuppressWarnings(value = { "unused" })
@@ -32,6 +32,7 @@ public class Citizen implements Reputable {
 	 * The UUID to use to identify this Citizen
 	 */
 	private Citizen(UUID uuid, String name) {
+		FileConfiguration citizenConfig = CityZen.citizenConfig.getConfig();
 		if (CityZen.citizenConfig.getConfig().getConfigurationSection("citizens." + uuid.toString()) != null) {
 			properties = citizenConfig.getConfigurationSection("citizens." + uuid.toString());
 		} else {
@@ -93,9 +94,10 @@ public class Citizen implements Reputable {
 	 * A Citizen that corresponds to this name, if one exists, else {@literal null}.
 	 */
 	public static Citizen getCitizen(String name) {
+		FileConfiguration citizenConfig = CityZen.citizenConfig.getConfig();
 		ConfigurationSection config = citizenConfig.getConfigurationSection("citizens");
 		for (String c : config.getKeys(false)) {
-			if (citizenConfig.getString("citizens." + c + ".name").equalsIgnoreCase(name)) {
+			if (citizenConfig.getString("citizens." + c + ".name") != null && citizenConfig.getString("citizens." + c + ".name").equalsIgnoreCase(name)) {
 				return new Citizen(UUID.fromString(c),name);
 			}
 		}
@@ -552,7 +554,6 @@ public class Citizen implements Reputable {
 		for (String prop : properties.getKeys(false)) {
 			if (prop.equalsIgnoreCase(property)) {
 				CityZen.citizenConfig.getConfig().set(properties.getCurrentPath() + "." + property,value);
-				citizenConfig = CityZen.citizenConfig.getConfig();
 			}
 		}
 	}

@@ -146,7 +146,7 @@ public class CitizenCommand {
 			if (city.getDeputies().size() > 0) {
 				sender.sendMessage(ChatColor.GOLD + "Deputies:\n");
 				for (Citizen c : city.getDeputies()) {
-					playerList += ChatColor.RED + c.getName() + " ";
+					playerList += ChatColor.RED + c.getName() + ", ";
 				}
 				sender.sendMessage(playerList);
 				playerList = "";
@@ -154,7 +154,7 @@ public class CitizenCommand {
 			if (citizens.size() > 0) {
 				sender.sendMessage(ChatColor.GOLD + "Citizens:\n");
 				for (Citizen c : citizens) {
-					playerList += ChatColor.BLUE + c.getName() + " ";
+					playerList += ChatColor.BLUE + c.getName() + ", ";
 				}
 				sender.sendMessage(playerList);
 				playerList = "";
@@ -225,7 +225,7 @@ public class CitizenCommand {
 						long comparison = citizens.get(j).getReputation();
 						if (category.equals("age")) comparison = citizens.get(j).getIssueDate().getTime();
 						if (values.get(i) == comparison) {
-							sender.sendMessage(ChatColor.BLUE + "| " + i + ". " + ChatColor.RED 
+							sender.sendMessage(ChatColor.BLUE + "| " + (i + 1) + ". " + ChatColor.RED 
 								+ (category.equalsIgnoreCase("age") ? new SimpleDateFormat("yyyy-MM-dd").format(new Date(values.get(i))) : values.get(i))
 								+ ChatColor.BLUE + " - " + citizens.get(j).getName());
 							citizens.remove(j);

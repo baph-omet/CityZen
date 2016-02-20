@@ -55,7 +55,7 @@ public class CityZenCommand {
 		StringBuilder message = new StringBuilder(ChatColor.GOLD+ "" + ChatColor.BOLD + "=== CityZen: The Premier City Management Plugin ===\n");
 		message.append(ChatColor.RESET + "" + ChatColor.BLUE + "| Version: " + ChatColor.WHITE + plugin.getDescription().getVersion() 
 				+ ChatColor.BLUE + " Author: " + ChatColor.WHITE + "iamvishnu" + ChatColor.GRAY + " ( iamvishnu.tumblr.com )\n");
-		message.append(ChatColor.BLUE + "| Download, get help, and learn about the plugin on GitHub:\n" + ChatColor.GRAY + "https://github.com/griffenx/CityZen/wiki\n");
+		message.append(ChatColor.BLUE + "| Download, get help, and learn about the plugin on GitHub:\n|" + ChatColor.GRAY + "    https://github.com/griffenx/CityZen/wiki\n");
 		message.append(ChatColor.BLUE + "| For a list of commands, try \"" + ChatColor.WHITE + "/cityzen help" + ChatColor.BLUE + "\"");
 		//TODO: Add BukkitDev link
 		sender.sendMessage(message.toString());
