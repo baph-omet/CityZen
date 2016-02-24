@@ -26,81 +26,84 @@ public class PlotCommand {
 	private static FileConfiguration config = CityZen.getPlugin().getConfig();
 	
 	public static boolean delegate(CommandSender sender, String[] args) {
-		switch (args[0].toLowerCase()) {
-			case "list":
-				list(sender, args);
-				break;
-			case "price":
-				price(sender,args);
-				break;
-			case "avail":
-			case "available":
-				available(sender, args);
-				break;
-			case "buy":
-				buy(sender);
-				break;
-			case "claim":
-				claim(sender);
-				break;
-			case "del":
-			case "destroy":
-			case "delete":
-				delete(sender);
-				break;
-			case "leave":
-			case "abandon":
-				abandon(sender);
-				break;
-			case "1":
-			case "p1":
-			case "pos1":
-			case "2":
-			case "p2":
-			case "pos2":
-			case "sel":
-			case "select":
-			case "c":
-			case "cr":
-			case "cre":
-			case "crea":
-			case "creat":
-			case "create":
-			case "m":
-			case "mo":
-			case "mov":
-			case "move":
-				select(sender, args);
-				break;
-			case "invite":
-				invite(sender, args);
-				break;
-			case "add":
-			case "addowner":
-			case "remove":
-			case "removeowner":
-				modifyowners(sender, args);
-				break;
-			case "i":
-			case "info":
-				info(sender);
-				break;
-			case "prot":
-			case "protection":
-			case "setprotection":
-				setprotection(sender, args);
-				break;
-			case "accept":
-			case "deny":
-				inviteReply(sender, args);
-				break;
-			case "wipe":
-				wipe(sender);
-				break;
-			default:
-				sender.sendMessage(Messaging.noSuchSubcommand(args[0]));
-				return false;
-		}
+		if (args.length > 0) {
+			switch (args[0].toLowerCase()) {
+				case "list":
+					list(sender, args);
+					break;
+				case "price":
+					price(sender,args);
+					break;
+				case "avail":
+				case "available":
+					available(sender, args);
+					break;
+				case "buy":
+					buy(sender);
+					break;
+				case "claim":
+					claim(sender);
+					break;
+				case "del":
+				case "destroy":
+				case "delete":
+					delete(sender, args);
+					break;
+				case "leave":
+				case "abandon":
+					abandon(sender);
+					break;
+				case "1":
+				case "p1":
+				case "pos1":
+				case "2":
+				case "p2":
+				case "pos2":
+				case "sel":
+				case "select":
+				case "c":
+				case "cr":
+				case "cre":
+				case "crea":
+				case "creat":
+				case "create":
+				case "m":
+				case "mo":
+				case "mov":
+				case "move":
+					select(sender, args);
+					break;
+				case "invite":
+					invite(sender, args);
+					break;
+				case "add":
+				case "addowner":
+				case "remove":
+				case "removeowner":
+					modifyowners(sender, args);
+					break;
+				case "i":
+				case "info":
+					info(sender);
+					break;
+				case "prot":
+				case "protection":
+				case "setprotection":
+					setprotection(sender, args);
+					break;
+				case "accept":
+				case "deny":
+					inviteReply(sender, args);
+					break;
+				case "wipe":
+					wipe(sender);
+					break;
+				default:
+					sender.sendMessage(Messaging.noSuchSubcommand(args[0]));
+					return false;
+			}
+			
+		} else sender.sendMessage(Messaging.noArguments("plot"));
 		return true;
 	}
 	
@@ -285,7 +288,7 @@ public class PlotCommand {
 													citizen.getPlayer().removeMetadata("pos1", CityZen.getPlugin());
 													citizen.getPlayer().removeMetadata("pos2", CityZen.getPlugin());
 												} else sender.sendMessage(ChatColor.RED + "You cannot create a Plot here. Plots must be no more than " 
-															+ config.getInt("plotBuffer") + " blocks away from another Plot in the same City.");
+															+ config.getInt("plotBuffer") + " blocks away from another Plot buffer in the same City.");
 											} else {
 												if (citizen.isCityOfficial()) {
 													if (sel.isSpaced(city)) {
@@ -587,7 +590,7 @@ public class PlotCommand {
 		} else sender.sendMessage(Messaging.playersOnly());
 	}
 	
-	private static void delete(CommandSender sender) {
+	private static void delete(CommandSender sender, String[] args) {
 		if (sender instanceof Player) {
 			if (sender.hasPermission("cityzen.plot.delete")) {
 				Citizen citizen = Citizen.getCitizen(sender);
@@ -609,7 +612,7 @@ public class PlotCommand {
 											ChatColor.GOLD + rep + " Reputation.");
 									c.subReputation(rep);
 								}
-								plot.wipe();
+								if (city.isWipePlots() && !(args.length >= 2 && args[1].equalsIgnoreCase("preserve"))) plot.wipe();
 								if (!plot.getOwners().contains(citizen)) sender.sendMessage(ChatColor.BLUE + "You successfully deleted this plot.");
 								plot.delete();
 							} else sender.sendMessage(ChatColor.RED + "You don't have permission to delete this plot. Only Admins, "
@@ -641,10 +644,9 @@ public class PlotCommand {
 								
 								boolean isAbandoned = false;
 								if (plot.getOwners().size() == 0) {
-									if (city.isOpenPlotting()) {
-										plot.wipe();
-										plot.delete();
-									} else isAbandoned = true;
+									if (city.isWipePlots()) plot.wipe();
+									if (city.isOpenPlotting()) plot.delete();
+									else isAbandoned = true;
 								}
 								citizen.subReputation(rep);
 								sender.sendMessage(ChatColor.BLUE + "You successfully abandoned this plot." + (isAbandoned ? " This plot is now abandoned, meaning anyone can claim it." : "") 

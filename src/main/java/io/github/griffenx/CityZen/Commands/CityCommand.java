@@ -114,8 +114,7 @@ public class CityCommand {
 										}
 									}
 									
-									long rep = plugin.getConfig().getLong("gainedOnJoinCity");
-									citizen.addReputation(rep);
+									long rep = plugin.getConfig().getLong("reputation.gainedOnJoinCity");
 									sender.sendMessage(ChatColor.BLUE + "You gained " + ChatColor.GOLD + rep + " Reputation" + ChatColor.BLUE + " for joining!");
 									
 								} else {

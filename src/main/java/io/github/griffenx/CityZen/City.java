@@ -521,15 +521,17 @@ public class City implements Reputable {
 		if (!ctz.isMayor()) {
 			removeDeputy(ctz);
 			List<String> ctzs = new Vector<String>();
-			int reduction = 0;
+			long reduction = 0;
+			long minReduction = CityZen.getPlugin().getConfig().getLong("reputation.gainedOnCityJoin");
 			for (Citizen c : getCitizens()) {
 				if (c.equals(ctz)) {
 					if (evict) {
-						reduction = (int) (ctz.getReputation() * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100);
+						reduction = (long) (ctz.getReputation() * CityZen.getPlugin().getConfig().getInt("reputation.lostOnEvictionPercent") / 100.0);
 						ban(ctz);
 					} else {
-						reduction = (int) (ctz.getReputation() * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100);
+						reduction = (long) (ctz.getReputation() * CityZen.getPlugin().getConfig().getInt("reputation.lostOnLeaveCityPercent") / 100.0);
 					}
+					if (reduction < minReduction) reduction = minReduction;
 					ctz.subReputation(reduction);
 					for (Plot p : getPlots()) {
 						if (p.getOwners().contains(ctz)) {
@@ -761,16 +763,6 @@ public class City implements Reputable {
 	 */
 	public void addPlot(Location corner1, Location corner2, Citizen creator) {
 		Plot.createPlot(this, corner1, corner2, creator);
-	}
-	
-	/**
-	 * Remove a plot from this city, wiping it entirely.
-	 * @param plot
-	 * The plot to wipe and remove from this city.
-	 */
-	public void removePlot(Plot plot) {
-		plot.wipe();
-		plot.delete();
 	}
 	
 	/**

@@ -490,6 +490,7 @@ public class Citizen implements Reputable {
 	}
 	
 	public void sendReward(Reward r) {
+		cancelReward(r);
 		if (getPassport().isOnline() && Reward.getEnabledWorlds().contains(getPlayer().getWorld())) {
 			CityZen.getPlugin().getServer().dispatchCommand(plugin.getServer().getConsoleSender(), r.getFormattedString(r.getCommand(),this));
 			if (r.getIsBroadcast()) {
@@ -497,7 +498,9 @@ public class Citizen implements Reputable {
 			} else {
 				sendMessage(r.getFormattedString(r.getMessage(),this));
 			}
-		} else queueReward(r);
+		} else {
+			if (!getQueuedRewards().contains(r)) queueReward(r);
+		}
 	}
 	
 	public void queueReward(Reward r) {
@@ -507,7 +510,9 @@ public class Citizen implements Reputable {
 	}
 	
 	public void cancelReward(Reward r) {
-		setProperty("queuedRewards",properties.getStringList("queuedRewards").remove(r.getID() + ""));
+		List<String> queuedRewards = properties.getStringList("queuedRewards");
+		queuedRewards.remove(Integer.toString(r.getID()));
+		setProperty("queuedRewards",queuedRewards);
 	}
 	
 	public List<Reward> getQueuedRewards() {
