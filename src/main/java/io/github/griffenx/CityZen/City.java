@@ -630,6 +630,7 @@ public class City implements Reputable {
 			if (c.equals(citizen)) return;
 			citizens.add(c.getUUID().toString());
 		}
+		citizens.add(citizen.getUUID().toString());
 		setProperty("waitlist", citizens);
 	}
 	
