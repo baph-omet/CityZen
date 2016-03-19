@@ -7,6 +7,9 @@ Player-run cities have become a prominent feature on the Core Server, but runnin
 
 In CityZen, a player can create a city wherever they want. The space where the city is founded will become the first of a series of protected plots that are only accessible by members of its city. As players join the city, each one gets their own plot for building, thus growing the city itself. The Mayor of the city has full control over who can join the city, as well as evicting inactive or unruly citizens. Furthermore, citizens can increase the reputation of their city by completing server tasks, such as voting for the server, winning arena matches, and completing quests. The better your city's rep, the better rewards everyone gets.
 
+## Reporting Issues:
+Please [see this page](https://github.com/griffenx/CityZen/wiki/Reporting-Issues) on how to properly report issues. Help us help you help us help you!
+
 ## Details:
 
 Visit [the wiki](https://github.com/griffenx/CityZen/wiki) to learn in-depth how to use this plugin.
@@ -25,9 +28,6 @@ In order to fully grasp how CityZen works, there are a few basic concepts to gra
 
 ## Installation:
 Download the latest release or compile for yourself from the latest commit, then simply load up on your Bukkit/Spigot server like you would any other plugin. You'll probably want to customize your `config.yml` and `rewards.yml` files to your liking, as the defaults may not be what you want. Make sure to visit the [wiki](https://github.com/griffenx/CityZen/wiki) for more info.
-
-## Reporting Issues:
-Please [see this page](https://github.com/griffenx/CityZen/wiki/Reporting-Issues) on how to properly report issues. Help us help you help us help you!
 
 ## Credits:
 This project is created and managed by Nathan Gunzenhauser ([iamvishnu](http://iamvishnu.tumblr.com)/griffenx). Built with suggestions and testing by [The Minecraft Blog](http://the-minecraft-blog.com) community.
