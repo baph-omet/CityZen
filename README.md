@@ -30,4 +30,4 @@ In order to fully grasp how CityZen works, there are a few basic concepts to gra
 Download the latest release or compile for yourself from the latest commit, then simply load up on your Bukkit/Spigot server like you would any other plugin. You'll probably want to customize your `config.yml` and `rewards.yml` files to your liking, as the defaults may not be what you want. Make sure to visit the [wiki](https://github.com/griffenx/CityZen/wiki) for more info.
 
 ## Credits:
-This project is created and managed by Nathan Gunzenhauser ([iamvishnu](http://iamvishnu.tumblr.com)/griffenx). Built with suggestions and testing by [The Minecraft Blog](http://the-minecraft-blog.com) community.
+This project is created and managed by Sarah Hawthorne ([iamvishnu](https://iamvishnu.net)/griffenx). Built with suggestions and testing by [The Minecraft Blog](http://the-minecraft-blog.com) community.
