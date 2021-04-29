@@ -15,57 +15,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 @SuppressWarnings("unused")
 public class Config {
-	/*private final Plugin plugin;
-	
-	private FileConfiguration cnfg = null;
-	private File cnfgFile = null;
-	private String cnfgName = null;
-	
-	public Config(String name) {
-		plugin = CityZen.getPlugin();
-		cnfgName = name;
-		saveDefaultConfig();
-		cnfgFile = new File(plugin.getDataFolder(), cnfgName);
-		cnfg = YamlConfiguration.loadConfiguration(cnfgFile);
-	}
-	
-	public void reload() {
-		if (cnfgFile == null) {
-			cnfgFile = new File(plugin.getDataFolder(), cnfgName);
-	    }
-	    cnfg = YamlConfiguration.loadConfiguration(cnfgFile);
-	 
-	    // Look for defaults in the jar
-	    Reader defConfigStream = new InputStreamReader(plugin.getResource(cnfgName), StandardCharsets.UTF_8);
-	    if (defConfigStream != null) {
-	        YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-	        cnfg.setDefaults(defConfig);
-	    }
-	}
-	
-	public void save() {
-		if (cnfg == null || cnfgFile == null) {
-	        return;
-	    }
-	    try {
-	        getConfig().save(cnfgFile);
-	    } catch (IOException ex) {
-	        plugin.getLogger().log(Level.SEVERE, "Could not save config to " + cnfgFile, ex);
-	    }
-	}
-	
-	public FileConfiguration getConfig() {
-		if (cnfg == null) {
-	        reload();
-	    }
-	    return cnfg;
-	}
-	
-	public void saveDefaultConfig() {
-		if (!cnfgFile.exists()) {
-            plugin.saveResource(cnfgName, false);
-        }
-	}*/
     private final String fileName;
     private final JavaPlugin plugin;
     
