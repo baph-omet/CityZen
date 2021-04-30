@@ -1,5 +1,11 @@
 package io.github.griffenx.CityZen;
 
+import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.util.Location;
+
 public class Selection {
 	public Position pos1;
 	public Position pos2;
@@ -77,7 +83,7 @@ public class Selection {
 			for (double y = 1; y <= pos1.world.getMaxHeight(); y++) {
 				for (double x = xLow; x <= xHigh; x++) {
 					for (double z = zLow; z <= zHigh; z++) {
-						if (!CityZen.WorldGuard.canBuild(citizen.getPlayer(), new Position(pos1.world,x,y,z).asLocation())) {
+						if (!WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery().testState(new Location((Extent) pos1.world, x, y, z), (LocalPlayer)citizen.getPlayer(), Flags.BUILD)) {
 							return true;
 						}
 					}

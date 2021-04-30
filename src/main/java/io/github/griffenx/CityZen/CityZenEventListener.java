@@ -6,7 +6,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Container;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -345,23 +347,10 @@ public class CityZenEventListener implements Listener {
 	@EventHandler (priority=EventPriority.NORMAL)
 	public void onContainerOpen(PlayerInteractEvent event) {
 		if (event.hasBlock()) {
-			Material[] types = {
-					Material.CHEST,
-					Material.TRAPPED_CHEST,
-					Material.BEACON,
-					Material.FURNACE,
-					Material.BURNING_FURNACE,
-					Material.DISPENSER,
-					Material.DROPPER,
-					Material.HOPPER
-			};
-			for (Material material : types) {
-				if (event.getClickedBlock().getType().equals(material)) {
-					if (!Util.canBuild(event.getPlayer(), event.getClickedBlock().getLocation())) {
-						event.setCancelled(true);
-						event.getPlayer().sendMessage(ChatColor.RED + "You cannot interact with this block in a city in which you cannot build.");
-						break;
-					}
+			if (event.getClickedBlock() instanceof Container || event.getMaterial() == Material.BEACON) {
+				if (!Util.canBuild(event.getPlayer(), event.getClickedBlock().getLocation())) {
+					event.setCancelled(true);
+					event.getPlayer().sendMessage(ChatColor.RED + "You cannot interact with this block in a city in which you cannot build.");
 				}
 			}
 		}
@@ -371,34 +360,7 @@ public class CityZenEventListener implements Listener {
 	public void onMobSpawn(CreatureSpawnEvent event) {
 		Location location = event.getLocation();
 		City city = City.getCity(location);
-		if (city != null) {
-			EntityType[] aggressives = {
-					EntityType.BLAZE,
-					EntityType.CAVE_SPIDER,
-					EntityType.CREEPER,
-					EntityType.ENDER_DRAGON,
-					EntityType.ENDERMAN,
-					EntityType.ENDERMITE,
-					EntityType.GHAST,
-					EntityType.GIANT,
-					EntityType.GUARDIAN,
-					EntityType.MAGMA_CUBE,
-					EntityType.PIG_ZOMBIE,
-					EntityType.SILVERFISH,
-					EntityType.SKELETON,
-					EntityType.SLIME,
-					EntityType.SPIDER,
-					EntityType.WITCH,
-					EntityType.WITHER,
-					EntityType.ZOMBIE
-			};
-			for (EntityType type : aggressives) {
-				if (type.equals(event.getEntityType())) {
-					event.setCancelled(true);
-					break;
-				}
-			}
-		}
+		if (city != null) if (event.getEntity() instanceof Monster) event.setCancelled(true);
 	}
 	
 	@EventHandler (priority=EventPriority.NORMAL)
@@ -431,32 +393,10 @@ public class CityZenEventListener implements Listener {
 	public void onEntityDamage(EntityDamageByEntityEvent event) {
 		if (event.getDamager().getType().equals(EntityType.PLAYER)) {
 			Player player = (Player)event.getDamager();
-			EntityType[] passives = {
-					EntityType.PIG,
-					EntityType.COW,
-					EntityType.CHICKEN,
-					EntityType.SHEEP,
-					EntityType.RABBIT,
-					EntityType.SQUID,
-					EntityType.HORSE,
-					EntityType.IRON_GOLEM,
-					EntityType.WOLF,
-					EntityType.OCELOT,
-					EntityType.ITEM_FRAME,
-					EntityType.VILLAGER,
-					EntityType.SNOWMAN,
-					EntityType.PAINTING,
-					EntityType.MUSHROOM_COW,
-					EntityType.ARMOR_STAND
-			};
-			
-			for (EntityType type : passives) {
-				if (type.equals(event.getEntityType())) {
-					if (!Util.canBuild(player, event.getEntity().getLocation())) {
-						player.sendMessage(ChatColor.RED + "You cannot damage entities in cities in which you cannot build.");
-						event.setCancelled(true);
-						break;
-					}
+			if (!(event.getEntity() instanceof Monster)) {
+				if (!Util.canBuild(player, event.getEntity().getLocation())) {
+					player.sendMessage(ChatColor.RED + "You cannot damage entities in cities in which you cannot build.");
+					event.setCancelled(true);
 				}
 			}
 		}

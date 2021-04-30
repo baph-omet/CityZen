@@ -15,38 +15,38 @@
       </plugins>
    </build>
    <repositories>
+	   <repository>
+	        <id>spigot-repo</id>
+	        <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+	   </repository>
        <repository>
-           <id>bukkit-repo</id>
-           <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
-       </repository>
-       <repository>
-            <id>vault-repo</id>
-            <url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
         <repository>
 	        <id>sk89q-repo</id>
-	        <url>http://maven.sk89q.com/repo/</url>
+	        <url>https://maven.enginehub.org/repo/</url>
 	    </repository>
    </repositories>
    <dependencies>
        <dependency>
-           <groupId>org.bukkit</groupId>
-           <artifactId>bukkit</artifactId>
-           <version>1.8-R0.1-SNAPSHOT</version>
-           <type>jar</type>
+           <groupId>org.spigotmc</groupId>
+           <artifactId>spigot-api</artifactId>
+           <version>1.16.5-R0.1-SNAPSHOT</version>
            <scope>provided</scope>
        </dependency>
        <dependency>
-            <groupId>net.milkbowl.vault</groupId>
+            <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
-            <version>1.5</version>
+            <version>1.7</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-	        <groupId>com.sk89q</groupId>
-	        <artifactId>worldguard</artifactId>
-	        <version>6.1</version>
+	        <groupId>com.sk89q.worldguard</groupId>
+	        <artifactId>worldguard-bukkit</artifactId>
+	        <version>7.0.4</version>
+	        <scope>provided</scope>
 	    </dependency>
    </dependencies>
-   <version>1.0.2</version>
+   <version>1.0.3</version>
 </project>

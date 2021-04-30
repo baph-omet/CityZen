@@ -60,7 +60,7 @@ public class InfoCommand {
 					if (target != null) {
 						log.info("Fetched passport for " + target.getName());
 						String[] messages = {
-								ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() + ChatColor.RESET + ChatColor.RED + " OFFICIAL PASSPORT",
+								ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getName() + ChatColor.RESET + ChatColor.RED + " OFFICIAL PASSPORT",
 								ChatColor.BLUE + "| Username: " + ChatColor.WHITE + (target.getPassport().isOnline() ? target.getPlayer().getDisplayName() : target.getPassport().getName()),
 								ChatColor.BLUE + "| City: " + (target.getAffiliation() != null ? target.getAffiliation().getChatName()
 										+ ChatColor.BLUE + (target.isMayor() ? " (Mayor)" : (target.isDeputy() ? " (Deputy)" : ""))
@@ -79,7 +79,7 @@ public class InfoCommand {
 				Citizen target = Citizen.getCitizen(args[0]);
 				if (target != null) {
 					String[] messages = {
-							ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() + ChatColor.RESET + ChatColor.RED + " OFFICIAL PASSPORT",
+							ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getName() + ChatColor.RESET + ChatColor.RED + " OFFICIAL PASSPORT",
 							ChatColor.BLUE + "| Username: " + ChatColor.WHITE + (target.getPassport().isOnline() ? target.getPlayer().getDisplayName() : target.getPassport().getName()),
 							ChatColor.BLUE + "| City: " + (target.getAffiliation() != null ? target.getAffiliation().getChatName()
 									+ ChatColor.BLUE + (target.isMayor() ? " (Mayor)" : (target.isDeputy() ? " (Deputy)" : ""))

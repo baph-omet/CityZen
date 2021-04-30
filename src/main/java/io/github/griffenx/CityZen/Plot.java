@@ -551,7 +551,7 @@ public class Plot {
 						else block.setType(Material.AIR);
 					} else if (dimension == Environment.THE_END) {
 						if (y < getBaseHeight() - 10) block.setType(Material.AIR);
-						else if (y <= getBaseHeight()) block.setType(Material.ENDER_STONE);
+						else if (y <= getBaseHeight()) block.setType(Material.END_STONE);
 						else block.setType(Material.AIR);
 					} else {
 						if (y < 5) block.setType(Material.BEDROCK);

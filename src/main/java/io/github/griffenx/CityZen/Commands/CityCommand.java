@@ -177,7 +177,7 @@ public class CityCommand {
 						}
 					}
 				}
-				sender.sendMessage(ChatColor.AQUA + "Cities on " + ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getServerName() 
+				sender.sendMessage(ChatColor.AQUA + "Cities on " + ChatColor.GOLD + "" + ChatColor.BOLD + plugin.getServer().getName() 
 						+ ChatColor.RESET + "" + ChatColor.AQUA + " (" + pageNumber + "/" + numberOfPages + ")");
 				for (String m : listCities[pageNumber - 1]) if (m != null) sender.sendMessage(m);
 				if (numberOfPages > 1 && pageNumber < numberOfPages) sender.sendMessage(ChatColor.BLUE + "Type \"/city list " + (pageNumber + 1) + "\" to view the next page.");
