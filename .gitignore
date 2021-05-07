@@ -44,4 +44,6 @@ Temporary Items
 
 *.jar
 *.project
-target/
+target
+*.class
+*.jar
