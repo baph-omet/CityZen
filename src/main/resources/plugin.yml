@@ -3,7 +3,7 @@ author: IAMVISHNU Media
 website: iamvishnu.net
 api-version: 1.16
 main: io.github.griffenx.CityZen.CityZen
-version: 1.0.3
+version: 1.0.4
 softdepend: [WorldGuard]
 
 commands:
