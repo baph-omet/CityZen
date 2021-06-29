@@ -64,6 +64,7 @@ permissions:
             cityzen.city.exclusion.add.others: true
             cityzen.city.exclusion.remove.others: true
             cityzen.city.exclusion.list.others: true
+            cityzen.city.citizens.others: true
             cityzen.citizen.list.others: true
             cityzen.plot.list.others: true
             cityzen.plot.available.others: true
@@ -113,6 +114,7 @@ permissions:
             cityzen.city.exclusion.add: true
             cityzen.city.exclusion.remove: true
             cityzen.city.exclusion.list: true
+            cityzen.city.citizens: true
             cityzen.citizen.top: true
             cityzen.citizen.list: true
             cityzen.plot.info: true
@@ -260,6 +262,10 @@ permissions:
         description: List all excluded materials for the specified City
         children:
             cityzen.city.exclusion.list: true
+    cityzen.city.citizens: 
+    	description: List all members of a city.
+    cityzen.city.citizens.others:
+    	description: List all members of a specified city.
     cityzen.citizen.top:
         description: List top Citizens with the specified criteria
     cityzen.citizen.list:
